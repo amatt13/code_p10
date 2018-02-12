@@ -1,0 +1,492 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.1//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_2.dtd'>
+<nta>
+	<declaration>bool on = true;
+const int ScheduleLength = 360;
+const int N = 5;
+// KiBaM
+const double C =5400.0;
+const double soc =4800.0;
+const double c = 1.0/6, k = 2.324e-4, k2 = k/c/(1-c);
+const double ThresholdPercentage = 40.0/100.0;
+const double Threshold = ((1-c)*C)*(ThresholdPercentage);
+const double MaxB = (1-c)*C;
+clock a = c*soc;
+clock b = (1-c)*soc;
+
+
+clock t; // time since release, accumulated execution time
+broadcast chan ready, skip; 
+urgent broadcast chan run, capacityFull;
+int skips = 0;
+
+// Time to pass one orbit
+const int OrbitTime =90;
+
+// Charge
+bool insolation =  true;
+const double RechargeRate =0.2;
+
+// Discharge
+double i = 1.0;
+const double IIdle = 1.0;
+const int NumberOfPayloads = 8;
+
+// Defined when a payload is active
+int B = 0; //best
+int W = 0; //worst
+int D = 0; //deadline
+
+// Restriction related
+const int Windows = 2;
+const int Window[Windows][2] = {{50, 80}, {10, 30}};
+const bool RunInWindow[Windows][N] = {{1, 0, 0, 0, 0},{0, 1, 1, 1, 0}};
+
+typedef int[0, Windows - 1] id_t;
+int inWindow[Windows] = {0,0};
+const int Depend[N][N] = {{0,0,0,0,0},{0,0,0,0,0},{0,0,0,0,0},{0,2,2,0,0},{0,0,0,0,0}};
+const int MaxRuns[N] = {9,3,2,2,1};
+int runs[N] = {0,0,0,0,0};
+bool runnable[N] = {0,0,0,0,0};
+int totalRuns[N] = {0,0,0,0,0};
+const int Profit[N] = {2,4,3,1,1}; 
+int earnings = 0;
+int Costs[N] = {4, 6, 4, 6, 6};
+
+// Tasks
+int active = -1;
+clock totalTime;
+int payloadNumber = 0;
+const int Payloads[N][3] = {{10,15,20}, {10,15,20}, {5,10,15}, {5,10,20}, {5,15,20}};
+//from cora
+int Queue[NumberOfPayloads] = {4, 0, 1, 0, 1, 0, 1, 0};
+const int RunStart[NumberOfPayloads] = {0, 50, 100, 140, 190, 230, 280, 320};
+</declaration>
+	<template>
+		<name x="5" y="5">Processor</name>
+		<declaration>clock x;
+
+void enqueue(){
+    if (payloadNumber &lt; NumberOfPayloads) {
+        i = IIdle + Costs[active];
+        B = Payloads[active][0];
+        W = Payloads[active][1];
+    }
+    else { on = false; }
+}
+
+void deadline(){
+    if (payloadNumber &lt; NumberOfPayloads) {
+        D = Payloads[active][2];
+    }
+    else { on = false; }
+}
+
+void dequeue(){
+    i = IIdle;
+    if (payloadNumber &gt;= NumberOfPayloads) {
+        on = false;
+    }
+}
+
+void setActive() { active = Queue[payloadNumber]; }
+
+bool done() { return payloadNumber &gt;= NumberOfPayloads; }
+
+void skipped() { skips ++; }
+</declaration>
+		<location id="id0" x="697" y="671">
+			<name x="687" y="637">Done</name>
+		</location>
+		<location id="id1" x="697" y="450">
+			<name x="687" y="416">Init</name>
+			<urgent/>
+		</location>
+		<location id="id2" x="1198" y="671">
+			<name x="1215" y="662">Running</name>
+			<label kind="invariant" x="1215" y="679">x &lt;= W</label>
+		</location>
+		<location id="id3" x="867" y="671">
+			<name x="858" y="688">Wait</name>
+			<label kind="invariant" x="850" y="705">x &lt;= D</label>
+		</location>
+		<location id="id4" x="1189" y="450">
+			<name x="1198" y="416">Ready</name>
+		</location>
+		<location id="id5" x="867" y="450">
+			<name x="824" y="416">Idle</name>
+			<label kind="invariant" x="722" y="476">totalTime &lt;= RunStart[payloadNumber]</label>
+		</location>
+		<init ref="id1"/>
+		<transition>
+			<source ref="id3"/>
+			<target ref="id0"/>
+			<label kind="guard" x="756" y="654">done()</label>
+			<label kind="assignment" x="739" y="671">on = false,
+active = -1</label>
+		</transition>
+		<transition>
+			<source ref="id1"/>
+			<target ref="id5"/>
+			<label kind="assignment" x="739" y="408">t=0,i = IIdle,
+setActive()</label>
+		</transition>
+		<transition>
+			<source ref="id4"/>
+			<target ref="id3"/>
+			<label kind="synchronisation" x="1011" y="535">skip?</label>
+			<label kind="assignment" x="926" y="552">payloadNumber ++,
+skipped()</label>
+		</transition>
+		<transition>
+			<source ref="id2"/>
+			<target ref="id3"/>
+			<label kind="guard" x="985" y="654">x &gt;= B</label>
+			<label kind="assignment" x="960" y="671">dequeue(), active = -1,
+payloadNumber ++</label>
+		</transition>
+		<transition>
+			<source ref="id4"/>
+			<target ref="id2"/>
+			<label kind="synchronisation" x="1121" y="535">run?</label>
+			<label kind="assignment" x="1121" y="552">x := 0,
+setActive(),
+enqueue(),
+earnings += Profit[active]</label>
+		</transition>
+		<transition>
+			<source ref="id5"/>
+			<target ref="id4"/>
+			<label kind="guard" x="935" y="416">totalTime &gt;=RunStart[payloadNumber]</label>
+			<label kind="synchronisation" x="1011" y="467">ready!</label>
+			<label kind="assignment" x="994" y="433">x=0, t=0,
+deadline()</label>
+		</transition>
+		<transition>
+			<source ref="id3"/>
+			<target ref="id5"/>
+			<label kind="guard" x="799" y="535">x &gt;= D &amp;&amp;
+!done()</label>
+			<label kind="assignment" x="799" y="569">setActive()</label>
+		</transition>
+	</template>
+	<template>
+		<name>Insolation</name>
+		<declaration>clock charge;
+		</declaration>
+		<location id="id6" x="-280" y="8">
+			<label kind="invariant" x="-365" y="25">charge &lt;=OrbitTime</label>
+		</location>
+		<location id="id7" x="34" y="0">
+			<label kind="invariant" x="24" y="17">charge&lt;= OrbitTime/2</label>
+		</location>
+		<init ref="id7"/>
+		<transition>
+			<source ref="id6"/>
+			<target ref="id7"/>
+			<label kind="guard" x="-178" y="25">charge &gt;= OrbitTime</label>
+			<label kind="assignment" x="-160" y="42">insolation = true,
+charge :=0</label>
+			<nail x="-212" y="42"/>
+			<nail x="0" y="42"/>
+		</transition>
+		<transition>
+			<source ref="id7"/>
+			<target ref="id6"/>
+			<label kind="guard" x="-187" y="-42">charge &gt;= OrbitTime/2</label>
+			<label kind="assignment" x="-178" y="-25">insolation = false</label>
+			<nail x="-17" y="-25"/>
+			<nail x="-212" y="-25"/>
+		</transition>
+	</template>
+	<template>
+		<name>EnergySource</name>
+		<declaration>double c_C = ((1-c)*C)-10.0;
+
+</declaration>
+		<location id="id8" x="42" y="-8">
+			<label kind="invariant" x="-161" y="-17">a' == -i+k*(b/(1-c)-a/c)
+&amp;&amp; b' == -k*(b/(1-c)-a/c)</label>
+		</location>
+		<location id="id9" x="280" y="-8">
+			<name x="297" y="-34">Chargeing</name>
+			<label kind="invariant" x="297" y="-17">a' == -i+k*(b/(1-c)-a/c) &amp;&amp;
+b' == -k*(b/(1-c)-a/c)+(insolation * RechargeRate)</label>
+		</location>
+		<init ref="id9"/>
+		<transition>
+			<source ref="id9"/>
+			<target ref="id9"/>
+			<label kind="guard" x="246" y="-144">on &amp;&amp; b &lt;= Threshold</label>
+			<label kind="assignment" x="246" y="-127">on = false</label>
+			<nail x="246" y="-102"/>
+			<nail x="306" y="-102"/>
+		</transition>
+		<transition>
+			<source ref="id8"/>
+			<target ref="id8"/>
+			<label kind="guard" x="10" y="-144">on &amp;&amp; b &lt;= Threshold</label>
+			<label kind="assignment" x="8" y="-127">on = false</label>
+			<nail x="-8" y="-110"/>
+			<nail x="68" y="-110"/>
+		</transition>
+		<transition>
+			<source ref="id8"/>
+			<target ref="id9"/>
+			<label kind="guard" x="127" y="25">b &lt; c_C</label>
+			<label kind="synchronisation" x="119" y="42">capacityFull!</label>
+			<nail x="42" y="42"/>
+			<nail x="161" y="42"/>
+			<nail x="280" y="42"/>
+		</transition>
+		<transition>
+			<source ref="id9"/>
+			<target ref="id8"/>
+			<label kind="guard" x="127" y="-25">b &gt; MaxB</label>
+			<label kind="synchronisation" x="119" y="-8">capacityFull!</label>
+		</transition>
+	</template>
+	<template>
+		<name>Scheduler</name>
+		<declaration>double checkB(double a,double b, double t){
+int j = 0;
+double temp_b = b, temp_a = a;
+for (j = 0; j &lt; W; j++) {
+    temp_a = temp_a -on*i+k*(temp_b/(1-c)-temp_a/c);
+    temp_b = temp_b -k*(temp_b/(1-c)-temp_a/c);
+}
+temp_b = temp_b + (D-W)*IIdle;
+
+if(payloadNumber &lt; NumberOfPayloads - 1) {
+    temp_b = temp_b + (RunStart[payloadNumber+1] - t) * IIdle;
+}
+if(temp_b + temp_a &lt; C*(ThresholdPercentage/100)) { return 0; }
+return temp_b;
+}
+
+bool mayRun(){
+// Are ther ea Window constraint?
+    int i, j, ok; int count = 0; int inWin;
+    for(i= 0; i &lt; Windows; i++){
+        if (RunInWindow[i][active] == 1 &amp;&amp; inWindow[i] == 1){
+            inWin = 1;
+        }
+        else if(RunInWindow[i][active] == 0){count ++;}
+
+    }
+    if (count == Windows){inWin = 1;}
+// Are there a dependency constraint? or have the payload been run to much?
+    for (i = 0; i &lt; N; i++){
+        for (j = 0; j &lt; N; j++){
+          	if(runs[j] &gt;= Depend[active][j]){
+          	ok++;}
+	    }
+        if(ok == N &amp;&amp; inWin == 1 &amp;&amp; runs[i] &lt; MaxRuns[i]){
+		    return true;}
+        else { return false;}
+    }
+    return true;
+}
+</declaration>
+		<location id="id10" x="8" y="-34">
+			<label kind="invariant" x="-59" y="-17">t &lt;= Payloads[Queue[payloadNumber]][2] -
+Payloads[Queue[payloadNumber]][1]</label>
+		</location>
+		<location id="id11" x="8" y="-144">
+		</location>
+		<init ref="id11"/>
+		<transition>
+			<source ref="id10"/>
+			<target ref="id11"/>
+			<label kind="guard" x="-323" y="-102">t == Payloads[Queue[payloadNumber]][2] -
+Payloads[Queue[payloadNumber]][1]</label>
+			<label kind="synchronisation" x="-127" y="-119">skip!</label>
+			<nail x="-51" y="-34"/>
+			<nail x="-51" y="-144"/>
+		</transition>
+		<transition>
+			<source ref="id10"/>
+			<target ref="id11"/>
+			<label kind="guard" x="153" y="-161">on &amp;&amp; mayRun() &amp;&amp;
+0.1 &lt; a * exp(-k2*W)+
+(((a+b)*k2*c-(Costs[active]+IIdle))*(1.0-exp(-k2*W))
+-(Costs[active]+IIdle)*c*(k2*W-1.0+exp(-k2*W)))/k2
+&amp;&amp; Threshold &lt; checkB(a,b,totalTime)</label>
+			<label kind="synchronisation" x="272" y="-68">run!</label>
+			<label kind="assignment" x="153" y="-68">runs[active] ++,
+totalRuns[active] ++</label>
+			<nail x="136" y="-34"/>
+			<nail x="136" y="-144"/>
+		</transition>
+		<transition>
+			<source ref="id11"/>
+			<target ref="id10"/>
+			<label kind="synchronisation" x="17" y="-119">ready?</label>
+		</transition>
+	</template>
+	<template>
+		<name>PayloadWindow</name>
+		<parameter>const id_t id</parameter>
+		<declaration>clock wtime;
+
+void setRunnable(){
+    if (inWindow[id] == 0) { inWindow[id] = 1; }
+    else { inWindow[id] = 0; }
+}
+</declaration>
+		<location id="id12" x="-212" y="119">
+			<label kind="invariant" x="-272" y="136">wtime &lt;= OrbitTime</label>
+		</location>
+		<location id="id13" x="-85" y="-93">
+			<label kind="invariant" x="-144" y="-136">wtime &lt;= Window[id][1]</label>
+		</location>
+		<location id="id14" x="-340" y="-93">
+			<label kind="invariant" x="-416" y="-136">wtime &lt;= Window[id][0]</label>
+		</location>
+		<init ref="id14"/>
+		<transition>
+			<source ref="id12"/>
+			<target ref="id14"/>
+			<label kind="guard" x="-348" y="-17">wtime &gt;= OrbitTime</label>
+			<label kind="assignment" x="-323" y="0">wtime = 0</label>
+		</transition>
+		<transition>
+			<source ref="id13"/>
+			<target ref="id12"/>
+			<label kind="guard" x="-195" y="-17">wtime &gt;= Window[id][1]</label>
+			<label kind="assignment" x="-187" y="0">setRunnable(),
+inWindow[id] = 0</label>
+		</transition>
+		<transition>
+			<source ref="id14"/>
+			<target ref="id13"/>
+			<label kind="guard" x="-314" y="-110">wtime &gt;= Window[id][0]</label>
+			<label kind="assignment" x="-280" y="-93">setRunnable(),
+inWindow[id] = 1</label>
+		</transition>
+	</template>
+	<system>system Processor, EnergySource, Scheduler, Insolation, PayloadWindow;
+  </system>
+	<queries>
+		<query>
+			<formula>simulate 10 [&lt;=175] { Task.x, Task.Running}
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>simulate 10 [&lt;=175] { totalTime, Task.Done}
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>simulate 1 [&lt;=30000] { insolation}
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>simulate 1000 [&lt;=200] {payloadNumber, NumberOfPayloads}
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>simulate 1 [&lt;= 200] {Task.Prep_next * -1, Task.Ready*2, Task.Running*3, Task.Idle*4, Task.Done*5}
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>Pr [&lt;=100] (&lt;&gt; Task.Idle &amp;&amp; Task.x &gt;= 15)
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>Pr [&lt;=720] ([] a &gt; 0)
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>Pr [&lt;=100] (&lt;&gt; Task.Prep_next &amp;&amp; totalTime &gt;= 25)
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>simulate 1 [&lt;=200] { active, Processor.Running-1}
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>simulate 1[&lt;=400] {inWindow[0], inWindow[1]}
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>Pr [&lt;=220] (&lt;&gt; Processor.Done)
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>Pr [&lt;=100] (&lt;&gt; Task.Ready &amp;&amp; totalTime ==10)
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>Pr [&lt;=100] (&lt;&gt; totalTime &gt;= 40)
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>Pr [&lt;=200](&lt;&gt; Task.Idle &amp;&amp; totalTime &gt;= 15 &amp;&amp; totalTime &lt;= 17)
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>Pr [&lt;=200] (&lt;&gt; Task.Running &amp;&amp; active == 1 &amp;&amp; Task.x &gt;=14)
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>simulate 1[&lt;=720] {active, Processor.Running*-2}
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>simulate 1 [&lt;=10000] {i}
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>simulate 1 [&lt;=10000] {payloadNumber}
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>simulate 1 [&lt;=4440] { a, b }
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>simulate 1 [&lt;=720] { a,b, Threshold }
+			</formula>
+			<comment>
+			</comment>
+		</query>
+	</queries>
+</nta>

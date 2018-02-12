@@ -1,0 +1,147 @@
+<nta><declaration>bool on = true; // in coulombs, status
+const int N =5;
+const int ScheduleLength = 360;
+const int Windows = 2;
+const int Window[Windows][2] = {{50, 80}, {10, 30}};
+const bool RunInWindow[Windows][N] = {{1, 0, 0, 0, 0},{0, 1, 1, 1, 0}};
+
+const int OrbitTime = 90;
+const int BatteryMax =5400;
+const int BatteryCritical = 40;
+typedef int[0, Windows - 1] id_t;
+
+ clock ins;
+ clock t_time;
+ 
+ broadcast chan ready, run, win;
+ urgent broadcast chan empty;
+ 
+ const int MaxRuns[N] ={9,3,2,2,1};
+ const int ChargeRate =1;
+ const int IdleCost = 1;
+ int batteryCap = 4800 ;
+ 
+ int active = 0;
+ int runs[N] = {0,0,0,0,0};
+ int tRuns[N] = {0,0,0,0,0};
+ bool available[N] = {0,0,0,0,0};
+ bool runnable[N] = {0,0,0,0,0};
+ 
+ const int Depend[N][N] = {{0,0,0,0,0},{0,0,0,0,0},{0,0,0,0,0},{0,2,2,0,0},{0,0,0,0,0}};
+ const int TaskTimes[N][3] = {{10,15,20},{10,15,20},{5,10,15},{5,10,20},{5,15,20}};
+ const int Profit[N] = {2,4,3,1,1};
+ const int Load[N] = {4,6,4,6,6};</declaration><template><name x="5" y="5">Processor</name><declaration>int queue[N] ={-1,-1,-1,-1,-1};
+clock x; 
+int runCost = 0;
+void mayRun(){
+  int i, j, ok; 
+  for (i = 0; i &lt; N; i++){
+  for (j = 0; j &lt; N; j++){
+  if(runs[j] &gt;= Depend[i][j]){
+  ok++;}}
+  if(ok == N &amp;&amp; available[i] == 1 &amp;&amp; runs[i] &lt; MaxRuns[i]){
+  runnable[i] = true;}
+  else { runnable[i] = false;}
+  ok = 0;}}
+void setQueue(){
+int i, j;
+
+bool tempqueue[N] = {-1,-1,-1,-1,-1};
+for (i = 0; i &lt; N; i++){
+if (runnable[i] == true){
+queue[j] = i; tempqueue[i] = true; j++; 
+}}
+for (i = 0; i &lt; N; i++){
+    queue[i] = tempqueue[i]; }}
+
+void dequeue(){
+ int a, i;
+ a = queue[0];
+ for (i = 0; i &lt; N-1; i++){
+ queue[i] = queue[i+1];
+}
+ queue[N-1] = a;
+}
+
+void reset(){
+ int i = 0; int all_done = 0;int j=0;
+ for(i = 0; i &lt; N; i++){
+ if(runs[i] == MaxRuns[i]){
+ all_done ++;}}
+  if (all_done == N){
+  for(j = 0; j &lt; N; j++){
+  runnable[j] = 0;runs[j] = 0; }}
+ }
+
+int runnabeCount(){
+ int count = 0; int i = 0;
+ for (i = 0; i&lt;N; i++){
+ if(runnable[i] != 0){return 1;}}
+ return 0;}
+
+bool checkBattery(){
+  if(batteryCap - Load[active] * ((TaskTimes[active][0] + TaskTimes[active][1])/2)&lt;
+ BatteryMax * (BatteryCritical /100))
+ { return 1;}
+ else {return 0;}}
+void updateBattery(){
+ int useage = Load[active] * ((TaskTimes[active][0] + TaskTimes[active][1])/2);
+  batteryCap -= useage;
+  runs[active] ++; x := 0;
+  tRuns[active] ++;}
+ 
+ void subIdle(){
+  int idle_cost = IdleCost * (TaskTimes[active][1] - ((TaskTimes[active][0] + TaskTimes[active][1])/2));
+  batteryCap -= idle_cost; }
+ 
+ void calcCost(){
+  int i =0;int j=0;int Window_dep=0;int pen = 0;
+  for(i=0;i&lt;Windows;i++){
+  for(j=0;j&lt;N;j++){
+  if(RunInWindow[i][j] == 1){Window_dep ++;}}}
+  if(Window_dep &gt; 0){
+  for (i=0;i&lt;Windows;i++){
+  for (j=0;j&lt;N;j++){
+  if(RunInWindow[i][j] == 1 &amp;&amp; runnable[j] == 1 &amp;&amp; active != j){pen++;}}}}
+  else {runCost = 5 - Profit[active]; return;}
+  for (i=0;i&lt;Windows;i++){ 
+  if(pen &amp;&amp; RunInWindow[i][active] == 0){
+  runCost = (5 - Profit[active]) *2;
+  return;}
+  // else{runCost = 5 - Profit[active];}
+  }}</declaration><location id="id0"><name>Try</name><committed /></location><location id="id1"><name>Start</name><urgent /></location><location id="id2"><name>Idle</name><label kind="invariant">cost' == 5</label></location><location id="id3"><name>Running</name><label kind="invariant">x &lt;= TaskTimes[active][1] &amp;&amp; cost' == runCost</label></location><location id="id6"><urgent /></location><location id="id4"><name>Wait</name><label kind="invariant">x &lt;= TaskTimes[active][2]</label></location><location id="id5"><name>Ready</name><label kind="invariant">cost' == IdleCost</label><urgent /></location><init ref="id1" /><transition><source ref="id5" /><target ref="id2" /><label kind="synchronisation">run?</label></transition><transition><source ref="id2" /><target ref="id0" /><label kind="synchronisation">win?</label></transition><transition><source ref="id1" /><target ref="id6" /><label kind="assignment">mayRun()</label></transition><transition><source ref="id6" /><target ref="id5" /><label kind="select">a: int[0,N-1]</label><label kind="guard">runnabeCount() &gt; 0 &amp;&amp; runnable[a] == 1</label><label kind="synchronisation">ready!</label><label kind="assignment">mayRun(), active = a</label></transition><transition><source ref="id0" /><target ref="id5" /><label kind="select">a: int[0,N-1]</label><label kind="synchronisation">ready!</label><label kind="assignment">mayRun(), active = a</label></transition><transition><source ref="id5" /><target ref="id6" /><label kind="guard">runnable[active] == 0 &amp;&amp; !checkBattery()</label><label kind="synchronisation">run?</label></transition><transition><source ref="id3" /><target ref="id4" /><label kind="guard">x &gt;= TaskTimes[active][1]</label></transition><transition><source ref="id5" /><target ref="id3" /><label kind="guard">runnable[active] == 1 &amp;&amp; !checkBattery()</label><label kind="synchronisation">run?</label><label kind="assignment">updateBattery(), calcCost()</label></transition><transition><source ref="id6" /><target ref="id2" /><label kind="guard">runnabeCount() == 0</label></transition><transition><source ref="id4" /><target ref="id6" /><label kind="guard">x &gt;= TaskTimes[active][2]</label><label kind="assignment">reset(), dequeue(),x = 0, mayRun()</label></transition></template><template><name>Scheduler</name><declaration>bool threshold = true; 
+         bool checkBattery(){ 
+          if(batteryCap &gt; (BatteryMax/100) * BatteryCritical){ 
+          return true;} 
+          else{return false;}}</declaration><location id="id7"><label kind="invariant">checkBattery()</label><urgent /></location><location id="id8" x="0" y="0"><label kind="invariant">checkBattery()</label></location><init ref="id8" /><transition><source ref="id7" /><target ref="id8" /><label kind="synchronisation">run!</label></transition><transition><source ref="id8" /><target ref="id7" /><label kind="synchronisation">ready?</label><nail x="51" y="-59" /></transition></template><template><name>Insolation</name><declaration>clock splitTime; 
+                 int chargeCount = 0; 
+                 void increaseBattery(){
+                  chargeCount ++;
+                  if(BatteryMax &lt;= batteryCap + ((ChargeRate * OrbitTime)-(IdleCost * OrbitTime))/8){
+                  batteryCap = BatteryMax;}
+                  else{ batteryCap += ((ChargeRate * OrbitTime )-(IdleCost * OrbitTime))/8;}
+                  splitTime = 0;} 
+                 void subIdle(){ 
+                  batteryCap -= (IdleCost*(OrbitTime/8)); splitTime = 0; chargeCount ++; }</declaration><location id="id9" x="-474" y="-190"><name>in_sun</name><label kind="invariant">splitTime &lt;= OrbitTime / 8 &amp;&amp; ins &lt;= OrbitTime / 2</label></location><location id="id10" x="-224" y="-190"><name>in_eclipse</name><label kind="invariant">splitTime &lt;= OrbitTime / 8 &amp;&amp; ins &lt;= OrbitTime</label></location><init ref="id9" /><transition><source ref="id9" /><target ref="id9" /><label kind="guard">splitTime &gt;= OrbitTime/8</label><label kind="assignment">increaseBattery()</label></transition><transition><source ref="id10" /><target ref="id10" /><label kind="guard">splitTime &gt;= OrbitTime/8</label><label kind="assignment">subIdle()</label></transition><transition><source ref="id10" /><target ref="id9" /><label kind="guard">ins &gt;= OrbitTime &amp;&amp; chargeCount == 8</label><label kind="assignment">ins := 0, splitTime = 0, chargeCount = 0</label></transition><transition><source ref="id9" /><target ref="id10" /><label kind="guard">ins &gt;= OrbitTime / 2 &amp;&amp; chargeCount == 4</label></transition></template><template><name>PayloadWindow</name><parameter>const id_t id</parameter><declaration>clock wtime; 
+         void alwaysAvailable() { 
+          int i = 0; int count = 0;
+          for(i=0;i &lt; N;i++){
+          if(available[i] == 1){count++;}}
+          if(count == 0){
+          for(i = 0; i &lt; N; i++){
+          if(RunInWindow[id][i] == 0){
+          available[i] = 1;}}}
+          else{
+          for(i = 0; i &lt; N; i++){
+          if(RunInWindow[id][i] == 0 &amp;&amp; available[i] == 1){available[i] = 1;} 
+          else{ available[i] = 0;}}}}
+         void setRunnable(){ 
+          int i= 0;
+          for (i = 0; i &lt; N; i++){
+          if(RunInWindow[id][i] == 1){ 
+          available[i] = 1; }}} 
+         void removeRunnable(){
+          int i= 0; 
+          for (i = 0; i &lt; N; i++){ 
+          if(RunInWindow[id][i] == 1){ 
+          available[i] = 0;}}}</declaration><location id="id11"><committed /></location><location id="id12"><committed /></location><location id="id13" x="100" y="10"><name>nNotIn</name><label kind="invariant">wtime &lt;= Window[id][0]</label></location><location id="id14" x="100" y="100"><label kind="invariant">wtime &lt;= OrbitTime</label></location><location id="id15" x="150" y="200"><name>In</name><label kind="invariant">wtime &lt;= Window[id][1]</label></location><init ref="id12" /><transition><source ref="id11" /><target ref="id15" /><label kind="guard">ins+TaskTimes[active][1] &lt;= Window[id][1]</label></transition><transition><source ref="id11" /><target ref="id15" /><label kind="guard">ins+TaskTimes[active][1] &gt;= Window[id][1]</label><label kind="assignment">runnable[active] = 0</label></transition><transition><source ref="id15" /><target ref="id11" /><label kind="synchronisation">ready?</label></transition><transition><source ref="id14" /><target ref="id13" /><label kind="guard">wtime &gt;= OrbitTime</label><label kind="synchronisation">win!</label><label kind="assignment">wtime = 0</label></transition><transition><source ref="id12" /><target ref="id13" /><label kind="assignment">alwaysAvailable()</label></transition><transition><source ref="id15" /><target ref="id14" /><label kind="guard">wtime &gt;= Window[id][1]</label><label kind="synchronisation">win!</label><label kind="assignment">removeRunnable()</label></transition><transition><source ref="id13" /><target ref="id15" /><label kind="guard">wtime &gt;= Window[id][0]</label><label kind="synchronisation">win!</label><label kind="assignment">setRunnable()</label></transition></template><system>system Processor, Scheduler, Insolation, PayloadWindow;</system><queries><query><formula /><comment /></query></queries></nta>
