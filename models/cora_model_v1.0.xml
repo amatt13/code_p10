@@ -1,4 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?><!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.1//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_1.dtd'><nta><declaration>const int N = 5; // slew, internal comm., collect data, send data, receive msg.
+<?xml version="1.0" encoding="utf-8"?><!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.1//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_1.dtd'><nta><declaration>const int N = 3; // slew, internal comm., collect data, send data, receive msg.
+const int S = 2;
 const int ScheduleLength = 360;
 const int Windows = 2;
 const int W = Windows;
@@ -6,16 +7,15 @@ const int Window[Windows][2] = {{50, 80}, {10, 30}};
 const bool RunInWindow[Windows][N] = {{1, 0, 0, 0, 0},{0, 1, 1, 1, 0}};
 
 const int OrbitTime = 90;
-typedef int[0, Windows - 1] id_t;
-const int max_memory = 10;
+const int max_memory = 50;
 
-clock ins;
+clock orbit_time;
 clock t_time;
  
 broadcast chan ready, run, win;
-urgent broadcast chan empty;
+urgent chan release[S][N], request[S], grant[S][N], preemt[N];
  
-int active = 0;
+
 int runs[N] = {0,0,0,0,0};
 int tRuns[N] = {0,0,0,0,0};
 bool available[N] = {0,0,0,0,0};
@@ -23,20 +23,21 @@ bool runnable[N] = {0,0,0,0,0};
  
 const int Depend[N][N] = {{0,0,0,0,0},{0,0,0,0,0},{0,0,0,0,0},{0,2,2,0,0},{0,0,0,0,0}};
 const int TaskTimes[N][3] = {{10,15,20},{10,15,20},{5,10,15},{5,10,20},{5,15,20}};
-const int priotity[N] = {2,4,3,1,1};
+
 
 /** Task Description */
-struct {
+typedef struct {
 	//const int depend_task[N];
 	bool depend_win[W];
 	int execution_time;
 	int deadline;
 	int prio;
 	int data_rate;
+	int orientation;
 } TaskDescription;
 
 /** Satellite Description */
-struct {
+typedef struct {
 	int offset;
 	int rotation;
 	int memory;
@@ -44,19 +45,42 @@ struct {
 } SatDescription;
 
 /** Satellite Description */
-struct {
+typedef struct {
 	int start_time;
 	int end_time;
 	int price_rate;
 } WindowDescription;
 
+typedef int[0, N-1] id_t;
+TaskDescription send_msg = {{0,1}, 10,15, 3, -5, 2};
+TaskDescription rec_msg = {{1,0}, 12,20, 5, 1, 1};
+TaskDescription slew = {{0,0}, 3,5, 1, 0, 0};
+TaskDescription jobs[N] = {send_msg, rec_msg, slew};
+
+typedef int[0, S-1] id_s;
+SatDescription satA = {10, 0, 15, {1,0,1}};
+SatDescription satB = {50, 1, 50, {1,1,1}};
+SatDescription sats[S] = {satA, satB};
+
+typedef int[0, Windows - 1] id_w;
+WindowDescription win1 = {40, 80, 13}; 
+WindowDescription win2 = {10, 30, 8};
+WindowDescription wins[Windows] = {win1, win2};
 
 
+bool empty(int q[N]){
+	int i = 0;
+	for (i = 0; i &lt; N; i++){
+		if(q[i] != 0){
+			return true;
+		}
+	}
+	return false;
+}
 
-
-
-
-
+const int prioritys[N] = {jobs[0].prio,jobs[1].prio,jobs[2].prio};
+bool running[N] = {0,0,0};
+int active[S] = {0,0};
 </declaration><template><name x="5" y="5">Processor</name><declaration>int queue[N] ={-1,-1,-1,-1,-1};
 clock x; 
 int runCost = 0;
@@ -126,7 +150,7 @@ void calcCost(){
 	}
 }</declaration><location id="id0" x="64" y="376"><name x="48" y="392">Try</name><committed/></location><location id="id1" x="344" y="-120"><name x="334" y="-150">Start</name><urgent/></location><location id="id2" x="64" y="-16"><name x="54" y="-46">Idle</name><label kind="invariant" x="32" y="-64">cost' == 5</label></location><location id="id3" x="744" y="376"><name x="712" y="392">Running</name><label kind="invariant" x="712" y="416">x &lt;= TaskTimes[active][1] &amp;&amp; cost' == runCost</label></location><location id="id4" x="344" y="-16"><urgent/></location><location id="id5" x="744" y="-16"><name x="734" y="-46">Wait</name><label kind="invariant" x="760" y="-32">x &lt;= TaskTimes[active][2]</label></location><location id="id6" x="344" y="376"><name x="320" y="392">Ready</name><urgent/></location><init ref="id1"/><transition><source ref="id6"/><target ref="id2"/><label kind="synchronisation" x="176" y="184">run?</label></transition><transition><source ref="id2"/><target ref="id0"/><label kind="synchronisation" x="64" y="184">win?</label></transition><transition><source ref="id1"/><target ref="id4"/><label kind="assignment" x="352" y="-80">mayRun()</label></transition><transition><source ref="id4"/><target ref="id6"/><label kind="select" x="256" y="168">a: int[0,N-1]</label><label kind="guard" x="184" y="96">runnabeCount() &gt; 0
 &amp;&amp; runnable[a] == 1</label><label kind="synchronisation" x="296" y="184">ready!</label><label kind="assignment" x="264" y="136">mayRun(),
-active = a</label><nail x="344" y="160"/></transition><transition><source ref="id0"/><target ref="id6"/><label kind="select" x="136" y="352">a: int[0,N-1]</label><label kind="synchronisation" x="160" y="392">ready!</label><label kind="assignment" x="120" y="376">mayRun(), active = a</label></transition><transition><source ref="id6"/><target ref="id4"/><label kind="guard" x="512" y="136">runnable[active] == 0</label><label kind="synchronisation" x="512" y="160">run?</label><nail x="512" y="160"/></transition><transition><source ref="id3"/><target ref="id5"/><label kind="guard" x="752" y="136">x &gt;= TaskTimes[active][1]</label></transition><transition><source ref="id6"/><target ref="id3"/><label kind="guard" x="424" y="352">runnable[active] == 1</label><label kind="synchronisation" x="544" y="376">run?</label><label kind="assignment" x="520" y="392">calcCost()</label></transition><transition><source ref="id4"/><target ref="id2"/><label kind="guard" x="128" y="-40">runnabeCount() == 0</label></transition><transition><source ref="id5"/><target ref="id4"/><label kind="guard" x="464" y="-40">x &gt;= TaskTimes[active][2]</label><label kind="assignment" x="416" y="-8">reset(), dequeue(),x = 0, mayRun()</label></transition></template><template><name>PayloadWindow</name><parameter>const id_t id</parameter><declaration>clock wtime;          
+active = a</label><nail x="344" y="160"/></transition><transition><source ref="id0"/><target ref="id6"/><label kind="select" x="136" y="352">a: int[0,N-1]</label><label kind="synchronisation" x="160" y="392">ready!</label><label kind="assignment" x="120" y="376">mayRun(), active = a</label></transition><transition><source ref="id6"/><target ref="id4"/><label kind="guard" x="512" y="136">runnable[active] == 0</label><label kind="synchronisation" x="512" y="160">run?</label><nail x="512" y="160"/></transition><transition><source ref="id3"/><target ref="id5"/><label kind="guard" x="752" y="136">x &gt;= TaskTimes[active][1]</label></transition><transition><source ref="id6"/><target ref="id3"/><label kind="guard" x="424" y="352">runnable[active] == 1</label><label kind="synchronisation" x="544" y="376">run?</label><label kind="assignment" x="520" y="392">calcCost()</label></transition><transition><source ref="id4"/><target ref="id2"/><label kind="guard" x="128" y="-40">runnabeCount() == 0</label></transition><transition><source ref="id5"/><target ref="id4"/><label kind="guard" x="464" y="-40">x &gt;= TaskTimes[active][2]</label><label kind="assignment" x="416" y="-8">dequeue(),x = 0, mayRun()</label></transition></template><template><name>PayloadWindow</name><parameter>const id_w id</parameter><declaration>clock wtime;          
 void alwaysAvailable() { 
           int i = 0; int count = 0;
           for(i=0;i &lt; N;i++){
@@ -150,13 +174,64 @@ void removeRunnable(){
           int i= 0; 
           for (i = 0; i &lt; N; i++){ 
           if(RunInWindow[id][i] == 1){ 
-          available[i] = 0;}}}</declaration><location id="id7" x="648" y="16"><committed/></location><location id="id8" x="-40" y="16"><committed/></location><location id="id9" x="104" y="16"><name x="80" y="-16">NotIn</name><label kind="invariant" x="24" y="-32">wtime &lt;= Window[id][0]</label></location><location id="id10" x="232" y="272"><label kind="invariant" x="222" y="287">wtime &lt;= OrbitTime</label></location><location id="id11" x="392" y="16"><name x="382" y="-14">In</name><label kind="invariant" x="288" y="-24">wtime &lt;= Window[id][1]</label></location><init ref="id8"/><transition><source ref="id7"/><target ref="id11"/><label kind="guard" x="376" y="56">ins+TaskTimes[active][1] &lt;= Window[id][1]</label><nail x="512" y="56"/></transition><transition><source ref="id7"/><target ref="id11"/><label kind="guard" x="360" y="-64">ins+TaskTimes[active][1] &gt;= Window[id][1]</label><label kind="assignment" x="440" y="-48">runnable[active] = 0</label><nail x="512" y="-32"/></transition><transition><source ref="id11"/><target ref="id7"/><label kind="synchronisation" x="480" y="0">ready?</label></transition><transition><source ref="id10"/><target ref="id9"/><label kind="guard" x="16" y="128">wtime &gt;= OrbitTime</label><label kind="assignment" x="88" y="144">wtime = 0</label></transition><transition><source ref="id8"/><target ref="id9"/><label kind="assignment" x="-32" y="24">alwaysAvailable()</label></transition><transition><source ref="id11"/><target ref="id10"/><label kind="guard" x="320" y="128">wtime &gt;= Window[id][1]</label><label kind="synchronisation" x="304" y="160">win!</label><label kind="assignment" x="312" y="144">removeRunnable()</label></transition><transition><source ref="id9"/><target ref="id11"/><label kind="guard" x="152" y="0">wtime &gt;= Window[id][0]</label><label kind="synchronisation" x="216" y="32">win!</label><label kind="assignment" x="184" y="16">setRunnable()</label></transition></template><template><name>PreemptiveScheduler</name><location id="id12" x="112" y="304"><name x="88" y="320">Preempt</name><committed/></location><location id="id13" x="112" y="-88"><name x="88" y="-72">Release</name><committed/></location><location id="id14" x="112" y="72"><name x="102" y="42">Occupied</name></location><location id="id15" x="-160" y="72"><committed/></location><location id="id16" x="-160" y="-88"><name x="-176" y="-120">Start</name></location><init ref="id16"/><transition><source ref="id12"/><target ref="id15"/><label kind="guard" x="-152" y="232">priority[queue[0] ] &gt; priority[active]</label><label kind="synchronisation" x="-152" y="248">preemt[active]!</label><label kind="assignment" x="-152" y="264">running[acrive] = false,
-active = queue[0]</label><nail x="-160" y="304"/></transition><transition><source ref="id13"/><target ref="id16"/><label kind="guard" x="-80" y="-104">empty(queue)</label><label kind="assignment" x="-72" y="-88">active = -1</label></transition><transition><source ref="id12"/><target ref="id14"/><label kind="guard" x="248" y="176">priotity[queue[0] ] &lt;= priotity[active]</label><nail x="240" y="184"/></transition><transition><source ref="id13"/><target ref="id15"/><label kind="guard" x="-72" y="-32">!empty(queue)</label><label kind="assignment" x="-72" y="-16">active = queue[0]</label></transition><transition><source ref="id14"/><target ref="id12"/><label kind="synchronisation" x="52" y="173">request[sat_id][task]?</label><label kind="assignment" x="52" y="188">enqueue(queue, task)</label></transition><transition><source ref="id14"/><target ref="id13"/><label kind="synchronisation" x="120" y="-31">release[sat_id][task]?</label><label kind="assignment" x="120" y="-16">running[task] = false,
-dequeue(queue, task)</label></transition><transition><source ref="id15"/><target ref="id14"/><label kind="synchronisation" x="-104" y="56">grant[sat_id][active]!</label><label kind="assignment" x="-104" y="72">running[active] = true</label></transition><transition><source ref="id16"/><target ref="id15"/><label kind="synchronisation" x="-328" y="-32">request[sat_id][task]?</label><label kind="assignment" x="-328" y="-16">enqueue(queue, task),
-active = queue[0]</label></transition></template><template><name>Resource</name><location id="id17" x="-288" y="96"><name x="-272" y="80">Occupied</name></location><location id="id18" x="64" y="96"><name x="48" y="64">Block</name><committed/></location><location id="id19" x="-288" y="-160"><name x="-296" y="-192">Unblock</name><committed/></location><location id="id20" x="-480" y="96"><name x="-472" y="72">Free</name></location><init ref="id20"/><transition><source ref="id19"/><target ref="id20"/><label kind="guard" x="-472" y="-152">empty(waiting)</label><nail x="-480" y="-160"/></transition><transition><source ref="id19"/><target ref="id17"/><label kind="guard" x="-128" y="-88">!empty(waiting)</label><label kind="synchronisation" x="-128" y="-72">request[sat_id][waiting[0] ]!</label><label kind="assignment" x="-128" y="-56">active = waiting[0],
+          available[i] = 0;}}}</declaration><location id="id7" x="648" y="16"><committed/></location><location id="id8" x="-40" y="16"><committed/></location><location id="id9" x="104" y="16"><name x="80" y="-16">NotIn</name><label kind="invariant" x="24" y="-32">wtime &lt;= Window[id][0]</label></location><location id="id10" x="232" y="272"><label kind="invariant" x="222" y="287">wtime &lt;= OrbitTime</label></location><location id="id11" x="392" y="16"><name x="382" y="-14">In</name><label kind="invariant" x="288" y="-24">wtime &lt;= Window[id][1]</label></location><init ref="id8"/><transition><source ref="id7"/><target ref="id11"/><label kind="guard" x="376" y="56">TaskTimes[active][1] &lt;= Window[id][1]</label><nail x="512" y="56"/></transition><transition><source ref="id7"/><target ref="id11"/><label kind="guard" x="360" y="-64">TaskTimes[active][1] &gt;= Window[id][1]</label><label kind="assignment" x="440" y="-48">runnable[active] = 0</label><nail x="512" y="-32"/></transition><transition><source ref="id11"/><target ref="id7"/><label kind="synchronisation" x="480" y="0">ready?</label></transition><transition><source ref="id10"/><target ref="id9"/><label kind="guard" x="16" y="128">wtime &gt;= OrbitTime</label><label kind="assignment" x="88" y="144">wtime = 0</label></transition><transition><source ref="id8"/><target ref="id9"/><label kind="assignment" x="-32" y="24">alwaysAvailable()</label></transition><transition><source ref="id11"/><target ref="id10"/><label kind="guard" x="320" y="128">wtime &gt;= Window[id][1]</label><label kind="synchronisation" x="304" y="160">win!</label><label kind="assignment" x="312" y="144">removeRunnable()</label></transition><transition><source ref="id9"/><target ref="id11"/><label kind="guard" x="152" y="0">wtime &gt;= Window[id][0]</label><label kind="synchronisation" x="216" y="32">win!</label><label kind="assignment" x="184" y="16">setRunnable()</label></transition></template><template><name>PreemptiveScheduler</name><parameter>const id_s sat_id</parameter><declaration>bool queue[N] = {0,0,0};
+int task = 0;
+
+void enqueue(int task){
+	// do stuff with queue
+	int i = N-1;
+	for (i = N-1; i &gt;= 0; i--){
+	
+	}
+}
+
+void dequeue(int task){
+	// do suff with queue
+}</declaration><location id="id12" x="112" y="304"><name x="88" y="320">Preempt</name><committed/></location><location id="id13" x="112" y="-88"><name x="88" y="-72">Release</name><committed/></location><location id="id14" x="112" y="72"><name x="102" y="42">Occupied</name></location><location id="id15" x="-160" y="72"><committed/></location><location id="id16" x="-160" y="-88"><name x="-176" y="-120">Start</name></location><init ref="id16"/><transition><source ref="id12"/><target ref="id15"/><label kind="guard" x="-152" y="232">prioritys[queue[0]] &gt; prioritys[active]</label><label kind="synchronisation" x="-152" y="248">preemt[active]!</label><label kind="assignment" x="-152" y="264">running[active] = false,
+active = queue[0]</label><nail x="-160" y="304"/></transition><transition><source ref="id13"/><target ref="id16"/><label kind="guard" x="-80" y="-104">empty(queue)</label><label kind="assignment" x="-72" y="-88">active = -1</label></transition><transition><source ref="id12"/><target ref="id14"/><label kind="guard" x="248" y="176">prioritys[queue[0] ] &lt;= prioritys[active]</label><nail x="240" y="184"/></transition><transition><source ref="id13"/><target ref="id15"/><label kind="guard" x="-72" y="-32">!empty(queue)</label><label kind="assignment" x="-72" y="-16">active = queue[0]</label></transition><transition><source ref="id14"/><target ref="id12"/><label kind="synchronisation" x="52" y="173">request[sat_id][task]?</label><label kind="assignment" x="52" y="188">enqueue(task)</label></transition><transition><source ref="id14"/><target ref="id13"/><label kind="synchronisation" x="120" y="-31">release[sat_id][task]?</label><label kind="assignment" x="120" y="-16">running[task] = false,
+dequeue(task)</label></transition><transition><source ref="id15"/><target ref="id14"/><label kind="synchronisation" x="-104" y="56">grant[sat_id][active]!</label><label kind="assignment" x="-104" y="72">running[active] = true</label></transition><transition><source ref="id16"/><target ref="id15"/><label kind="synchronisation" x="-328" y="-32">request[sat_id]?</label><label kind="assignment" x="-328" y="-16">enqueue(task),
+active = queue[0]</label></transition></template><template><name>Resource</name><parameter>const id_s res_id</parameter><declaration>int waiting[N] = {0,0,0};
+int task = 0;
+
+void unlockInheritance(int res_id, int task){}
+
+
+
+void dequeue(int task){
+	// use waiting
+}
+
+
+
+void enqueue(int task){// use waiting
+}
+
+void lockInheritance(int res_id, int active){}
+
+void boostPriority(int res_id, int task_id){
+	//priority = preemting task priority + 1
+}
+
+</declaration><location id="id17" x="-288" y="96"><name x="-272" y="80">Occupied</name></location><location id="id18" x="64" y="96"><name x="48" y="64">Block</name><committed/></location><location id="id19" x="-288" y="-160"><name x="-296" y="-192">Unblock</name><committed/></location><location id="id20" x="-480" y="96"><name x="-472" y="72">Free</name></location><init ref="id20"/><transition><source ref="id19"/><target ref="id20"/><label kind="guard" x="-472" y="-152">empty(waiting)</label><nail x="-480" y="-160"/></transition><transition><source ref="id19"/><target ref="id17"/><label kind="guard" x="-128" y="-88">!empty(waiting)</label><label kind="synchronisation" x="-128" y="-72">request[res_id][waiting[0] ]!</label><label kind="assignment" x="-128" y="-56">active = waiting[0],
 lockInheritance(res_id, active)</label><nail x="-48" y="-160"/></transition><transition><source ref="id17"/><target ref="id19"/><label kind="synchronisation" x="-376" y="-80">release[res_id][task]?</label><label kind="assignment" x="-376" y="-64">unlockInheritance(res_id, task),
-dequeue(waiting, task)</label></transition><transition><source ref="id18"/><target ref="id17"/><label kind="guard" x="-152" y="192">running[task_id]</label><label kind="synchronisation" x="-168" y="208">release[sat_id][task_id]!</label><nail x="-96" y="184"/></transition><transition><source ref="id17"/><target ref="id18"/><label kind="synchronisation" x="-176" y="40">request[res_id][task]?</label><label kind="assignment" x="-176" y="56">task_id = task,
-enqueue(waiting, task_id),
-boostPriority(res_id, task_id)</label></transition><transition><source ref="id20"/><target ref="id17"/><label kind="synchronisation" x="-464" y="104">request[res_id][task]?</label><label kind="assignment" x="-464" y="120">enqueue(waiting, task),
+dequeue(task)</label></transition><transition><source ref="id18"/><target ref="id17"/><label kind="guard" x="-152" y="192">running[task_id]</label><label kind="synchronisation" x="-168" y="208">release[res_id][task]!</label><nail x="-96" y="184"/></transition><transition><source ref="id17"/><target ref="id18"/><label kind="synchronisation" x="-176" y="40">request[res_id][task]?</label><label kind="assignment" x="-176" y="56">enqueue(task),
+boostPriority(res_id, task)</label></transition><transition><source ref="id20"/><target ref="id17"/><label kind="synchronisation" x="-464" y="104">request[res_id][task]?</label><label kind="assignment" x="-464" y="120">enqueue(task),
 active = waiting[0],
-lockInheritance(res_id, active)</label></transition></template><system>system Processor, PayloadWindow;</system></nta>
+lockInheritance(res_id, active)</label></transition></template><template><name>Satelitte</name><parameter>const id_s sat_id</parameter><declaration>clock run_time, exe_time;
+int task = 0;
+
+void select_task(){
+	int selected = 0;
+	//select next task
+	active[sat_id] = selected;
+	task = selected;
+
+}
+
+bool rotation(){
+	if (rotation != jobs[task].orientation){return false;}
+	else {return true;}
+}</declaration><location id="id21" x="240" y="48"><name x="256" y="16">Slewing</name></location><location id="id22" x="40" y="-128"><name x="30" y="-158">Ready</name></location><location id="id23" x="-416" y="48"><committed/></location><location id="id24" x="40" y="48"><name x="48" y="16">Running</name><label kind="invariant" x="-16" y="64">run_time  &lt;= jobs[task].deadline &amp;&amp;
+exe_time  &lt;= jobs[task].execution_time</label></location><location id="id25" x="-416" y="-128"><name x="-432" y="-160">Idle</name></location><location id="id26" x="-728" y="-128"><name x="-744" y="-160">Start</name><label kind="invariant" x="-832" y="-104">orbit_time &lt;= sats[sat_id].offset</label><committed/></location><init ref="id26"/><transition><source ref="id21"/><target ref="id24"/></transition><transition><source ref="id22"/><target ref="id21"/><label kind="guard" x="112" y="-144">!rotation()</label><nail x="240" y="-128"/></transition><transition><source ref="id24"/><target ref="id23"/><label kind="guard" x="-312" y="-24">run_time &gt; jobs[task].deadline</label><nail x="-216" y="-8"/></transition><transition><source ref="id23"/><target ref="id25"/></transition><transition><source ref="id24"/><target ref="id23"/><label kind="guard" x="-376" y="56">exe_time  &gt;= jobs[task].execution_time &amp;&amp;
+run_time  &lt;= jobs[task].deadline</label><label kind="synchronisation" x="-248" y="33">release[sat_id][task]!</label><label kind="assignment" x="-304" y="88">runs[sat_id][task] ++</label></transition><transition><source ref="id22"/><target ref="id24"/><label kind="guard" x="48" y="-88">rotation()</label><label kind="synchronisation" x="48" y="-72">grant[sat_id][res_id]?</label><label kind="assignment" x="48" y="-56">exe_time = 0</label></transition><transition><source ref="id25"/><target ref="id22"/><label kind="synchronisation" x="-280" y="-144">request[sat_id]!</label><label kind="assignment" x="-264" y="-120">select_task,
+run_time = 0</label></transition><transition><source ref="id26"/><target ref="id25"/><label kind="guard" x="-696" y="-152">orbit_time &gt;= sats[sat_id].offset</label></transition></template><system>system Processor, PayloadWindow;</system></nta>
