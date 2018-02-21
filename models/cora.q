@@ -43,4 +43,4 @@
 /*
 
 */
-E<> t_time >= SCHEDULE_LENGHT
+E<> t_time >= 60
