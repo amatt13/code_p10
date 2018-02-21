@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?><!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.1//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_1.dtd'><nta><declaration>const int N = 4;
-const int S = 2;
+const int S = 1;
 const int R = 2;
 const int W = 2;
 const int SCHEDULE_LENGHT = 360;
@@ -55,7 +55,7 @@ const TaskDescription jobs[N]         = {send_data, gather_new_data, transfer, r
 
 const SatDescription sat_gat = {10, 0, 0, {0,1,1,0}, -1};
 const SatDescription sat_sen = {30, 2, 0, {1,0,0,1}, -1};
-SatDescription sats[S] = {sat_gat, sat_sen};
+SatDescription sats[S] = {sat_sen};
 
 const WindowDescription win1 = {0, 40, 13}; 
 const WindowDescription win2 = {20, 60, 8};
@@ -67,11 +67,11 @@ id_s runnable_request;
 bool runnable[N] = {0, 0, 0, 0};
 clock orbit_time[S];
 int orbits[S];
-int runs[S][N] = {{0, 0, 0, 0}, {0, 0, 0, 0}};
+int runs[S][N] = {/*{0, 0, 0, 0}, */{0, 0, 0, 0}};
 const int prios[N] = {jobs[0].prio, jobs[1].prio, jobs[2].prio, jobs[3].prio};
-int priorities[S][N] = {prios,prios};
-int active[S] = {0, 0};
-int queue[S][N] = {{-1,-1,-1,-1}, {-1,-1,-1,-1}};
+int priorities[S][N] = {/*prios,*/prios};
+int active[S] = {/*0,*/ 0};
+int queue[S][N] = {/*{-1,-1,-1,-1},*/ {-1,-1,-1,-1}};
 //bool running[S] = {?};
 
 
@@ -184,7 +184,7 @@ int calc_cost(){
 
 void update_storage(int mult){
 	//TODO introduce finer grunulairy (in case of preemption)
-	sats[sat_id].memory += (jobs[task].execution_time * jobs[task].data_rate * mult)/2;
+	sats[sat_id].memory += (jobs[task].execution_time * jobs[task].data_rate * mult);
 	if (sats[sat_id].memory &gt; MAX_MEMORY) {
 		sats[sat_id].memory = MAX_MEMORY;
 	} else if (sats[sat_id].memory &lt; 0) {
@@ -236,6 +236,7 @@ void suggest_task(){
 				if (priorities[sat_id][i] &lt;= 100) {
 					priorities[sat_id][i] = priorities[sat_id][i] * 2; 
 				}
+				else priorities[sat_id][i] = 100;
 			}
 			else if (sats[sat_id].memory &gt;= HIGH_MEMORY &amp;&amp; jobs[i].data_rate &lt; 0) {
 				if (priorities[sat_id][i] &lt;= 100) {
