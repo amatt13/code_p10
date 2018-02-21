@@ -23,7 +23,7 @@
 /*
 
 */
-E<> t_time == 75 && runs[1][0] > 0
+//E<> runs[1][0] == 10
 
 /*
 
@@ -43,4 +43,4 @@ E<> t_time == 75 && runs[1][0] > 0
 /*
 
 */
-//E<> t_time >= SCHEDULE_LENGHT
+E<> t_time >= SCHEDULE_LENGHT
