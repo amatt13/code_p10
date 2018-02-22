@@ -50,12 +50,12 @@ typedef struct {
 const TaskDescription send_data       = {{1,0}, 20,30, 9, -2, true, 1, -1};
 const TaskDescription gather_new_data = {{0,1}, 5,10,  6,  2, false, 0, -1};
 const TaskDescription transfer        = {{0,0}, 3,12,  4, -1, false, 2, -1};
-const TaskDescription receive         = {{0,0}, 3,12,   5,  3, false, 0, -1};
+const TaskDescription receive         = {{0,0}, 3,12,  5, 15, false, 0, -1};
 const TaskDescription jobs[N]         = {send_data, gather_new_data, transfer, receive};
 
 const SatDescription sat_gat = {10, 0, 0, {0,1,1,0}, -1};
 const SatDescription sat_sen = {20, 2, 0, {1,0,0,1}, -1};
-SatDescription sats[S] = {sat_gat, sat_sen};
+SatDescription sats[S] = {sat_gat, sat_sen};  //ER DE BYTTET OM?!
 
 const WindowDescription win1 = {0, 40, 13}; 
 const WindowDescription win2 = {20, 60, 8};
@@ -234,15 +234,30 @@ void suggest_task(){
 
 	for (i = 0; i &lt; N; i++) {
 		if (runnable[i]) {
-			if (sats[sat_id].memory &lt;= LOW_MEMORY &amp;&amp; jobs[i].data_rate &gt; 0) {
-				if (priorities[sat_id][i] &lt;= 100) {
-					priorities[sat_id][i] = priorities[sat_id][i] * 2; 
+			if (sats[sat_id].memory &lt;= LOW_MEMORY ) {
+				if (jobs[i].data_rate &gt; 0) {
+					if (priorities[sat_id][i] &lt;= 100) {
+						priorities[sat_id][i] = priorities[sat_id][i] * 2; 
+					}
+					else {
+						priorities[sat_id][i] = 100;
+					}
 				}
-				else priorities[sat_id][i] = 100;
+				else if (jobs[i].data_rate &lt; 0) {
+					priorities[sat_id][i] = 0;
+				}
 			}
-			else if (sats[sat_id].memory &gt;= HIGH_MEMORY &amp;&amp; jobs[i].data_rate &lt; 0) {
-				if (priorities[sat_id][i] &lt;= 100) {
-					priorities[sat_id][i] = priorities[sat_id][i] * 2;
+			else if (sats[sat_id].memory &gt;= HIGH_MEMORY) {
+				if (jobs[i].data_rate &lt; 0) {
+					if (priorities[sat_id][i] &lt;= 100) {
+						priorities[sat_id][i] = priorities[sat_id][i] * 2; 
+					}
+					else {
+						priorities[sat_id][i] = 100;
+					}
+				}
+				else if (jobs[i].data_rate &gt; 0) {
+					priorities[sat_id][i] = 0;
 				} 
 			}
 		}
@@ -255,9 +270,13 @@ void suggest_task(){
 			high = priorities[sat_id][i];
 		}
 	}
-	if (selected != -1)
+	if (selected != -1 &amp;&amp; high &gt; 0) {
 		is_queued[selected] = true;
-	sats[sat_id].suggested_task = selected;
+		sats[sat_id].suggested_task = selected;
+	}
+	else {
+	sats[sat_id].suggested_task = -1;
+	}
 }
 </declaration><location id="id14" x="-352" y="-328"><committed/></location><location id="id15" x="-264" y="-328"><committed/></location><location id="id16" x="-472" y="-424"><name x="-482" y="-454">Start</name></location><location id="id17" x="-64" y="-424"><name x="-56" y="-448">Slewing</name><label kind="invariant" x="-128" y="-408">slew_time &lt;= 3</label></location><location id="id18" x="-312" y="-216"><name x="-296" y="-224">Check</name><committed/></location><location id="id19" x="-312" y="-424"><name x="-304" y="-448">Wait</name><label kind="invariant" x="-416" y="-456">loc_time &lt;= 3</label></location><init ref="id16"/><transition><source ref="id15"/><target ref="id19"/><label kind="guard" x="-336" y="-360">selected == -1</label><nail x="-312" y="-328"/></transition><transition><source ref="id14"/><target ref="id18"/><label kind="synchronisation" x="-392" y="-287">check!</label></transition><transition><source ref="id15"/><target ref="id19"/><label kind="guard" x="-272" y="-368">selected != -1</label><label kind="synchronisation" x="-280" y="-384">add_task[sat_id]!</label></transition><transition><source ref="id16"/><target ref="id19"/><label kind="synchronisation" x="-452" y="-439">start[sat_id]?</label><label kind="assignment" x="-452" y="-424">loc_time = 0</label></transition><transition><source ref="id17"/><target ref="id19"/><label kind="guard" x="-240" y="-528">orientation(sat_id)</label><label kind="synchronisation" x="-248" y="-512">slew_sat[sat_id]!</label><label kind="assignment" x="-248" y="-496">loc_time = 0</label><nail x="-104" y="-496"/><nail x="-312" y="-496"/></transition><transition><source ref="id17"/><target ref="id17"/><label kind="guard" x="-80" y="-528">slew_time &gt;= 3 &amp;&amp;
 !orientation(sat_id)</label><label kind="assignment" x="-8" y="-416">turn_satellite(),
