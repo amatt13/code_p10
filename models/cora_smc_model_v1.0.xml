@@ -1,0 +1,768 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.1//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_2.dtd'>
+<nta>
+	<declaration>const int N = 4;
+const int S = 2;
+const int R = 2;
+const int W = 2;
+const int SCHEDULE_LENGHT = 360;
+const int ORBIT_TIME = 100;
+const int MAX_MEMORY = 100;
+const int LOW_MEMORY = MAX_MEMORY * 40/100;
+const int HIGH_MEMORY = MAX_MEMORY * 60/100;
+
+typedef int[0, N-1] id_t;
+typedef int[0, R-1] id_r;
+typedef int[0, S-1] id_s;
+typedef int[0, W-1] id_w;
+
+clock t_time;
+
+urgent broadcast chan release[S], request[S], grant[S][N], preemt[N], slew_sat[S], 
+		      add_task[S], start[S], check;
+
+/** Task Description */
+typedef struct {
+	bool depend_win[W];
+	int execution_time;
+	int deadline;
+	int prio;
+	int data_rate;
+	bool has_cost;
+	int orientation;
+	int res;
+} TaskDescription;
+
+/** Satellite Description */
+typedef struct {
+	int offset;
+	int rotation;
+	int memory;
+	bool can_does[N];
+	int suggested_task;
+} SatDescription;
+
+/** Window Description */
+typedef struct {
+	int start_time;
+	int end_time;
+	int price_rate;
+} WindowDescription; 
+                                      /*  w     E  D   P  rate Co   Orien*/
+const TaskDescription send_data       = {{1,0}, 20,30, 9, -2, true, 1, -1};
+const TaskDescription gather_new_data = {{0,1}, 5,10,  6,  2, false, 0, -1};
+const TaskDescription transfer        = {{0,0}, 3,12,  4, -1, false, 2, -1};
+const TaskDescription receive         = {{0,0}, 3,12,  5, 15, false, 0, -1};
+const TaskDescription jobs[N]         = {send_data, gather_new_data, transfer, receive};
+
+const SatDescription sat_gat = {10, 0, 0, {0,1,1,0}, -1};
+const SatDescription sat_sen = {20, 2, 0, {1,0,0,1}, -1};
+SatDescription sats[S] = {sat_gat, sat_sen};  //ER DE BYTTET OM?!
+
+const WindowDescription win1 = {0, 40, 13}; 
+const WindowDescription win2 = {20, 60, 8};
+const WindowDescription wins[W] = {win1, win2};
+
+
+/** Variables */
+id_s runnable_request;
+meta bool runnable[N] = {0, 0, 0, 0};
+clock orbit_time[S];
+int orbits[S];
+int runs[S][N] = {{0, 0, 0, 0}, {0, 0, 0, 0}};
+const int prios[N] = {jobs[0].prio, jobs[1].prio, jobs[2].prio, jobs[3].prio};
+int priorities[S][N] = {prios, prios};
+int active[S] = {0, 0};
+int queue[S][N] = {{-1,-1,-1,-1}, {-1,-1,-1,-1}};
+//bool running[S] = {?};
+
+
+bool empty(int q[N]){
+	int i = 0;
+	for (i = 0; i &lt; N; i++){
+		if(q[i] != -1){
+			return false;
+		}
+	}
+	return true;
+}
+
+bool orientation(int sat_id){
+	if (jobs[active[sat_id]].orientation != 0){ // 0 = no specific orientation required
+		if (sats[sat_id].rotation != jobs[active[sat_id]].orientation){return false;}
+		else {return true;}}
+	else {return true;}
+}
+</declaration>
+	<template>
+		<name>Scheduler</name>
+		<parameter>const id_s sat_id</parameter>
+		<declaration>int task = 0;
+
+/** order the queue to highest priority in front */
+void orderQueue(){ //OI! Look here
+	int i, temp = -1, selected = -1, high = -1, to_check = -1;
+	 
+	if(queue[sat_id][0] == -1){ return; }
+	for (i = 0; i &lt; N; i++){
+		if (queue[sat_id][i] != -1) {
+			to_check = queue[sat_id][i];
+			if (runnable[to_check] == 1) {
+				if(priorities[sat_id][to_check] &gt; high){
+					selected = i;
+					high = priorities[sat_id][to_check];
+	}}}}
+	if (selected != -1) {
+		temp = queue[sat_id][selected];
+		queue[sat_id][selected] = queue[sat_id][0];
+		queue[sat_id][0] = temp;
+	}
+
+}
+/** Add task to back of queue */
+void enqueue(int _task){
+	int i = 0;
+	if (queue[sat_id][N-1] == -1){
+	for (i = 0; i &lt; N; i++){
+		if (queue[sat_id][i] == -1){
+			queue[sat_id][i] = _task; 
+			i = N;
+		} else if (queue[sat_id][i] == _task) {
+			return;
+		}}
+	}
+	orderQueue();
+	
+}
+/** Amount of queued tasks */
+int len(){ 
+	int i;
+	for (i = 0; i &lt; N; i++){
+		if(queue[sat_id][i] == -1) {
+			return i; 
+		}
+	}
+	return N;
+}
+/** Update the queue after running the first one */
+void dequeue(){
+	int i = 0, k = len();
+        while (i &lt; k) {
+        	queue[sat_id][i] = queue[sat_id][i + 1];
+                i++;
+        }
+        queue[sat_id][i] = -1;
+	orderQueue();
+}</declaration>
+		<location id="id0" x="-161" y="8">
+			<committed/>
+		</location>
+		<location id="id1" x="-161" y="-51">
+			<committed/>
+		</location>
+		<location id="id2" x="-17" y="-8">
+			<committed/>
+		</location>
+		<location id="id3" x="160" y="304">
+			<name x="136" y="320">Preempt</name>
+			<committed/>
+		</location>
+		<location id="id4" x="159" y="-189">
+			<name x="135" y="-221">Release</name>
+			<committed/>
+		</location>
+		<location id="id5" x="160" y="72">
+			<name x="150" y="42">Occupied</name>
+		</location>
+		<location id="id6" x="-160" y="72">
+			<committed/>
+		</location>
+		<location id="id7" x="-161" y="-189">
+			<name x="-201" y="-181">Start</name>
+		</location>
+		<init ref="id7"/>
+		<transition>
+			<source ref="id0"/>
+			<target ref="id6"/>
+			<label kind="synchronisation" x="-204" y="25">check?</label>
+		</transition>
+		<transition>
+			<source ref="id1"/>
+			<target ref="id0"/>
+			<label kind="synchronisation" x="-204" y="-34">check!</label>
+		</transition>
+		<transition>
+			<source ref="id6"/>
+			<target ref="id7"/>
+			<label kind="guard" x="-289" y="-221">queue[sat_id][0] == -1 ||
+!runnable[queue[sat_id][0]]</label>
+			<nail x="-248" y="72"/>
+			<nail x="-249" y="-189"/>
+		</transition>
+		<transition>
+			<source ref="id2"/>
+			<target ref="id6"/>
+			<label kind="synchronisation" x="-93" y="-34">check?</label>
+			<label kind="assignment" x="-96" y="16">orderQueue(),
+active[sat_id] = queue[sat_id][0]</label>
+			<nail x="-110" y="-8"/>
+		</transition>
+		<transition>
+			<source ref="id5"/>
+			<target ref="id5"/>
+			<label kind="guard" x="240" y="40">sats[sat_id].suggested_task == -1</label>
+			<label kind="synchronisation" x="240" y="56">add_task[sat_id]?</label>
+			<nail x="344" y="72"/>
+			<nail x="344" y="112"/>
+			<nail x="312" y="72"/>
+		</transition>
+		<transition>
+			<source ref="id3"/>
+			<target ref="id6"/>
+			<label kind="guard" x="-152" y="272">priorities[sat_id][queue[sat_id][0]] &gt; 
+priorities[sat_id][active[sat_id]]</label>
+			<label kind="assignment" x="-152" y="304">active[sat_id] = queue[sat_id][0]</label>
+			<nail x="-160" y="304"/>
+		</transition>
+		<transition>
+			<source ref="id4"/>
+			<target ref="id7"/>
+			<label kind="guard" x="-81" y="-205">empty(queue[sat_id])</label>
+			<label kind="assignment" x="-81" y="-189">active[sat_id] = 0</label>
+		</transition>
+		<transition>
+			<source ref="id3"/>
+			<target ref="id5"/>
+			<label kind="guard" x="200" y="168">priorities[sat_id][queue[sat_id][0] ] &lt;= 
+priorities[sat_id][active[sat_id]]</label>
+			<nail x="200" y="184"/>
+		</transition>
+		<transition>
+			<source ref="id4"/>
+			<target ref="id2"/>
+			<label kind="guard" x="-8" y="-102">!empty(queue[sat_id])</label>
+			<label kind="synchronisation" x="51" y="-85">check!</label>
+		</transition>
+		<transition>
+			<source ref="id5"/>
+			<target ref="id3"/>
+			<label kind="guard" x="-80" y="144">sats[sat_id].suggested_task != -1</label>
+			<label kind="synchronisation" x="32" y="160">add_task[sat_id]?</label>
+			<label kind="assignment" x="-96" y="176">task = sats[sat_id].suggested_task,
+enqueue(task)</label>
+		</transition>
+		<transition>
+			<source ref="id5"/>
+			<target ref="id4"/>
+			<label kind="synchronisation" x="167" y="-141">release[sat_id]?</label>
+			<label kind="assignment" x="167" y="-125">orderQueue(),
+runnable_request = sat_id</label>
+		</transition>
+		<transition>
+			<source ref="id6"/>
+			<target ref="id5"/>
+			<label kind="guard" x="-85" y="51">queue[sat_id][0] != -1 &amp;&amp; 
+runnable[queue[sat_id][0]]</label>
+			<label kind="synchronisation" x="-93" y="85">request[sat_id]!</label>
+			<label kind="assignment" x="-85" y="102">active[sat_id] = queue[sat_id][0],
+dequeue()</label>
+		</transition>
+		<transition>
+			<source ref="id7"/>
+			<target ref="id1"/>
+			<label kind="synchronisation" x="-217" y="-149">add_task[sat_id]?</label>
+			<label kind="assignment" x="-241" y="-133">task = sats[sat_id].suggested_task,
+enqueue(task)</label>
+		</transition>
+	</template>
+	<template>
+		<name>Processor</name>
+		<parameter>const id_s sat_id</parameter>
+		<declaration>clock run_time[N], exe_time;
+int time_used[N] = {0, 0, 0, 0};
+int task = 0;
+double price;
+hybrid clock cost;
+
+void resetPriority() {
+	int i;
+    priorities[sat_id][task] = jobs[task].prio;
+    for(i = 0; i &lt; N; i++){
+        if (priorities[sat_id][i] == 0){
+            priorities[sat_id][i] = jobs[i].prio;
+        }
+    }
+}
+
+
+void boostPriority(){
+	priorities[sat_id][task] = jobs[active[sat_id]].prio + 1;
+}
+
+void calc_cost(){
+// TODO: Håndter overlappende vinduer
+	int i = 0;
+	for (i = 0; i &lt; W; i++){
+	if(jobs[task].depend_win[i] == 1){
+		if (wins[i].price_rate * jobs[task].has_cost != 0){	
+		price = wins[i].price_rate; //choose cheapest
+		}
+        else price = 0.0;
+	}
+	}
+}
+
+void update_storage(int mult){
+	//TODO introduce finer grunulairy (in case of preemption)
+	sats[sat_id].memory += (jobs[task].execution_time * jobs[task].data_rate * mult)/2;
+	if (sats[sat_id].memory &gt; MAX_MEMORY) {
+		sats[sat_id].memory = MAX_MEMORY;
+	} else if (sats[sat_id].memory &lt; 0) {
+		sats[sat_id].memory = 0;
+	}
+}
+
+void updateProgress(int time) {
+	time_used[task] += time;
+}
+
+void resetProgress() {
+	time_used[task] = 0;
+}</declaration>
+		<location id="id8" x="-408" y="-80">
+			<committed/>
+		</location>
+		<location id="id9" x="80" y="96">
+			<name x="70" y="66">Slewing</name>
+			<label kind="invariant" x="102" y="85">cost' == 0</label>
+		</location>
+		<location id="id10" x="-288" y="96">
+			<name x="-288" y="112">Occupied</name>
+			<label kind="invariant" x="-288" y="128">run_time[task]  &lt;= jobs[task].deadline &amp;&amp;
+exe_time + time_used[task]  &lt;= jobs[task].execution_time &amp;&amp;
+cost' == price</label>
+		</location>
+		<location id="id11" x="-288" y="312">
+			<name x="-272" y="304">Block</name>
+			<committed/>
+		</location>
+		<location id="id12" x="-512" y="96">
+			<name x="-504" y="72">Free</name>
+			<label kind="invariant" x="-552" y="119">cost' == 0</label>
+		</location>
+		<init ref="id12"/>
+		<transition>
+			<source ref="id8"/>
+			<target ref="id12"/>
+			<label kind="synchronisation" x="-512" y="1">release[sat_id]!</label>
+			<label kind="assignment" x="-512" y="16">resetPriority(),
+resetProgress()</label>
+			<nail x="-512" y="-80"/>
+		</transition>
+		<transition>
+			<source ref="id10"/>
+			<target ref="id8"/>
+			<label kind="guard" x="-432" y="-40">run_time[task] &gt;= jobs[task].deadline &amp;&amp; 
+exe_time + time_used[task]  &lt; jobs[task].execution_time</label>
+			<label kind="assignment" x="-408" y="8">update_storage(1)</label>
+			<nail x="-312" y="-64"/>
+			<nail x="-384" y="-72"/>
+		</transition>
+		<transition>
+			<source ref="id9"/>
+			<target ref="id10"/>
+			<label kind="synchronisation" x="-28" y="104">slew_sat[sat_id]?</label>
+			<label kind="assignment" x="-48" y="96">exe_time = 0</label>
+			<nail x="116" y="120"/>
+			<nail x="-52" y="120"/>
+		</transition>
+		<transition>
+			<source ref="id10"/>
+			<target ref="id9"/>
+			<label kind="guard" x="-232" y="48">!orientation(sat_id)</label>
+			<label kind="synchronisation" x="-232" y="64">slew_sat[sat_id]!</label>
+		</transition>
+		<transition>
+			<source ref="id10"/>
+			<target ref="id8"/>
+			<label kind="guard" x="-360" y="-112">exe_time + time_used[task] == jobs[task].execution_time</label>
+			<label kind="assignment" x="-280" y="-96">runs[sat_id][task] ++,
+update_storage(2)</label>
+			<label kind="comments" x="-408" y="38">Unblock</label>
+			<nail x="-288" y="-80"/>
+			<nail x="-392" y="-80"/>
+		</transition>
+		<transition>
+			<source ref="id11"/>
+			<target ref="id10"/>
+			<label kind="assignment" x="-408" y="204">exe_time = 0,
+calc_cost()</label>
+			<nail x="-328" y="296"/>
+			<nail x="-328" y="120"/>
+		</transition>
+		<transition>
+			<source ref="id10"/>
+			<target ref="id11"/>
+			<label kind="synchronisation" x="-280" y="208">request[sat_id]?</label>
+			<label kind="assignment" x="-280" y="224">boostPriority(),
+updateProgress(jobs[task].execution_time/2),
+task = active[sat_id],
+run_time[task] = 0</label>
+		</transition>
+		<transition>
+			<source ref="id12"/>
+			<target ref="id10"/>
+			<label kind="synchronisation" x="-480" y="96">request[sat_id]?</label>
+			<label kind="assignment" x="-480" y="112">task = active[sat_id],
+exe_time = 0,
+run_time[task] = 0,
+calc_cost()</label>
+		</transition>
+	</template>
+	<template>
+		<name>OrbitTimer</name>
+		<parameter>const id_s sat_id</parameter>
+		<location id="id13" x="-384" y="-616">
+			<name x="-432" y="-648">Offset</name>
+			<committed/>
+		</location>
+		<location id="id14" x="-384" y="-752">
+			<name x="-394" y="-782">Start</name>
+			<label kind="invariant" x="-368" y="-760">orbit_time[sat_id] &lt;= sats[sat_id].offset</label>
+		</location>
+		<location id="id15" x="-208" y="-616">
+			<name x="-240" y="-648">Revolve</name>
+			<label kind="invariant" x="-192" y="-624">orbit_time[sat_id] &lt;= ORBIT_TIME</label>
+		</location>
+		<init ref="id14"/>
+		<transition>
+			<source ref="id13"/>
+			<target ref="id15"/>
+			<label kind="synchronisation" x="-344" y="-640">start[sat_id]!</label>
+		</transition>
+		<transition>
+			<source ref="id14"/>
+			<target ref="id13"/>
+			<label kind="guard" x="-376" y="-720">orbit_time[sat_id] &gt;= 
+sats[sat_id].offset</label>
+			<label kind="assignment" x="-376" y="-696">orbit_time[sat_id] = 0</label>
+		</transition>
+		<transition>
+			<source ref="id15"/>
+			<target ref="id15"/>
+			<label kind="guard" x="-296" y="-552">orbit_time[sat_id] &gt;= ORBIT_TIME</label>
+			<label kind="assignment" x="-264" y="-536">orbit_time[sat_id] = 0,
+orbits[sat_id] ++</label>
+			<nail x="-144" y="-552"/>
+			<nail x="-264" y="-552"/>
+		</transition>
+	</template>
+	<template>
+		<name>Satellite</name>
+		<parameter>const id_s sat_id</parameter>
+		<declaration>clock loc_time, slew_time;
+bool is_queued[N] = {0,0,0,0};
+int selected = -1;
+
+/** Change satellite orientation */
+void turn_satellite(){
+	if (jobs[active[sat_id]].orientation != 0){
+	if (sats[sat_id].rotation &lt; jobs[active[sat_id]].orientation){sats[sat_id].rotation ++;}
+	else if (sats[sat_id].rotation &gt; jobs[active[sat_id]].orientation){sats[sat_id].rotation --;}}
+}
+
+/** Suggest a new task to execute */
+void suggest_task(){
+	int i, j, k, count = 0, high = -1; bool cans[N] = {0,0,0,0};
+	selected = -1;
+
+	for (i = 0; i &lt; N; i++){
+		if (sats[sat_id].can_does[i]) { 
+			cans[i] = true; }}
+
+	for (i = 0; i &lt; N; i++) {
+		if (cans[i]) {
+			if (sats[sat_id].memory &lt;= LOW_MEMORY ) {
+				if (jobs[i].data_rate &gt; 0) {
+					if (priorities[sat_id][i]*2 &lt;= 100) {
+						priorities[sat_id][i] = priorities[sat_id][i] * 2; 
+					}
+					else {
+						priorities[sat_id][i] = 100;
+					}
+				}
+				else if (jobs[i].data_rate &lt; 0) {
+					priorities[sat_id][i] = 0;
+				}
+			}
+			else if (sats[sat_id].memory &gt;= HIGH_MEMORY) {
+				if (jobs[i].data_rate &lt; 0) {
+					if (priorities[sat_id][i]*2 &lt;= 100) {
+						priorities[sat_id][i] = priorities[sat_id][i] * 2; 
+					}
+					else {
+						priorities[sat_id][i] = 100;
+					}
+				}
+				else if (jobs[i].data_rate &gt; 0) {
+					priorities[sat_id][i] = 0;
+				} 
+			}
+		}
+	}
+
+	//TODO make logic for handeling ties
+	for (i = 0; i &lt; N; i++){
+		if (cans[i] &amp;&amp; priorities[sat_id][i] &gt; high){
+			selected = i;
+			high = priorities[sat_id][i];
+		}
+	}
+	if (selected != -1 &amp;&amp; high &gt; 0) {
+		is_queued[selected] = true;
+		sats[sat_id].suggested_task = selected;
+	}
+	else {
+	sats[sat_id].suggested_task = -1;
+	}
+}
+</declaration>
+		<location id="id16" x="-467" y="-221">
+			<committed/>
+		</location>
+		<location id="id17" x="-264" y="-328">
+			<committed/>
+		</location>
+		<location id="id18" x="-472" y="-424">
+			<name x="-482" y="-454">Start</name>
+		</location>
+		<location id="id19" x="-64" y="-424">
+			<name x="-56" y="-448">Slewing</name>
+			<label kind="invariant" x="-128" y="-408">slew_time &lt;= 3</label>
+		</location>
+		<location id="id20" x="-312" y="-216">
+			<name x="-296" y="-224">Check</name>
+			<committed/>
+		</location>
+		<location id="id21" x="-312" y="-424">
+			<name x="-304" y="-448">Wait</name>
+			<label kind="invariant" x="-416" y="-456">loc_time &lt;= 3</label>
+		</location>
+		<init ref="id18"/>
+		<transition>
+			<source ref="id17"/>
+			<target ref="id21"/>
+			<label kind="guard" x="-340" y="-357">selected == -1</label>
+			<nail x="-312" y="-328"/>
+		</transition>
+		<transition>
+			<source ref="id16"/>
+			<target ref="id20"/>
+			<label kind="synchronisation" x="-425" y="-246">check!</label>
+		</transition>
+		<transition>
+			<source ref="id17"/>
+			<target ref="id21"/>
+			<label kind="guard" x="-272" y="-368">selected != -1</label>
+			<label kind="synchronisation" x="-280" y="-384">add_task[sat_id]!</label>
+		</transition>
+		<transition>
+			<source ref="id18"/>
+			<target ref="id21"/>
+			<label kind="synchronisation" x="-452" y="-439">start[sat_id]?</label>
+			<label kind="assignment" x="-452" y="-424">loc_time = 0</label>
+		</transition>
+		<transition>
+			<source ref="id19"/>
+			<target ref="id21"/>
+			<label kind="guard" x="-240" y="-528">orientation(sat_id)</label>
+			<label kind="synchronisation" x="-248" y="-512">slew_sat[sat_id]!</label>
+			<label kind="assignment" x="-248" y="-496">loc_time = 0</label>
+			<nail x="-104" y="-496"/>
+			<nail x="-312" y="-496"/>
+		</transition>
+		<transition>
+			<source ref="id19"/>
+			<target ref="id19"/>
+			<label kind="guard" x="-80" y="-528">slew_time &gt;= 3 &amp;&amp;
+!orientation(sat_id)</label>
+			<label kind="assignment" x="-8" y="-416">turn_satellite(),
+slew_time = 0</label>
+			<nail x="-64" y="-496"/>
+			<nail x="24" y="-496"/>
+			<nail x="24" y="-424"/>
+		</transition>
+		<transition>
+			<source ref="id20"/>
+			<target ref="id17"/>
+			<label kind="assignment" x="-272" y="-304">loc_time = 0,
+suggest_task()</label>
+		</transition>
+		<transition>
+			<source ref="id21"/>
+			<target ref="id20"/>
+			<label kind="guard" x="-408" y="-323">loc_time &gt;= 3</label>
+			<label kind="assignment" x="-493" y="-306">runnable_request = sat_id</label>
+		</transition>
+		<transition>
+			<source ref="id21"/>
+			<target ref="id19"/>
+			<label kind="synchronisation" x="-248" y="-440">slew_sat[sat_id]?</label>
+			<label kind="assignment" x="-248" y="-424">slew_time = 0</label>
+		</transition>
+	</template>
+	<template>
+		<name>CheckRunnable</name>
+		<declaration>bool all_checked = false;
+bool checked[N][W] = {{false, false}, {false, false}, {false, false}, {false, false}};
+int window_to_check = 0, task_to_check = 0;
+
+
+void next() {
+    if (task_to_check &lt; N) {
+        if (window_to_check &lt; W - 1) {
+            window_to_check++;
+        }
+        else {
+            task_to_check ++;
+            window_to_check = 0;     
+        }
+    }
+    else {
+        all_checked = true;
+        task_to_check = 0;
+        window_to_check = 0;
+    }
+}
+
+
+void resetRunnable() {
+	int i;
+	for (i = 0; i &lt; N; i++) {
+		runnable[i] = 0;
+	}
+}
+
+
+/** text */ 
+bool independent(){ 
+	int i = 0, count = 0;
+	
+	for (i = 0; i &lt; W; i++){
+		if (jobs[task_to_check].depend_win[i] == 0) {
+			count ++;
+		}
+		if (count == W) {
+			return true;
+		}
+	}
+	return false;
+}
+
+void skipWindowCheck() {
+	runnable[task_to_check] = true;
+	task_to_check += 1;
+	next();
+}
+
+//TODO overhold at vi ikke går ud over et vindue</declaration>
+		<location id="id22" x="-312" y="-576">
+			<name x="-322" y="-606">Wait</name>
+		</location>
+		<location id="id23" x="160" y="-208">
+			<name x="150" y="-238">Check</name>
+			<committed/>
+		</location>
+		<location id="id24" x="-312" y="-216">
+			<committed/>
+		</location>
+		<init ref="id22"/>
+		<transition>
+			<source ref="id24"/>
+			<target ref="id24"/>
+			<label kind="guard" x="-464" y="-216">independent()</label>
+			<label kind="assignment" x="-464" y="-200">skipWindowCheck()</label>
+			<nail x="-408" y="-224"/>
+			<nail x="-408" y="-184"/>
+		</transition>
+		<transition>
+			<source ref="id22"/>
+			<target ref="id24"/>
+			<label kind="synchronisation" x="-424" y="-368">check?</label>
+			<label kind="assignment" x="-424" y="-352">resetRunnable()</label>
+			<nail x="-384" y="-296"/>
+		</transition>
+		<transition>
+			<source ref="id23"/>
+			<target ref="id24"/>
+			<label kind="guard" x="-384" y="32">jobs[task_to_check].depend_win[window_to_check] == true &amp;&amp;
+orbit_time[runnable_request] &gt; wins[window_to_check].end_time</label>
+			<label kind="assignment" x="-232" y="56">next()</label>
+			<nail x="-80" y="32"/>
+			<nail x="-312" y="32"/>
+		</transition>
+		<transition>
+			<source ref="id23"/>
+			<target ref="id24"/>
+			<label kind="guard" x="-248" y="-264">jobs[task_to_check].depend_win[window_to_check] == false</label>
+			<label kind="assignment" x="-168" y="-240">next()</label>
+			<nail x="-56" y="-224"/>
+			<nail x="-208" y="-224"/>
+		</transition>
+		<transition>
+			<source ref="id23"/>
+			<target ref="id24"/>
+			<label kind="guard" x="-232" y="-176">jobs[task_to_check].depend_win[window_to_check] == true &amp;&amp;
+orbit_time[runnable_request] &gt;= wins[window_to_check].start_time &amp;&amp; 
+orbit_time[runnable_request] &lt;= wins[window_to_check].end_time</label>
+			<label kind="assignment" x="-232" y="-136">runnable[task_to_check] = true,
+next()</label>
+			<nail x="-8" y="-176"/>
+			<nail x="-216" y="-176"/>
+		</transition>
+		<transition>
+			<source ref="id23"/>
+			<target ref="id24"/>
+			<label kind="guard" x="-384" y="-48">jobs[task_to_check].depend_win[window_to_check] == true &amp;&amp;
+orbit_time[runnable_request] &lt; wins[window_to_check].start_time</label>
+			<label kind="assignment" x="-232" y="-16">next()</label>
+			<nail x="-208" y="8"/>
+		</transition>
+		<transition>
+			<source ref="id24"/>
+			<target ref="id23"/>
+			<label kind="guard" x="-176" y="-400">!all_checked &amp;&amp;
+!independent()</label>
+			<nail x="-128" y="-376"/>
+		</transition>
+		<transition>
+			<source ref="id24"/>
+			<target ref="id22"/>
+			<label kind="guard" x="-304" y="-480">all_checked</label>
+			<label kind="synchronisation" x="-304" y="-448">check!</label>
+			<label kind="assignment" x="-304" y="-464">all_checked = false</label>
+		</transition>
+	</template>
+	<system>system OrbitTimer, Scheduler, Satellite, Processor, CheckRunnable;</system>
+	<queries>
+		<query>
+			<formula>simulate 10 [&lt;= 200] {Processor(1).cost}
+
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>Pr[&lt;=200] (&lt;&gt; cost == 70 )
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>E&lt;&gt; Processor(1).Occupied &amp;&amp; Processor(1).task == 0  &amp;&amp; runs[1][0] &gt; 3
+			</formula>
+			<comment>
+			</comment>
+		</query>
+	</queries>
+</nta>
