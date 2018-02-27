@@ -10,6 +10,12 @@ const int HIGH_MEMORY = MAX_MEMORY * 60/100;
 const int RECEIVE_INDEX = 3;
 const int TRANSMIT_INDEX = 2;
 
+const int ZEROES[N] = {0,0,0,0};
+const int S_ZEROES[S][N] = {ZEROES, ZEROES, ZEROES, ZEROES};
+const int MINUSSES[N] = {-1,-1,-1,-1};
+const int S_MINUSSES[S][N] = {MINUSSES, MINUSSES, MINUSSES, MINUSSES};
+const int ACTIVE_INIT[S] = {-1,-1,-1,-1}
+
 typedef int[0, N-1] id_t;
 typedef int[0, R-1] id_r;
 typedef int[0, S-1] id_s;
@@ -67,15 +73,14 @@ const WindowDescription wins[W] = {win1, win2};
 
 /** Variables */
 id_s runnable_request;
-bool runnable[N] = {0, 0, 0, 0};
+bool runnable[N] = ZEROES;
 clock orbit_time[S];
 int orbits[S];
-int runs[S][N] = {{0, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}};
+int runs[S][N] = S_ZEROES;
 const int prios[N] = {jobs[0].prio, jobs[1].prio, jobs[2].prio, jobs[3].prio};
 int priorities[S][N] = {prios, prios, prios, prios};
-int active[S] = {-1,-1,-1, -1};
-int queue[S][N] = {{-1,-1,-1,-1}, {-1,-1,-1,-1}, {-1,-1,-1,-1}, {-1,-1,-1,-1}};
-//bool running[S] = {?};
+int active[S] = MINUSSES;
+int queue[S][N] = S_MINUSSES;
 int sender = -1;
 
 
@@ -200,7 +205,7 @@ runnable_request = sat_id</label></transition><transition><source ref="id15"/><t
 runnable_request = sat_id</label></transition><transition><source ref="id16"/><target ref="id15"/><label kind="guard" x="-7" y="106">queue[sat_id][0] != -1 &amp;&amp; 
 runnable[queue[sat_id][0]]</label><label kind="synchronisation" x="-8" y="136">request[sat_id]!</label><label kind="assignment" x="-8" y="152">dequeue(), is_synced = false</label></transition><transition><source ref="id17"/><target ref="id11"/><label kind="synchronisation" x="-139" y="-94">add_task[sat_id]?</label><label kind="assignment" x="-163" y="-78">task = sats[sat_id].suggested_task,
 enqueue(task)</label></transition></template><template><name>Processor</name><parameter>const id_s sat_id</parameter><declaration>clock run_time[N], exe_time;
-int time_used[N] = {0, 0, 0, 0};
+int time_used[N] = ZEROES;
 int task = 0;
 int price;
 int expenses;
@@ -282,7 +287,7 @@ run_time[task] = 0</label></transition><transition><source ref="id26"/><target r
 &amp;&amp; !orientation(sat_id))</label><label kind="synchronisation" x="-480" y="96">request[sat_id]?</label><label kind="assignment" x="-480" y="112">startNew()</label><nail x="-472" y="96"/></transition></template><template><name>OrbitTimer</name><parameter>const id_s sat_id</parameter><location id="id27" x="-384" y="-616"><name x="-432" y="-648">Offset</name><committed/></location><location id="id28" x="-384" y="-752"><name x="-394" y="-782">Start</name><label kind="invariant" x="-368" y="-760">orbit_time[sat_id] &lt;= sats[sat_id].offset</label></location><location id="id29" x="-208" y="-616"><name x="-240" y="-648">Revolve</name><label kind="invariant" x="-192" y="-624">orbit_time[sat_id] &lt;= ORBIT_TIME</label></location><init ref="id28"/><transition><source ref="id27"/><target ref="id29"/><label kind="synchronisation" x="-344" y="-640">start[sat_id]!</label></transition><transition><source ref="id28"/><target ref="id27"/><label kind="guard" x="-376" y="-720">orbit_time[sat_id] &gt;= 
 sats[sat_id].offset</label><label kind="assignment" x="-376" y="-696">orbit_time[sat_id] = 0</label></transition><transition><source ref="id29"/><target ref="id29"/><label kind="guard" x="-296" y="-552">orbit_time[sat_id] &gt;= ORBIT_TIME</label><label kind="assignment" x="-264" y="-536">orbit_time[sat_id] = 0,
 orbits[sat_id] ++</label><nail x="-144" y="-552"/><nail x="-264" y="-552"/></transition></template><template><name>Satellite</name><parameter>const id_s sat_id</parameter><declaration>clock loc_time, slew_time;
-bool is_queued[N] = {0,0,0,0};
+bool is_queued[N] = ZEROES;
 int selected = -1;
 
 /** Change satellite orientation */
@@ -352,7 +357,6 @@ void suggest_task(){
 !orientation(sat_id)</label><label kind="assignment" x="-8" y="-416">turn_satellite(),
 slew_time = 0</label><nail x="-64" y="-496"/><nail x="24" y="-496"/><nail x="24" y="-424"/></transition><transition><source ref="id33"/><target ref="id30"/><label kind="assignment" x="-272" y="-304">loc_time = 0,
 suggest_task()</label></transition><transition><source ref="id34"/><target ref="id33"/><label kind="guard" x="-408" y="-323">loc_time &gt;= 3</label><label kind="assignment" x="-493" y="-306">runnable_request = sat_id</label></transition><transition><source ref="id34"/><target ref="id32"/><label kind="synchronisation" x="-256" y="-440">slew_sat[sat_id]?</label><label kind="assignment" x="-240" y="-424">slew_time = 0</label></transition></template><template><name>CheckRunnable</name><declaration>bool all_checked = false;
-//bool checked[N][W] = {{false, false}, {false, false}, {false, false}, {false, false}};
 int window_to_check = 0, task_to_check = 0;
 
 
