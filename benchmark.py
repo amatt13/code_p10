@@ -29,19 +29,26 @@ if __name__ == '__main__':
         y = "-y"
 
     time_measurements = []
+    my_location_windows = my_location.replace("/", "\\")
     i = 0
     with open(my_location + "/benchmark_trace", 'w') as trace_file:
         while i < args.i:
             i += 1
-            start = datetime.datetime.now()
             output = None
             if write:
                 output = trace_file
+            
+            start = datetime.datetime.now()
             if linux_machine(OS):
-                subprocess.Popen([my_location + "verifyta", my_location + "models/classic_v1.xml", my_location + "models/classic.q", "-o1", t, y], stdout=output, stderr=output).wait()
+                subprocess.Popen([my_location + "verifyta", my_location + 
+                    "models/classic_v1.xml", my_location + 
+                    "models/classic.q", 
+                    "-o1", t, y], stdout=output, stderr=output).wait()
             else:
-                my_location_windows = my_location.replace("/", "\\")
-                subprocess.Popen([my_location_windows    + "verifyta.exe", my_location_windows + "models\\classic_v1.xml", my_location_windows + "models\\classic.q", "-o1", t, y], stdout=output, stderr=output).wait()
+                subprocess.Popen([my_location_windows + "verifyta.exe", my_location_windows + 
+                    "models\\classic_v1.xml", my_location_windows + 
+                    "models\\classic.q", 
+                    "-o1", t, y], stdout=output, stderr=output).wait()
             end = datetime.datetime.now()
             time = end - start
             total_seconds = time.total_seconds()
