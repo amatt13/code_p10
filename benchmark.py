@@ -17,17 +17,21 @@ if __name__ == '__main__':
     parser.add_argument('-i', type=int, required=False, help='Number of iterations to run', default=1)
     parser.add_argument('--write', action='store_true', required=False, help='Write results to a file (set --t to get a trace)')
     parser.add_argument('--t', action='store_true', required=False, help='Generate and show some trace')
+    parser.add_argument('--s', action='store_true', required=False, help='Reduces output')
     args = parser.parse_args()
 
     OS = args.o
     if args.o is None:
         OS = linux
     write = args.write
-    t = '-X'  # -X is not a valid argument and is therefore ignored
-    y = '-X'
+    t = y = s = q = ""
+
     if args.t:
         t = "-t0"
         y = "-y"
+    if args.s:
+        s = "-s"
+        q = "-q"
 
     time_measurements = []
     my_location_windows = my_location.replace("/", "\\")
@@ -38,13 +42,13 @@ if __name__ == '__main__':
             output = None
             if write:
                 output = trace_file
-
+            p1 = None
             start = datetime.datetime.now()
             if linux_machine(OS):
-                subprocess.Popen([my_location + "verifyta", my_location + "models/classic_v1.xml", my_location + "models/classic.q",
-                    "-o1", t, y], stdout=output, stderr=output).wait()
+                subprocess.Popen([my_location + "verifyta", my_location + "models/final_models/classic_v1.xml", my_location + "models/final_models/classic.q",
+                    "-o1", t, y, s, q], stdout=output, stderr=output).wait()
             else:
-                subprocess.Popen(my_location_windows + "verifyta.exe -o1 " + t + " " + y  + " " + my_location_windows + "models\\classic_v1.xml " + my_location_windows + "models\\classic.q", stdout=output, stderr=output).wait()
+                subprocess.Popen(my_location_windows + "verifyta.exe -o1 " + t + " " + s + " " + q + " "  + y  + " " + my_location_windows + "models\\final_models\\classic_v1.xml " + my_location_windows + "models\\final_models\\classic.q", stdout=output, stderr=output).wait()
             end = datetime.datetime.now()
             time = end - start
             total_seconds = time.total_seconds()

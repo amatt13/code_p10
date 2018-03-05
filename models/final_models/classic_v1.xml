@@ -1,23 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?><!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.1//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_1.dtd'><nta><declaration>const int N = 4;
-const int S = 4;
+const int S = 3;
 const int R = 2;
 const int W = 2;
 const int SCHEDULE_LENGHT = 360;
 const int ORBIT_TIME = 60;
-const int MAX_MEMORY = 100;
-const int LOW_MEMORY = MAX_MEMORY * 40/100;
-const int HIGH_MEMORY = MAX_MEMORY * 60/100;
+const int MAX_MEMORY = 10000;
+const int LOW_MEMORY = MAX_MEMORY * (20/100);
+const int HIGH_MEMORY = MAX_MEMORY * (80/100);
 const int RECEIVE_INDEX = 3;
 const int TRANSMIT_INDEX = 2;
 
 const int ZEROES[N] = {0,0,0,0};
-const int S_ZEROES[S][N] = {ZEROES, ZEROES, ZEROES, ZEROES};
+const int S_ZEROES[S][N] = {ZEROES, ZEROES, ZEROES};
 const int MINUSSES[N] = {-1,-1,-1,-1};
-const int S_MINUSSES[S][N] = {MINUSSES, MINUSSES, MINUSSES, MINUSSES};
-const int ACTIVE_INIT[S] = {-1,-1,-1,-1};
+const int S_MINUSSES[S][N] = {MINUSSES, MINUSSES, MINUSSES};
+const int ACTIVE_INIT[S] = {-1,-1,-1};
 
 int data_earth = 0;
 int data_storage = 0;
+int internal_transfer = 0;
 int value = 0;
 
 typedef int[0, N-1] id_t;
@@ -59,18 +60,18 @@ typedef struct {
 } WindowDescription; 
 				      /* 0 = forward, 1 = earth, 2 = backwards*/
                                       /*  w     E  D   P  rate Co   Orien*/
-const TaskDescription send_data       = {{1,0}, 20,30, 9, -5, true, 1, -1};
+const TaskDescription send_data       = {{1,0}, 20,30, 9, -2, true, 1, -1};
 const TaskDescription gather_new_data = {{0,1}, 5,10,  6,  5, false, 0, -1};
 const TaskDescription transfer        = {{0,0}, 3,15,  4, -3, false, 2, -1};
 const TaskDescription receive         = {{0,0}, 3,15,  5, 3, false, 0, -1};
 const TaskDescription jobs[N]         = {send_data, gather_new_data, transfer, receive}; //update RECEIVE_INDEX if receive moves
 
-const SatDescription sat_trans = {3, 0, 0, {1,1,0,0}, -1};
-const SatDescription sat_gat = {3, 0, 0, {1,1,0,0}, -1};
-const SatDescription sat_sen = {9, 2, 0, {1,1,0,0}, -1};
-SatDescription sats[S] = {sat_gat, sat_trans, sat_trans, sat_sen};
+const SatDescription sat_trans = {3, 0, 0, {0,0,1,1}, -1};
+const SatDescription sat_gat = {3, 0, 0, {0,1,1,0}, -1};
+const SatDescription sat_sen = {9, 2, 0, {1,0,0,1}, -1};
+SatDescription sats[S] = {sat_gat, sat_trans, sat_sen};
 
-const WindowDescription win1 = {0, 40, 13}; 
+const WindowDescription win1 = {0, 60, 13}; 
 const WindowDescription win2 = {20, 60, 8};
 const WindowDescription wins[W] = {win1, win2};
 
@@ -82,7 +83,7 @@ clock orbit_time[S];
 int orbits[S];
 int runs[S][N] = S_ZEROES;
 const int prios[N] = {jobs[0].prio, jobs[1].prio, jobs[2].prio, jobs[3].prio};
-int priorities[S][N] = {prios, prios, prios, prios};
+int priorities[S][N] = {prios, prios, prios};
 int active[S] = ACTIVE_INIT;
 int queue[S][N] = S_MINUSSES;
 int sender = -1;
@@ -303,6 +304,9 @@ void update_storage(int mult){
 	}
 	if (task !=  RECEIVE_INDEX &amp;&amp; task != TRANSMIT_INDEX){
 		statistics(mult, value);
+	}
+	else if (value &gt; 0) {
+		internal_transfer += value;
 	}
 }
 
