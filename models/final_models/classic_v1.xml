@@ -16,6 +16,10 @@ const int MINUSSES[N] = {-1,-1,-1,-1};
 const int S_MINUSSES[S][N] = {MINUSSES, MINUSSES, MINUSSES, MINUSSES};
 const int ACTIVE_INIT[S] = {-1,-1,-1,-1};
 
+int data_earth = 0;
+int data_storage = 0;
+int value = 0;
+
 typedef int[0, N-1] id_t;
 typedef int[0, R-1] id_r;
 typedef int[0, S-1] id_s;
@@ -61,9 +65,9 @@ const TaskDescription transfer        = {{0,0}, 3,15,  4, -3, false, 2, -1};
 const TaskDescription receive         = {{0,0}, 3,15,  5, 3, false, 0, -1};
 const TaskDescription jobs[N]         = {send_data, gather_new_data, transfer, receive}; //update RECEIVE_INDEX if receive moves
 
-const SatDescription sat_trans = {3, 0, 0, {0,0,1,1}, -1};
-const SatDescription sat_gat = {3, 0, 85, {0,1,1,0}, -1};
-const SatDescription sat_sen = {9, 2, 0, {1,0,0,1}, -1};
+const SatDescription sat_trans = {3, 0, 0, {1,1,0,0}, -1};
+const SatDescription sat_gat = {3, 0, 0, {1,1,0,0}, -1};
+const SatDescription sat_sen = {9, 2, 0, {1,1,0,0}, -1};
 SatDescription sats[S] = {sat_gat, sat_trans, sat_trans, sat_sen};
 
 const WindowDescription win1 = {0, 40, 13}; 
@@ -230,7 +234,7 @@ bool notInternalCom() {
 
 
 </declaration><location id="id0" x="120" y="-136"><committed/></location><location id="id1" x="376" y="-264"><committed/></location><location id="id2" x="432" y="48"><committed/></location><location id="id3" x="432" y="-40"><committed/></location><location id="id4" x="576" y="-40"></location><location id="id5" x="576" y="128"></location><location id="id6" x="336" y="-208"><committed/></location><location id="id7" x="-80" y="-224"><committed/></location><location id="id8" x="-32" y="368"><committed/></location><location id="id9" x="56" y="368"><committed/></location><location id="id10" x="-232" y="128"><committed/></location><location id="id11" x="-232" y="64"><committed/></location><location id="id12" x="120" y="32"><committed/></location><location id="id13" x="248" y="368"><name x="224" y="384">Preempt</name><committed/></location><location id="id14" x="240" y="-136"><name x="264" y="-152">Release</name><committed/></location><location id="id15" x="238" y="127"><name x="256" y="104">Occupied</name></location><location id="id16" x="-82" y="127"><committed/></location><location id="id17" x="-83" y="-134"><name x="-72" y="-128">Start</name></location><init ref="id7"/><transition><source ref="id14"/><target ref="id0"/><label kind="guard" x="80" y="-176">active[com] != RECEIVE_INDEX</label><nail x="224" y="-160"/><nail x="144" y="-160"/></transition><transition><source ref="id14"/><target ref="id0"/><label kind="guard" x="120" y="-128">active[com] == 
-RECEIVE_INDEX</label><label kind="synchronisation" x="128" y="-104">release[com]!</label></transition><transition><source ref="id1"/><target ref="id17"/><label kind="synchronisation" x="-40" y="-264">release[sat_id]!</label><label kind="assignment" x="-40" y="-248">active[sat_id] = -1</label><nail x="-48" y="-264"/></transition><transition><source ref="id4"/><target ref="id14"/><label kind="synchronisation" x="416" y="-128">release[sat_id]?</label><nail x="568" y="-128"/></transition><transition><source ref="id5"/><target ref="id14"/><label kind="synchronisation" x="416" y="-152">release[sat_id]?</label><nail x="584" y="120"/><nail x="680" y="120"/><nail x="680" y="-136"/><nail x="584" y="-136"/><nail x="584" y="-144"/><nail x="568" y="-144"/><nail x="568" y="-136"/></transition><transition><source ref="id5"/><target ref="id1"/><label kind="guard" x="408" y="-288">task == TRANSMIT_INDEX</label><label kind="synchronisation" x="416" y="-264">not_rdy_to_rec[com]?</label><nail x="688" y="128"/><nail x="688" y="96"/><nail x="688" y="-264"/></transition><transition><source ref="id2"/><target ref="id15"/><label kind="synchronisation" x="272" y="32">transmit_data[com]!</label><nail x="272" y="48"/></transition><transition><source ref="id3"/><target ref="id15"/><label kind="synchronisation" x="296" y="-8">request[com]!</label><nail x="272" y="8"/></transition><transition><source ref="id5"/><target ref="id2"/><label kind="guard" x="464" y="32">rdyToTrans()</label><label kind="synchronisation" x="448" y="48">request[sat_id]!</label><nail x="560" y="48"/></transition><transition><source ref="id4"/><target ref="id3"/><label kind="guard" x="456" y="-56">rdyToTrans()</label><label kind="synchronisation" x="448" y="-40">request[sat_id]!</label></transition><transition><source ref="id5"/><target ref="id4"/><label kind="guard" x="528" y="-16">orientation(sat_id) &amp;&amp; 
+RECEIVE_INDEX</label><label kind="synchronisation" x="128" y="-104">release[com]!</label></transition><transition><source ref="id1"/><target ref="id17"/><label kind="synchronisation" x="-40" y="-280">release[sat_id]!</label><label kind="assignment" x="-40" y="-264">active[sat_id] = -1</label><nail x="-48" y="-264"/></transition><transition><source ref="id4"/><target ref="id14"/><label kind="synchronisation" x="416" y="-128">release[sat_id]?</label><nail x="568" y="-128"/></transition><transition><source ref="id5"/><target ref="id14"/><label kind="synchronisation" x="416" y="-152">release[sat_id]?</label><nail x="584" y="120"/><nail x="680" y="120"/><nail x="680" y="-136"/><nail x="584" y="-136"/><nail x="584" y="-144"/><nail x="568" y="-144"/><nail x="568" y="-136"/></transition><transition><source ref="id5"/><target ref="id1"/><label kind="guard" x="408" y="-288">task == TRANSMIT_INDEX</label><label kind="synchronisation" x="416" y="-264">not_rdy_to_rec[com]?</label><nail x="688" y="128"/><nail x="688" y="96"/><nail x="688" y="-264"/></transition><transition><source ref="id2"/><target ref="id15"/><label kind="synchronisation" x="272" y="32">transmit_data[com]!</label><nail x="272" y="48"/></transition><transition><source ref="id3"/><target ref="id15"/><label kind="synchronisation" x="296" y="-8">request[com]!</label><nail x="272" y="8"/></transition><transition><source ref="id5"/><target ref="id2"/><label kind="guard" x="464" y="32">rdyToTrans()</label><label kind="synchronisation" x="448" y="48">request[sat_id]!</label><nail x="560" y="48"/></transition><transition><source ref="id4"/><target ref="id3"/><label kind="guard" x="456" y="-56">rdyToTrans()</label><label kind="synchronisation" x="448" y="-40">request[sat_id]!</label></transition><transition><source ref="id5"/><target ref="id4"/><label kind="guard" x="528" y="-16">orientation(sat_id) &amp;&amp; 
 !rdyToTrans()</label><label kind="synchronisation" x="528" y="8">transmit_data[com]!</label></transition><transition><source ref="id15"/><target ref="id5"/><label kind="guard" x="344" y="80">task == TRANSMIT_INDEX
 &amp;&amp; !is_synced &amp;&amp;
 active[com] == -1</label><label kind="synchronisation" x="392" y="144">go!</label><label kind="assignment" x="344" y="128">is_synced = true</label></transition><transition><source ref="id4"/><target ref="id1"/><label kind="synchronisation" x="416" y="-232">not_rdy_to_rec[com]?</label><nail x="576" y="-232"/><nail x="376" y="-232"/></transition><transition><source ref="id6"/><target ref="id15"/><label kind="synchronisation" x="288" y="-80">request[sat_id]!</label><nail x="336" y="-32"/><nail x="248" y="0"/></transition><transition><source ref="id17"/><target ref="id6"/><label kind="guard" x="144" y="-240">hasSpace()</label><label kind="synchronisation" x="112" y="-224">transmit_data[sat_id]?</label><label kind="assignment" x="88" y="-208">task = RECEIVE_INDEX,
@@ -277,13 +281,28 @@ void calc_cost(){
 	}
 }
 
+void statistics(int mult, int value){
+	if (value &lt; 0){
+		data_earth += value*-1;
+	}
+	else{
+		data_storage += value;
+	}
+}
+
 void update_storage(int mult){
 	//TODO introduce finer grunulairy (in case of preemption)
-	sats[sat_id].memory += (jobs[task].execution_time * jobs[task].data_rate * mult)/2;
+	value = (jobs[task].execution_time * jobs[task].data_rate * mult)/2;
+	sats[sat_id].memory += value;
 	if (sats[sat_id].memory &gt; MAX_MEMORY) {
-		sats[sat_id].memory = MAX_MEMORY;
+		value = (value - (MAX_MEMORY - sats[sat_id].memory));
+		sats[sat_id].memory = MAX_MEMORY;	
 	} else if (sats[sat_id].memory &lt; 0) {
+		value = (value - sats[sat_id].memory);
 		sats[sat_id].memory = 0;
+	}
+	if (task !=  RECEIVE_INDEX &amp;&amp; task != TRANSMIT_INDEX){
+		statistics(mult, value);
 	}
 }
 

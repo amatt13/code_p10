@@ -80,11 +80,10 @@ def colorCodedText(kind, code):
             formatedCode = formatedCode + "\\textcolor{update}{" + line + "}\\\\"
     return formatedCode
 
-textOffsetX = -10
-textOffsetY = 0
+textOffsetX = -15
+textOffsetY = -5
 nodeOffsetX = 0
 nodeOffsetY = 0
-
 
 def GenerateTikz(name, nodes, transitions):
     f = open(name+".tex", "w")
@@ -106,6 +105,12 @@ def GenerateTikz(name, nodes, transitions):
             fragments = code.split("\n")
             code = colorCodedText(l.Label.kind, fragments)
             f.write("\\node[anchor=north west, text width=10cm, font=\\tiny, align=left] at (" + str(int(l.Label.x)+textOffsetX) + "," + str((int(l.Label.y)+textOffsetY)*-1) + ") {\\begin{tabular}{l}" + code + "\\end{tabular}};\n")
+    f.write("   % place node name labels\n")
+    for l in nodes:
+        if l.Name is not None:
+            f.write("\\node[anchor=north west, text width=10cm, font=\\tiny, align=left] at (" + str(
+                int(l.Name.x) + textOffsetX) + "," + str(
+                (int(l.Name.y) + textOffsetY) * -1) + ") {\\begin{tabular}{l} \\textcolor{name}{" + l.Name.name + "}\\end{tabular}};\n")
     f.write("   % place transition labels\n")
     for t in transitions:
         for ts in t.labels:
@@ -121,7 +126,7 @@ def GenerateTikz(name, nodes, transitions):
             path = path + "(" + ns.x + ", " + str(int(ns.y)*-1) + ") -- "
         path = path + "(" + t.target + ") {};\n"
         f.write(path)
-    f.write("   \\end{tikzpicture}\n   \\label{fig:t_" + name + "}\n   \\caption{" + name+ "sef" + " template}\n\end{figure}\n")
+    f.write("   \\end{tikzpicture}\n   \\label{fig:t_" + name + "}\n   \\caption{" + name.replace('_','\_') + " template}\n\end{figure}\n")
 
 
 if __name__ == '__main__':
@@ -201,8 +206,5 @@ if __name__ == '__main__':
                             inLocation = False
                         elif line[1:][:-1] == 'transition':
                             inTransition = False
-            pass
-
-
     for l in templates:
         GenerateTikz(l.name, l.nodes, l.transitions)

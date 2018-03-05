@@ -1,0 +1,24 @@
+\begin{figure}[H]
+   \centering
+   \begin{tikzpicture}[x=0.02cm,y=0.02cm]
+   % place nodes
+\node[location] at (-208, 696)   (id27) {c};
+\node[init] at (-208, 800)   (id28) {};
+\node[location] at (-208, 616)   (id29) {};
+   % place node labels
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-202,816) {\begin{tabular}{l}\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-202,624) {\begin{tabular}{l}\end{tabular}};
+   % place transition labels
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-218,664) {\begin{tabular}{l}\textcolor{sync}{start[sat\_id]!}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-218,776) {\begin{tabular}{l}\textcolor{guard}{orbit\_time[sat\_id] \&gt;= }\\\textcolor{guard}{sats[sat\_id].offset}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-218,744) {\begin{tabular}{l}\textcolor{update}{orbit\_time[sat\_id] = 0}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-306,552) {\begin{tabular}{l}\textcolor{guard}{orbit\_time[sat\_id] \&gt;= ORBIT\_TIME}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-274,536) {\begin{tabular}{l}\textcolor{update}{orbit\_time[sat\_id] = 0,}\\\textcolor{update}{orbits[sat\_id] ++}\\\end{tabular}};
+   % place transitions
+\draw[->] (id27) -- (id29) {};
+\draw[->] (id28) -- (id27) {};
+\draw[->] (id29) -- (-144, 552) -- (-264, 552) -- (id29) {};
+   \end{tikzpicture}
+   \label{fig:t_classic_v1_OrbitTimer}
+   \caption{classic_v1_OrbitTimersef template}
+\end{figure}

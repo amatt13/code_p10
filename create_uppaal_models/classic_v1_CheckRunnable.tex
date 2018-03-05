@@ -1,0 +1,41 @@
+\begin{figure}[H]
+   \centering
+   \begin{tikzpicture}[x=0.02cm,y=0.02cm]
+   % place nodes
+\node[location] at (104, 216)   (id35) {c};
+\node[init] at (-312, 320)   (id36) {};
+\node[location] at (-120, 216)   (id37) {c};
+\node[location] at (-312, 216)   (id38) {c};
+   % place node labels
+   % place transition labels
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-66,240) {\begin{tabular}{l}\textcolor{guard}{depends()}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-482,176) {\begin{tabular}{l}\textcolor{guard}{independent()}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-482,160) {\begin{tabular}{l}\textcolor{update}{skipWindowCheck()}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-466,264) {\begin{tabular}{l}\textcolor{sync}{check?}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-522,280) {\begin{tabular}{l}\textcolor{update}{resetRunnable()}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-250,48) {\begin{tabular}{l}\textcolor{guard}{depends() \&\&}\\\textcolor{guard}{orbit\_time[RQ] \&gt; getEnd()}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-250,16) {\begin{tabular}{l}\textcolor{update}{next()}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-258,280) {\begin{tabular}{l}\textcolor{guard}{!depends()}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-242,256) {\begin{tabular}{l}\textcolor{update}{next()}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-250,176) {\begin{tabular}{l}\textcolor{guard}{depends() \&\&}\\\textcolor{guard}{orbit\_time[RQ] \&gt;= getStart() \&\& }\\\textcolor{guard}{orbit\_time[RQ] \&lt;= getEnd()}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-250,136) {\begin{tabular}{l}\textcolor{update}{runnable[task\_to\_check] = true,}\\\textcolor{update}{next()}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-250,104) {\begin{tabular}{l}\textcolor{guard}{depends() \&\&}\\\textcolor{guard}{orbit\_time[RQ] \&lt; getStart()}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-250,72) {\begin{tabular}{l}\textcolor{update}{next()}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-290,232) {\begin{tabular}{l}\textcolor{guard}{!all\_checked \&\&}\\\textcolor{guard}{!independent()}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-402,296) {\begin{tabular}{l}\textcolor{guard}{all\_checked}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-402,264) {\begin{tabular}{l}\textcolor{sync}{check!}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-402,280) {\begin{tabular}{l}\textcolor{update}{all\_checked = false}\\\end{tabular}};
+   % place transitions
+\draw[->] (id37) -- (id35) {};
+\draw[->] (id38) -- (-376, 200) -- (-352, 160) -- (id38) {};
+\draw[->] (id36) -- (-400, 320) -- (-400, 216) -- (id38) {};
+\draw[->] (id35) -- (104, 48) -- (-312, 48) -- (id38) {};
+\draw[->] (id37) -- (-216, 264) -- (id38) {};
+\draw[->] (id35) -- (-8, 176) -- (-216, 176) -- (id38) {};
+\draw[->] (id35) -- (88, 104) -- (-296, 104) -- (id38) {};
+\draw[->] (id38) -- (-248, 216) -- (-152, 216) -- (id37) {};
+\draw[->] (id38) -- (id36) {};
+   \end{tikzpicture}
+   \label{fig:t_classic_v1_CheckRunnable}
+   \caption{classic_v1_CheckRunnablesef template}
+\end{figure}

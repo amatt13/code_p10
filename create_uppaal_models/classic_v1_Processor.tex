@@ -1,0 +1,74 @@
+\begin{figure}[H]
+   \centering
+   \begin{tikzpicture}[x=0.02cm,y=0.02cm]
+   % place nodes
+\node[location] at (32, -240)   (id18) {c};
+\node[location] at (32, 152)   (id19) {c};
+\node[location] at (-224, 80)   (id20) {c};
+\node[location] at (32, 80)   (id21) {};
+\node[location] at (-408, 80)   (id22) {c};
+\node[location] at (32, -96)   (id23) {};
+\node[location] at (-224, -96)   (id24) {};
+\node[location] at (-224, -240)   (id25) {c};
+\node[init] at (-616, -96)   (id26) {};
+   % place node labels
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-402,-104) {\begin{tabular}{l}\end{tabular}};
+   % place transition labels
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (54,-40) {\begin{tabular}{l}\textcolor{sync}{preemt[sat\_id]?}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-114,-240) {\begin{tabular}{l}\textcolor{update}{preemt\_task()}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-34,-200) {\begin{tabular}{l}\textcolor{sync}{preemt[sat\_id]?}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-274,152) {\begin{tabular}{l}\textcolor{sync}{release[sat\_id]!}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-290,48) {\begin{tabular}{l}\textcolor{sync}{release[sat\_id]?}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-106,-32) {\begin{tabular}{l}\textcolor{sync}{release[sat\_id]?}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-162,96) {\begin{tabular}{l}\textcolor{sync}{release[sat\_id]?}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-114,128) {\begin{tabular}{l}\textcolor{guard}{run\_time[task] \&gt;= getDeadline()}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-634,200) {\begin{tabular}{l}\textcolor{guard}{activeIsTrans() \&\& }\\\textcolor{guard}{orientation(sat\_id)}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-634,168) {\begin{tabular}{l}\textcolor{sync}{request[sat\_id]?}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-634,152) {\begin{tabular}{l}\textcolor{update}{startNew()}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-98,48) {\begin{tabular}{l}\textcolor{sync}{request[sat\_id]?}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-98,32) {\begin{tabular}{l}\textcolor{update}{exe\_time = 0}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-58,8) {\begin{tabular}{l}\textcolor{guard}{isInternalCom() \&\&}\\\textcolor{guard}{orientation(sat\_id)}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-58,-16) {\begin{tabular}{l}\textcolor{sync}{slew\_sat[sat\_id]?}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-618,96) {\begin{tabular}{l}\textcolor{sync}{release[sat\_id]!}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-618,80) {\begin{tabular}{l}\textcolor{update}{resetPriority(),}\\\textcolor{update}{resetProgress()}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-554,56) {\begin{tabular}{l}\textcolor{guard}{run\_time[task] \&gt;= }\\\textcolor{guard}{getDeadline() \&\& }\\\textcolor{guard}{exe\_time + time\_used[task]  \&lt; }\\\textcolor{guard}{getExeTime()}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-554,0) {\begin{tabular}{l}\textcolor{update}{update\_storage(1)}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-114,-120) {\begin{tabular}{l}\textcolor{guard}{!isInternalCom() \&\&}\\\textcolor{guard}{orientation(sat\_id)}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-114,-144) {\begin{tabular}{l}\textcolor{sync}{slew\_sat[sat\_id]?}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-114,-160) {\begin{tabular}{l}\textcolor{update}{exe\_time = 0}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-178,-56) {\begin{tabular}{l}\textcolor{guard}{!orientation(sat\_id)}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-178,-72) {\begin{tabular}{l}\textcolor{sync}{slew\_sat[sat\_id]!}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-402,0) {\begin{tabular}{l}\textcolor{guard}{exe\_time + time\_used[task] }\\\textcolor{guard}{==  getETime()}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-402,-24) {\begin{tabular}{l}\textcolor{update}{reportDone()}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-418,-38) {\begin{tabular}{l}\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-186,-184) {\begin{tabular}{l}\textcolor{update}{exe\_time = 0,}\\\textcolor{update}{calc\_cost()}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-346,-176) {\begin{tabular}{l}\textcolor{sync}{request[sat\_id]?}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-338,-192) {\begin{tabular}{l}\textcolor{update}{preemt\_task()}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-562,-48) {\begin{tabular}{l}\textcolor{guard}{!activeTrans() ||}\\\textcolor{guard}{(activeTrans() \&\&}\\\textcolor{guard}{!orientation(sat\_id))}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-562,-96) {\begin{tabular}{l}\textcolor{sync}{request[sat\_id]?}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-562,-112) {\begin{tabular}{l}\textcolor{update}{startNew()}\\\end{tabular}};
+   % place transitions
+\draw[->] (id21) -- (112, 48) -- (112, -104) -- (112, -240) -- (id18) {};
+\draw[->] (id18) -- (id25) {};
+\draw[->] (id23) -- (id18) {};
+\draw[->] (id19) -- (-408, 152) -- (id22) {};
+\draw[->] (id20) -- (id22) {};
+\draw[->] (id24) -- (id20) {};
+\draw[->] (id23) -- (-88, -16) -- (-80, -8) -- (-96, 8) -- (-104, 0) -- (id20) {};
+\draw[->] (id21) -- (id20) {};
+\draw[->] (id21) -- (id19) {};
+\draw[->] (id26) -- (-640, -96) -- (-640, 168) -- (128, 168) -- (128, 80) -- (id21) {};
+\draw[->] (id21) -- (id24) {};
+\draw[->] (id23) -- (id21) {};
+\draw[->] (id22) -- (-616, 80) -- (id26) {};
+\draw[->] (id24) -- (-408, -80) -- (id22) {};
+\draw[->] (id23) -- (-104, -128) -- (id24) {};
+\draw[->] (id24) -- (-104, -72) -- (id23) {};
+\draw[->] (id24) -- (-328, 0) -- (id22) {};
+\draw[->] (id25) -- (-176, -224) -- (-176, -120) -- (id24) {};
+\draw[->] (id24) -- (id25) {};
+\draw[->] (id26) -- (-472, -96) -- (id24) {};
+   \end{tikzpicture}
+   \label{fig:t_classic_v1_Processor}
+   \caption{classic_v1_Processorsef template}
+\end{figure}
