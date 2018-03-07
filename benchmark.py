@@ -2,6 +2,7 @@ import subprocess
 import argparse
 import os
 import datetime
+import re
 
 my_location = os.path.dirname(os.path.realpath(__file__)) + '/'
 linux = 'linux'
@@ -54,4 +55,15 @@ if __name__ == '__main__':
             total_seconds = time.total_seconds()
             time_measurements.append(total_seconds)
             print(str(i) + ": " + str(time_measurements[-1]))
+    with open('benchmark_trace', 'r') as trace:
+        line = trace.readline()
+        while line:
+            t_time = re.findall("(t_time[>=]+[0-9]+)", line)
+            if t_time:
+                t_time = t_time[0].split('=')[1]
+                if int(t_time) == 597 or int(t_time) == 600:
+                    print("data_earth: " + re.findall("(data_earth\=[0-9]+)", line)[0].split('=')[1])
+                    print("data_storage: " + re.findall("(data_storage\=[0-9]+)", line)[0].split('=')[1])
+                    print('internal_transfer: ' + re.findall("(internal_transfer\=[0-9]+)", line)[0].split('=')[1])
+            line = trace.readline()
     print("Avergae time: " + str(sum(time_measurements) / len(time_measurements)))

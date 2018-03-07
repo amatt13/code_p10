@@ -128,12 +128,13 @@ def calculateOrbit(heightAmount):
     return [v, a, t / 60]
 
 
-if __name__ == '__main__':
+def generateData(scheduleLength):
     line1 = line2 = ""
     LL = []
-    date = datetime.datetime.now()
+    date = datetime.datetime(2018, 3, 7, 9, 40, 39)
+    print(date)
     lat = long = 0
-    for x in range(0, (1440 * 2), 1):
+    for x in range(0, scheduleLength, 1):
         day_of_year = date.timetuple().tm_yday + (date.hour + ((date.minute + x) / 60)) / 24
         dateOnly = str(date).split(" ")[0].replace("-", "/")
         dateYear = str(date).split("-")[0]
@@ -160,25 +161,34 @@ if __name__ == '__main__':
     Stations = [[-45.10, 50.00]]
     LLxStations = []
     radius_earth = 6.37 * 10 ** 6
-    for y in Stations:
+    data_string = 'const bool TWINDOW[SCHEDULE_LENGHT][STATIONS] = {'
+    for x in LL:
         tmpSet = []
-        for x in LL:
+        data_string += '{'
+        for y in Stations:
             lat1 = np.radians(y[0])
             lon1 = np.radians(y[1])
             lat2 = np.radians(x[0])
             lon2 = np.radians(x[1])
 
-            dlon = lon2 - lon1
-            dlat = lat2 - lat1
+            dlon = np.radians(lon2 - lon1)
+            dlat = np.radians(lat2 - lat1)
 
             a = np.sin(dlat / 2) ** 2 + np.cos(lat1) * np.cos(lat2) * np.sin(dlon / 2) ** 2
             c = 2 * atan2(np.sqrt(a), np.sqrt(1 - a))
 
             distance = radius_earth * c
             print(distance)
-            if distance >= 2000:
+            if distance >= 50000:
                 tmpSet.append(0)
+                data_string += '0,'
             else:
                 tmpSet.append(1)
+                data_string += '1,'
+        data_string = data_string[:-1]
+        data_string += '},'
         LLxStations.append([y[0], y[1], tmpSet])
-    print(LLxStations)
+    return data_string[:-1] + '};'
+
+if __name__ == '__main__':
+    print(generateData(360))
