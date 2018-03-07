@@ -11,6 +11,12 @@ linux = 'linux'
 def linux_machine(OS_name: str):
     return OS_name == linux
 
+def makeSenceQuestionMark(satID, clock):
+    bla = re.findall("(\ Processor\(" + satID + "\)." + clock +"[>=]+[0-9]+,)", line)
+    if bla:
+        return bla[0].split('=')[1][:-1]
+    else:
+        return '0'
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Benchmark tool for UPPAAL models')
@@ -56,14 +62,27 @@ if __name__ == '__main__':
             time_measurements.append(total_seconds)
             print(str(i) + ": " + str(time_measurements[-1]))
     with open('benchmark_trace', 'r') as trace:
-        line = trace.readline()
-        while line:
+        for line in reversed(list(trace)):
             t_time = re.findall("(t_time[>=]+[0-9]+)", line)
             if t_time:
-                t_time = t_time[0].split('=')[1]
-                if int(t_time) == 597 or int(t_time) == 600:
-                    print("data_earth: " + re.findall("(data_earth\=[0-9]+)", line)[0].split('=')[1])
-                    print("data_storage: " + re.findall("(data_storage\=[0-9]+)", line)[0].split('=')[1])
-                    print('internal_transfer: ' + re.findall("(internal_transfer\=[0-9]+)", line)[0].split('=')[1])
-            line = trace.readline()
+                print("data_earth: " + re.findall("(data_earth\=[0-9]+)", line)[0].split('=')[1])
+                print("data_storage: " + re.findall("(data_storage\=[0-9]+)", line)[0].split('=')[1])
+                print('internal_transfer: ' + re.findall("(internal_transfer\=[0-9]+)", line)[0].split('=')[1])
+                print('satellite one:')
+
+                print('idle clock: ' + makeSenceQuestionMark('0', 'idle'))
+                print('wait clock: ' + makeSenceQuestionMark('0', 'wait'))
+                print('work clock: ' + makeSenceQuestionMark('0', 'work'))
+                print('satellite two:')
+                print('idle clock: ' + makeSenceQuestionMark('1', 'idle'))
+                print('wait clock: ' + makeSenceQuestionMark('1', 'wait'))
+                print('work clock: ' + makeSenceQuestionMark('1', 'work'))
+                print('satellite three:')
+                print('idle clock: ' + makeSenceQuestionMark('2', 'idle'))
+                print('wait clock: ' + makeSenceQuestionMark('2', 'wait'))
+                print('work clock: ' + makeSenceQuestionMark('2', 'work'))
+                break
     print("Avergae time: " + str(sum(time_measurements) / len(time_measurements)))
+
+
+
