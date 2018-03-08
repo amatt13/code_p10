@@ -12,8 +12,10 @@ const int LOW_MEMORY = MAX_MEMORY * 50/100;
 const int HIGH_MEMORY = MAX_MEMORY * 75/100;
 const int RECEIVE_INDEX = 3;
 const int TRANSMIT_INDEX = 2;
-const int STATIONS = 1;
+const int STATIONS = 2;
 const int TASK_SUGGEST_INTERNAL = 3;
+const int STATION_INDEX = 3;
+const int STATION_ATTRI = 3;
 
 const int ZEROES[N] = {0,0,0,0};
 const int S_ZEROES[S][N] = {ZEROES, ZEROES, ZEROES};
@@ -21,7 +23,10 @@ const int MINUSSES[N] = {-1,-1,-1,-1};
 const int S_MINUSSES[S][N] = {MINUSSES, MINUSSES, MINUSSES};
 const int ACTIVE_INIT[S] = {-1,-1,-1};
 
-const bool TWINDOW[SCHEDULE_LENGHT][STATIONS] = {{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{1},{1},{1},{1},{1},{1},{1},{1},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{1},{1},{1},{1},{1},{1},{1},{1},{1},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{1},{1},{1},{1},{1},{1},{1},{1},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{1},{1},{1},{1},{1},{1},{1},{1},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0},{0}};
+//              index, stations, status
+const int TWINDOW[STATION_INDEX][STATIONS][STATION_ATTRI] = {{{0,50,0}, {0,25,1}},
+                                                             {{51,100,1}, {26,100,0}},
+                                                             {{101,9999,0}, {101,9999,0}}    };
 
 int data_earth = 0;
 int data_storage = 0;
@@ -1055,7 +1060,19 @@ suggest_task()</label>
 		<name>CheckRunnable</name>
 		<declaration>bool all_checked = false;
 int window_to_check = 0, task_to_check = 0;
+int station = 0;
+int index[STATIONS] = {0,0};
+bool station_to_check = false;
+bool can_run = false;
 
+void inWindow(){
+    if (TWINDOW[index[window_to_check]][window_to_check][2])
+    {
+        can_run = true;
+    }else{
+        can_run = false;
+    }
+}
 
 void next() {
     if (task_to_check &lt; N) {
@@ -1111,13 +1128,8 @@ void skipWindowCheck() {
 	task_to_check += 1;
 }
 
-
-int getStart() {
-	return wins[window_to_check].start_time;
-}
-
-int getEnd() {
-	return wins[window_to_check].end_time;
+int windowEnd() {
+	return TWINDOW[index[window_to_check]][window_to_check][1];
 }
 
 bool depends() {
@@ -1125,49 +1137,78 @@ bool depends() {
 }
 
 //TODO overhold at vi ikke går ud over et vindue</declaration>
-		<location id="id35" x="104" y="-216">
+		<location id="id35" x="102" y="-212">
 			<committed/>
 		</location>
-		<location id="id36" x="-312" y="-320">
-			<name x="-322" y="-350">Wait</name>
+		<location id="id36" x="-306" y="-314">
+			<name x="-316" y="-344">Wait</name>
 		</location>
-		<location id="id37" x="-120" y="-216">
+		<location id="id37" x="-119" y="-212">
 			<committed/>
 		</location>
-		<location id="id38" x="-312" y="-216">
+		<location id="id38" x="-306" y="-212">
 			<committed/>
 		</location>
 		<init ref="id36"/>
 		<transition>
+			<source ref="id35"/>
+			<target ref="id38"/>
+			<label kind="guard" x="-178" y="-93">!station_to_check &amp;&amp;
+!can_run</label>
+			<label kind="assignment" x="-178" y="-51">next()</label>
+			<nail x="-8" y="-51"/>
+			<nail x="-195" y="-51"/>
+		</transition>
+		<transition>
+			<source ref="id35"/>
+			<target ref="id38"/>
+			<label kind="guard" x="-178" y="-178">can_run &amp;&amp; 
+!station_to_check</label>
+			<label kind="assignment" x="-178" y="-136">runnable[task_to_check] = true,
+next()</label>
+			<nail x="-8" y="-136"/>
+			<nail x="-195" y="-136"/>
+		</transition>
+		<transition>
+			<source ref="id35"/>
+			<target ref="id35"/>
+			<label kind="guard" x="127" y="-238">windowEnd() &lt; t_time - sats[RQ].offset</label>
+			<label kind="assignment" x="280" y="-212">index[window_to_check]++</label>
+			<nail x="450" y="-212"/>
+			<nail x="450" y="-161"/>
+		</transition>
+		<transition>
+			<source ref="id35"/>
+			<target ref="id35"/>
+			<label kind="guard" x="110" y="-127">windowEnd() &gt;= t_time - sats[RQ].offset</label>
+			<label kind="assignment" x="102" y="-102">station_to_check = false,
+inWindow()</label>
+			<nail x="264" y="-102"/>
+			<nail x="94" y="-102"/>
+		</transition>
+		<transition>
 			<source ref="id37"/>
 			<target ref="id35"/>
 			<label kind="guard" x="-56" y="-240">depends()</label>
+			<label kind="assignment" x="-102" y="-216">station_to_check = true,
+can_run = false</label>
 		</transition>
 		<transition>
 			<source ref="id38"/>
 			<target ref="id38"/>
-			<label kind="guard" x="-472" y="-176">independent()</label>
-			<label kind="assignment" x="-472" y="-160">skipWindowCheck(),
+			<label kind="guard" x="-466" y="-172">independent()</label>
+			<label kind="assignment" x="-466" y="-156">skipWindowCheck(),
 allTaskChecked()</label>
-			<nail x="-376" y="-200"/>
-			<nail x="-352" y="-160"/>
+			<nail x="-370" y="-196"/>
+			<nail x="-346" y="-156"/>
 		</transition>
 		<transition>
 			<source ref="id36"/>
 			<target ref="id38"/>
 			<label kind="synchronisation" x="-456" y="-264">check?</label>
 			<label kind="assignment" x="-512" y="-280">resetRunnable()</label>
-			<nail x="-400" y="-320"/>
-			<nail x="-400" y="-216"/>
-		</transition>
-		<transition>
-			<source ref="id35"/>
-			<target ref="id38"/>
-			<label kind="guard" x="-240" y="-48">depends() &amp;&amp;
-orbit_time[RQ] &gt; getEnd()</label>
-			<label kind="assignment" x="-240" y="-16">next()</label>
-			<nail x="104" y="-48"/>
-			<nail x="-312" y="-48"/>
+			<nail x="-399" y="-314"/>
+			<nail x="-399" y="-212"/>
 		</transition>
 		<transition>
 			<source ref="id37"/>
@@ -1177,32 +1218,10 @@ orbit_time[RQ] &gt; getEnd()</label>
 			<nail x="-216" y="-264"/>
 		</transition>
 		<transition>
-			<source ref="id35"/>
-			<target ref="id38"/>
-			<label kind="guard" x="-240" y="-176">depends() &amp;&amp;
-orbit_time[RQ] &gt;= getStart() &amp;&amp; 
-orbit_time[RQ] &lt;= getEnd()</label>
-			<label kind="assignment" x="-240" y="-136">runnable[task_to_check] = true,
-next()</label>
-			<nail x="-8" y="-176"/>
-			<nail x="-216" y="-176"/>
-		</transition>
-		<transition>
-			<source ref="id35"/>
-			<target ref="id38"/>
-			<label kind="guard" x="-240" y="-104">depends() &amp;&amp;
-orbit_time[RQ] &lt; getStart()</label>
-			<label kind="assignment" x="-240" y="-72">next()</label>
-			<nail x="88" y="-104"/>
-			<nail x="-296" y="-104"/>
-		</transition>
-		<transition>
 			<source ref="id38"/>
 			<target ref="id37"/>
-			<label kind="guard" x="-280" y="-232">!all_checked &amp;&amp;
+			<label kind="guard" x="-272" y="-229">!all_checked &amp;&amp;
 !independent()</label>
-			<nail x="-248" y="-216"/>
-			<nail x="-152" y="-216"/>
 		</transition>
 		<transition>
 			<source ref="id38"/>
@@ -1216,7 +1235,7 @@ orbit_time[RQ] &lt; getStart()</label>
 system OrbitTimer, CheckRunnable, Scheduler &lt; Satellite &lt; Processor ;</system>
 	<queries>
 		<query>
-			<formula>E&lt;&gt; t_time &gt; 600
+			<formula>E&lt;&gt; t_time &gt; 6
 			</formula>
 			<comment>
 			</comment>
