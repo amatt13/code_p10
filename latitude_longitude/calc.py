@@ -8,6 +8,24 @@ RADIUS_EARTH = 6.37 * 10 ** 6
 G = 6.673 * 10 ** -11
 
 
+class Orbit:
+    def __init__(self, inclination, RAAN, eccentricity, aPerigee, mAnomaly, mMotion, revolutionAtEpoch):
+        self.inclination = inclination
+        self.RAAN = RAAN
+        self.eccentricity = eccentricity
+        self.aPerigee = aPerigee
+        self.mAnomaly = mAnomaly
+        self.mMotion = mMotion
+        self.revolutionAtEpoch = revolutionAtEpoch
+
+
+class Station:
+    def __init__(self, longitude, latitude, distance):
+        self.longitude = longitude
+        self.latitude = latitude
+        self.distance = distance
+
+
 def checksum(line: str):
     checksum = 0
     for x in line:
@@ -111,16 +129,18 @@ def calculate_orbit(height_amount):
     return [v, a, t / 60]
 
 
-def generate_data(schedule_length):
+# line2 = construct_line_two("50.0000", "020.519", "0020247", "81.2115", "279.186", "16.30050059", "00000")
+def generate_data_for_station(stations, orbit, schedule_length, list):
     LL = []
+    returnset = []
     date = datetime.datetime(2018, 3, 7, 9, 40, 39)
-    print(date)
     for x in range(0, schedule_length, 1):
         day_of_year = date.timetuple().tm_yday + (date.hour + ((date.minute + x) / 60)) / 24
         date_only = str(date).split(" ")[0].replace("-", "/")
         date_year = str(date).split("-")[0]
         line1 = construct_line_one(str(date_year)[2:], day_of_year)
-        line2 = construct_line_two("50.0000", "020.519", "0020247", "81.2115", "279.186", "16.30050059", "00000")
+        line2 = construct_line_two(orbit.inclination, orbit.RAAN, orbit.eccentricity, orbit.aPerigee, orbit.mAnomaly,
+                                   orbit.mMotion, orbit.revolutionAtEpoch)
         tle = ephem.readtle("OrbitName", line1, line2)
         tle.compute(date_only)
         lat = float(str(tle.sublat).split(":")[-3]) + float(str(tle.sublat).split(":")[-2]) / 60 + float(
@@ -133,41 +153,77 @@ def generate_data(schedule_length):
             long += float(str(tle.sublong).split(":")[-2]) / 60 + float(str(tle.sublong).split(":")[-1]) / (
                 60 * 60)
         LL.append([long, lat])
-        # print(long, ", ", lat)
-        # print('%s %s' % (tle.sublong, tle.sublat))
-        # print(str(tle.sublong).split(":")[-3] + "." + str(tle.sublong).split(":")[-2], ", ", str(tle.sublat).split(":")[-3] + "." + str(tle.sublat).split(":")[-2])  # , ", Hours:" + str(x/60))
-    print(LL)
-    stations = [[-45.10, 50.00]]
-    LLxStations = []
-    data_string = 'const bool TWINDOW[SCHEDULE_LENGHT][STATIONS] = {'
-    for x in LL:
-        tmp_set = []
-        data_string += '{'
-        for y in stations:
-            lat1 = np.radians(y[0])
-            lon1 = np.radians(y[1])
-            lat2 = np.radians(x[0])
-            lon2 = np.radians(x[1])
+    for sta in stations:
+        set = []
+        for y in LL:
+            lat1 = np.radians(sta.latitude)
+            lon1 = np.radians(sta.longitude)
+            lat2 = np.radians(y[1])
+            lon2 = np.radians(y[0])
 
             dlon = np.radians(lon2 - lon1)
             dlat = np.radians(lat2 - lat1)
-
             a = np.sin(dlat / 2) ** 2 + np.cos(lat1) * np.cos(lat2) * np.sin(dlon / 2) ** 2
             c = 2 * atan2(np.sqrt(a), np.sqrt(1 - a))
 
             distance = RADIUS_EARTH * c
-            print(distance)
-            if distance >= 50000:
-                tmp_set.append(0)
-                data_string += '0,'
+            if distance >= sta.distance:
+                set.append(0)
             else:
-                tmp_set.append(1)
-                data_string += '1,'
-        data_string = data_string[:-1]
-        data_string += '},'
-        LLxStations.append([y[0], y[1], tmp_set])
-    return data_string[:-1] + '};'
+                set.append(1)
+        list.append(set)
+
+
+def format_data(array):
+    output = 'const int TWINDOW[STATION_INDEX][STATIONS][STATION_ATTRI] = {\n'
+    complete_set = []
+    for lists, aValue in enumerate(array):
+        first = array[lists][0]
+        count = 0
+        dataset = []
+        for index, value in enumerate(array[lists]):
+            if value == first:
+                count += 1
+            else:
+                dataset.append([index - count, index, first, lists])
+                count = 0
+                first = value
+        dataset.append([len(array[lists]) - count, len(array[lists]), first, lists])
+        complete_set.append(dataset)
+    longest = 0
+    number_of_lists = 0
+    x1 = 0
+    x2 = 0
+    for i, v in enumerate(complete_set):
+        number_of_lists += 1
+        if len(complete_set[i]) > longest:
+            longest = len(complete_set[i])
+    for i in range(longest):
+        output += '{'
+        for x in range(number_of_lists):
+            if len(complete_set[x]) > i:
+                output += '{' + str(complete_set[x][i][0]) + ', ' + str(complete_set[x][i][1]) + ', ' + str(
+                    complete_set[x][i][2]) + '}, '
+            else:
+                output += '{0, 9999, 0}, '
+        output = output[:-2]
+        output += '},\n'
+        x2 += 1
+    output = output[:-2]
+    output += '};'
+    print('const int STATION_INDEX = ' + str(x2) + ';')
+    print('const int STATIONS = ' + str(len(array)) + ';')
+    print('const int STATION_ATTRI = ' + str(3) + ';')
+    print(output)
 
 
 if __name__ == '__main__':
-    print(generate_data(360))
+    orbit1 = Orbit("50.0000", "020.519", "0020247", "81.2115", "279.186", "16.30050059", "00000")
+    orbit2 = Orbit("45.0000", "060.519", "0020247", "79.2115", "260.186", "16.20050059", "00000")
+    orbit3 = Orbit("60.0000", "160.519", "0020247", "75.2115", "220.186", "16.40050059", "00000")
+    stations = [Station(-45.10, 50.00, 50000), Station(-32.50, 75.00, 10000000)]
+    locations = []
+    length = 1440
+    generate_data_for_station(stations, orbit1, length, locations)
+    # generate_data_for_station(stations, orbit2, length, locations)
+    format_data(locations)

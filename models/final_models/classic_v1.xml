@@ -12,10 +12,7 @@ const int LOW_MEMORY = MAX_MEMORY * 50/100;
 const int HIGH_MEMORY = MAX_MEMORY * 75/100;
 const int RECEIVE_INDEX = 3;
 const int TRANSMIT_INDEX = 2;
-const int STATIONS = 2;
 const int TASK_SUGGEST_INTERNAL = 3;
-const int STATION_INDEX = 3;
-const int STATION_ATTRI = 3;
 
 const int ZEROES[N] = {0,0,0,0};
 const int S_ZEROES[S][N] = {ZEROES, ZEROES, ZEROES};
@@ -24,9 +21,45 @@ const int S_MINUSSES[S][N] = {MINUSSES, MINUSSES, MINUSSES};
 const int ACTIVE_INIT[S] = {-1,-1,-1};
 
 //              index, stations, status
-const int TWINDOW[STATION_INDEX][STATIONS][STATION_ATTRI] = {{{0,50,0}, {0,25,1}},
-                                                             {{51,100,1}, {26,100,0}},
-                                                             {{101,9999,0}, {101,9999,0}}    };
+const int STATION_INDEX = 35;
+const int STATIONS = 2;
+const int STATION_ATTRI = 3;
+const int TWINDOW[STATION_INDEX][STATIONS][STATION_ATTRI] = {
+{{0, 9, 0}, {0, 1440, 1}},
+{{10, 22, 1}, {0, 9999, 0}},
+{{23, 97, 0}, {0, 9999, 0}},
+{{98, 110, 1}, {0, 9999, 0}},
+{{111, 186, 0}, {0, 9999, 0}},
+{{187, 198, 1}, {0, 9999, 0}},
+{{199, 274, 0}, {0, 9999, 0}},
+{{275, 287, 1}, {0, 9999, 0}},
+{{288, 362, 0}, {0, 9999, 0}},
+{{363, 375, 1}, {0, 9999, 0}},
+{{376, 451, 0}, {0, 9999, 0}},
+{{452, 463, 1}, {0, 9999, 0}},
+{{464, 539, 0}, {0, 9999, 0}},
+{{540, 552, 1}, {0, 9999, 0}},
+{{553, 627, 0}, {0, 9999, 0}},
+{{628, 640, 1}, {0, 9999, 0}},
+{{641, 716, 0}, {0, 9999, 0}},
+{{717, 728, 1}, {0, 9999, 0}},
+{{729, 804, 0}, {0, 9999, 0}},
+{{805, 817, 1}, {0, 9999, 0}},
+{{818, 892, 0}, {0, 9999, 0}},
+{{893, 905, 1}, {0, 9999, 0}},
+{{906, 981, 0}, {0, 9999, 0}},
+{{982, 993, 1}, {0, 9999, 0}},
+{{994, 1069, 0}, {0, 9999, 0}},
+{{1070, 1082, 1}, {0, 9999, 0}},
+{{1083, 1157, 0}, {0, 9999, 0}},
+{{1158, 1170, 1}, {0, 9999, 0}},
+{{1171, 1246, 0}, {0, 9999, 0}},
+{{1247, 1258, 1}, {0, 9999, 0}},
+{{1259, 1334, 0}, {0, 9999, 0}},
+{{1335, 1346, 1}, {0, 9999, 0}},
+{{1347, 1422, 0}, {0, 9999, 0}},
+{{1423, 1435, 1}, {0, 9999, 0}},
+{{1436, 1440, 0}, {0, 9999, 0}}};
 
 int data_earth = 0;
 int data_storage = 0;
@@ -71,10 +104,10 @@ typedef struct {
 } WindowDescription; 
 				      /* 0 = forward, 1 = earth, 2 = backwards*/
                                       /*  w     E  D   P  rate Co   Orien*/
-const TaskDescription send_data       = {{1,0}, 20,60, 9, -2, true, 1};
-const TaskDescription gather_new_data = {{0,1}, 5,20,  6,  5, false, 0};
-const TaskDescription transfer        = {{0,0}, 3,30,  4, -3, false, 2};
-const TaskDescription receive         = {{0,0}, 3,30,  5, 3, false, 0};
+const TaskDescription send_data       = {{1,1}, 20,60, 9, -2, true, 1};
+const TaskDescription gather_new_data = {{0,1}, 5,20,  6,  5, true, 0};
+const TaskDescription transfer        = {{0,0}, 3,30,  4, -3, true, 2};
+const TaskDescription receive         = {{0,0}, 3,30,  5, 3, true, 0};
 const TaskDescription jobs[N]         = {send_data, gather_new_data, transfer, receive}; //update RECEIVE_INDEX if receive moves
 
 const SatDescription sat_trans = {3, 0, 0, {0,0,1,1}, -1};
@@ -90,6 +123,7 @@ const WindowDescription wins[W] = {win1, win2};
 /** Variables */
 id_s RQ;
 bool runnable[N] = {0,0,0,0};
+bool win_active[W] = {0,0};
 clock orbit_time[S];
 int orbits[S];
 int runs[S][N] = S_ZEROES;
@@ -561,14 +595,17 @@ void boostPriority(){
 void calc_cost(){
 // TODO: Håndter overlappende vinduer
 	int i = 0;
+    price = 9999;
 	for (i = 0; i &lt; W; i++){
-	if(jobs[task].depend_win[i] == 1){
-		if (wins[i].price_rate * jobs[task].has_cost != 0){	
-		price = wins[i].price_rate * jobs[task].execution_time; //choose cheapest
-		}
-        else price = 0;
+	    if(jobs[task].depend_win[i] == 1 &amp;&amp; win_active[i]){
+            if (price &gt;= wins[i].price_rate * jobs[task].execution_time){
+                price = wins[i].price_rate * jobs[task].execution_time; //choose cheapest
+            }
+	    }
 	}
-	}
+    if (price == 9999){
+        price = 0;
+    }
 }
 
 void statistics(int mult, int value){
@@ -782,7 +819,8 @@ orientation(sat_id)</label>
 			<source ref="id21"/>
 			<target ref="id24"/>
 			<label kind="synchronisation" x="-88" y="-48">request[sat_id]?</label>
-			<label kind="assignment" x="-88" y="-32">exe_time = 0</label>
+			<label kind="assignment" x="-88" y="-32">exe_time = 0,
+calc_cost()</label>
 		</transition>
 		<transition>
 			<source ref="id23"/>
@@ -855,7 +893,8 @@ calc_cost()</label>
 (activeTrans() &amp;&amp;
 !orientation(sat_id))</label>
 			<label kind="synchronisation" x="-552" y="96">request[sat_id]?</label>
-			<label kind="assignment" x="-552" y="112">startNew()</label>
+			<label kind="assignment" x="-552" y="112">startNew(),
+calc_cost()</label>
 			<nail x="-472" y="96"/>
 		</transition>
 	</template>
@@ -1153,11 +1192,12 @@ bool depends() {
 		<transition>
 			<source ref="id35"/>
 			<target ref="id38"/>
-			<label kind="guard" x="-178" y="-93">!station_to_check &amp;&amp;
+			<label kind="guard" x="-178" y="-67">!station_to_check &amp;&amp;
 !can_run</label>
-			<label kind="assignment" x="-178" y="-51">next()</label>
-			<nail x="-8" y="-51"/>
-			<nail x="-195" y="-51"/>
+			<label kind="assignment" x="-178" y="-25">win_active[window_to_check] = can_run,
+next()</label>
+			<nail x="-8" y="-25"/>
+			<nail x="-195" y="-25"/>
 		</transition>
 		<transition>
 			<source ref="id35"/>
@@ -1165,6 +1205,7 @@ bool depends() {
 			<label kind="guard" x="-178" y="-178">can_run &amp;&amp; 
 !station_to_check</label>
 			<label kind="assignment" x="-178" y="-136">runnable[task_to_check] = true,
+win_active[window_to_check] = can_run,
 next()</label>
 			<nail x="-8" y="-136"/>
 			<nail x="-195" y="-136"/>
@@ -1180,7 +1221,8 @@ next()</label>
 		<transition>
 			<source ref="id35"/>
 			<target ref="id35"/>
-			<label kind="guard" x="110" y="-127">windowEnd() &gt;= t_time - sats[RQ].offset</label>
+			<label kind="guard" x="110" y="-144">windowEnd() &gt;= t_time - sats[RQ].offset &amp;&amp;
+station_to_check</label>
 			<label kind="assignment" x="102" y="-102">station_to_check = false,
 inWindow()</label>
 			<nail x="264" y="-102"/>
@@ -1235,7 +1277,13 @@ allTaskChecked()</label>
 system OrbitTimer, CheckRunnable, Scheduler &lt; Satellite &lt; Processor ;</system>
 	<queries>
 		<query>
-			<formula>E&lt;&gt; t_time &gt; 6
+			<formula>E&lt;&gt; Processor(2).Occupied &amp;&amp; Processor(2).price == 0 &amp;&amp; Processor(2).task == 0 &amp;&amp; t_time &lt; 400
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>E&lt;&gt; t_time &gt; 600
 			</formula>
 			<comment>
 			</comment>
