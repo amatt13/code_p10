@@ -2,43 +2,43 @@
    \centering
    \begin{tikzpicture}[x=0.02cm,y=0.02cm]
    % place nodes
-\node[location] at (-96, 320)   (id30) {c};
-\node[init] at (-440, 424)   (id31) {};
-\node[location] at (-312, 592)   (id32) {};
-\node[location] at (-312, 320)   (id33) {c};
-\node[location] at (-312, 424)   (id34) {};
+\node[location] at (-216, 576)   (id31) {c};
+\node[init] at (-816, 576)   (id32) {};
+\node[location] at (-720, 464)   (id33) {};
+\node[location] at (-216, 464)   (id34) {c};
+\node[location] at (-528, 464)   (id35) {};
    % place node labels
-\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-298,608) {\begin{tabular}{l}\end{tabular}};
-\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-298,424) {\begin{tabular}{l}\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-826,445) {\begin{tabular}{l}\textcolor{invariant}{slew\_time \&lt;= 3}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-554,437) {\begin{tabular}{l}\textcolor{invariant}{loc\_time \&lt;= TASK\_SUGGEST\_INTERNAL}\\\end{tabular}};
    % place transition labels
-\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-482,528) {\begin{tabular}{l}\textcolor{sync}{release[sat\_id]?}\\\end{tabular}};
-\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-482,512) {\begin{tabular}{l}\textcolor{update}{loc\_time = 0}\\\end{tabular}};
-\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-210,400) {\begin{tabular}{l}\textcolor{guard}{!validSuggestion(sat\_id)}\\\end{tabular}};
-\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-274,376) {\begin{tabular}{l}\textcolor{guard}{validSuggestion(sat\_id)}\\\end{tabular}};
-\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-234,360) {\begin{tabular}{l}\textcolor{sync}{add\_task[sat\_id]!}\\\end{tabular}};
-\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-434,424) {\begin{tabular}{l}\textcolor{sync}{start[sat\_id]?}\\\end{tabular}};
-\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-434,408) {\begin{tabular}{l}\textcolor{update}{loc\_time = 0}\\\end{tabular}};
-\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-234,528) {\begin{tabular}{l}\textcolor{guard}{orientation(sat\_id)}\\\end{tabular}};
-\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-234,512) {\begin{tabular}{l}\textcolor{sync}{slew\_sat[sat\_id]!}\\\end{tabular}};
-\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-234,496) {\begin{tabular}{l}\textcolor{update}{loc\_time = 0}\\\end{tabular}};
-\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-362,696) {\begin{tabular}{l}\textcolor{guard}{slew\_time \&gt;= 3 \&\&}\\\textcolor{guard}{!orientation(sat\_id)}\\\end{tabular}};
-\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-354,664) {\begin{tabular}{l}\textcolor{update}{turn\_satellite(),}\\\textcolor{update}{slew\_time = 0}\\\end{tabular}};
-\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-274,312) {\begin{tabular}{l}\textcolor{update}{loc\_time = 0,}\\\textcolor{update}{suggest\_task()}\\\end{tabular}};
-\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-426,376) {\begin{tabular}{l}\textcolor{guard}{loc\_time \&gt;= 3}\\\end{tabular}};
-\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-426,360) {\begin{tabular}{l}\textcolor{update}{RQ = sat\_id}\\\end{tabular}};
-\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-362,520) {\begin{tabular}{l}\textcolor{sync}{slew\_sat[sat\_id]?}\\\end{tabular}};
-\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-354,504) {\begin{tabular}{l}\textcolor{update}{slew\_time = 0}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-682,437) {\begin{tabular}{l}\textcolor{sync}{release[sat\_id]?}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-682,421) {\begin{tabular}{l}\textcolor{update}{loc\_time = 0}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-514,605) {\begin{tabular}{l}\textcolor{guard}{!validSuggestion(sat\_id)}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-506,581) {\begin{tabular}{l}\textcolor{guard}{validSuggestion(sat\_id)}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-506,557) {\begin{tabular}{l}\textcolor{sync}{add\_task[sat\_id]!}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-786,605) {\begin{tabular}{l}\textcolor{sync}{start[sat\_id]?}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-786,581) {\begin{tabular}{l}\textcolor{update}{loc\_time = 0}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-682,549) {\begin{tabular}{l}\textcolor{guard}{orientation(sat\_id)}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-682,533) {\begin{tabular}{l}\textcolor{sync}{slew\_sat[sat\_id]!}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-682,509) {\begin{tabular}{l}\textcolor{update}{loc\_time = 0}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-858,541) {\begin{tabular}{l}\textcolor{guard}{slew\_time \&gt;= 3 \&\&}\\\textcolor{guard}{!orientation(sat\_id)}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-858,501) {\begin{tabular}{l}\textcolor{update}{turn\_satellite(),}\\\textcolor{update}{slew\_time = 0}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-322,541) {\begin{tabular}{l}\textcolor{update}{loc\_time = 0,}\\\textcolor{update}{suggest\_task()}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-506,493) {\begin{tabular}{l}\textcolor{guard}{loc\_time \&gt;= TASK\_SUGGEST\_INTERNAL}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-506,469) {\begin{tabular}{l}\textcolor{update}{RQ = sat\_id}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-682,485) {\begin{tabular}{l}\textcolor{sync}{slew\_sat[sat\_id]?}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-682,469) {\begin{tabular}{l}\textcolor{update}{slew\_time = 0}\\\end{tabular}};
    % place transitions
-\draw[->] (id32) -- (-360, 576) -- (-360, 440) -- (id34) {};
-\draw[->] (id30) -- (-96, 424) -- (id34) {};
-\draw[->] (id30) -- (id34) {};
-\draw[->] (id31) -- (id34) {};
-\draw[->] (id32) -- (-232, 576) -- (-232, 440) -- (id34) {};
-\draw[->] (id32) -- (-352, 632) -- (-248, 632) -- (id32) {};
-\draw[->] (id33) -- (id30) {};
-\draw[->] (id34) -- (id33) {};
-\draw[->] (id34) -- (id32) {};
+\draw[->] (id33) -- (-688, 416) -- (-576, 416) -- (id35) {};
+\draw[->] (id31) -- (-528, 576) -- (id35) {};
+\draw[->] (id31) -- (-288, 552) -- (-512, 552) -- (id35) {};
+\draw[->] (id32) -- (-552, 576) -- (id35) {};
+\draw[->] (id33) -- (-688, 504) -- (-576, 504) -- (id35) {};
+\draw[->] (id33) -- (-856, 464) -- (-856, 496) -- (-736, 496) -- (id33) {};
+\draw[->] (id34) -- (id31) {};
+\draw[->] (id35) -- (id34) {};
+\draw[->] (id35) -- (id33) {};
    \end{tikzpicture}
    \label{fig:t_classic_v1_Satellite}
-   \caption{classic_v1_Satellitesef template}
+   \caption{classic\_v1\_Satellite template}
 \end{figure}
