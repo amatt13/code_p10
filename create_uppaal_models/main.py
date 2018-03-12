@@ -83,7 +83,7 @@ def colorCodedText(kind, code):
     return formatedCode
 
 textOffsetX = -10
-textOffsetY = 0
+textOffsetY = -5
 nodeOffsetX = 0
 nodeOffsetY = 0
 
@@ -121,9 +121,10 @@ def GenerateTikz(name, nodes, transitions):
         path = "\draw[->] (" + t.source + ") -- "
         for ns in t.nails:
             path = path + "(" + ns.x + ", " + str(int(ns.y)*-1) + ") -- "
-        path = path + "(" + t.target + ") {};\n"
+        test = t.target
+        path = path + "(" + test + ") {};\n"
         f.write(path)
-    f.write("   \\end{tikzpicture}\n   \\label{fig:t_" + name + "}\n   \\caption{" + name+ "sef" + " template}\n\end{figure}\n")
+    f.write("   \\end{tikzpicture}\n   \\label{fig:t_" + name + "}\n   \\caption{" + name.replace('_','\\_') + " template}\n\end{figure}\n")
 
 
 if __name__ == '__main__':
@@ -131,10 +132,14 @@ if __name__ == '__main__':
         if filename.split('.')[1] == 'xml':
             with open(filename) as f:
                 for line in f:
-                    xml = xml + line
+                    if line[-2:] == '>\n':
+                        xml = xml + line.replace('\t', '').replace('\n', '')
+                    else:
+                        xml = xml + line.replace('\t', '')
                 xml = xml.replace('\n', '!newline!')
                 xmlList = xml.split('<')
                 for line in xmlList:
+
                     if line[:8] == 'template':
                         inTemplate = True
                     elif line[:8] == 'location':
