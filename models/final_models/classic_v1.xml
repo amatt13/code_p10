@@ -3,7 +3,6 @@
 <nta>
 	<declaration>const int N = 4; // Amount of tasks
 const int S = 3; // Amount of satellites
-const int STATIONS = 2; // amount of windows i.e. stations to which can be communicated
 const int SCHEDULE_LENGHT = 360; // Length of schedule
 const int ORBIT_TIME = 60; // duration of one orbit
 const int MAX_MEMORY = 100; // satellites maximum storage capacity
@@ -25,7 +24,7 @@ typedef int[0, S-1] id_s;
 
 // Describes time intervals where windows are open i.e. comunnication with Earth is possible
 const int STATION_INDEX = 35; // changes for; when station are in range
-
+const int STATIONS = 2; // amount of windows i.e. stations to which can be communicated
 const int STATION_ATTRI = 3; // elements discribing window
 const int OVER_STATION[STATION_INDEX][STATIONS][STATION_ATTRI] = {
 // Start_time, End_time, active or not
