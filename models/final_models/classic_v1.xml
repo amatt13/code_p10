@@ -1,30 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.1//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_2.dtd'>
 <nta>
-	<declaration>const int N = 4;
-const int S = 3;
-const int R = 2;
-const int W = 2;
-const int SCHEDULE_LENGHT = 360;
-const int ORBIT_TIME = 60;
-const int MAX_MEMORY = 100;
-const int LOW_MEMORY = MAX_MEMORY * 50/100;
-const int HIGH_MEMORY = MAX_MEMORY * 75/100;
-const int RECEIVE_INDEX = 3;
-const int TRANSMIT_INDEX = 2;
-const int TASK_SUGGEST_INTERNAL = 3;
+	<declaration>const int N = 4; // Amount of tasks
+const int S = 3; // Amount of satellites
+const int W = 2; // amount of stations/windows
+const int SCHEDULE_LENGHT = 360; // Length of schedule
+const int ORBIT_TIME = 60; // duration of one orbit
+const int MAX_MEMORY = 100; // satellites maximum storage capacity
+const int LOW_MEMORY = MAX_MEMORY * 50/100; // threshold for when  little memory is used
+const int HIGH_MEMORY = MAX_MEMORY * 75/100; // threshold for when a lot memory is used
+const int RECEIVE_INDEX = 3; // the index for the receive task
+const int TRANSMIT_INDEX = 2; // the index for the internal send task
+const int TASK_SUGGEST_INTERVAL = 3; // how often should a task be suggested
 
+// used for common instansiations of arrays
 const int ZEROES[N] = {0,0,0,0};
 const int S_ZEROES[S][N] = {ZEROES, ZEROES, ZEROES};
 const int MINUSSES[N] = {-1,-1,-1,-1};
 const int S_MINUSSES[S][N] = {MINUSSES, MINUSSES, MINUSSES};
 const int ACTIVE_INIT[S] = {-1,-1,-1};
 
-//              index, stations, status
-const int STATION_INDEX = 35;
-const int STATIONS = 2;
-const int STATION_ATTRI = 3;
+typedef int[0, N-1] id_t;
+typedef int[0, S-1] id_s;
+
+// Describes time intervals where windows are open i.e. comunnication with Earth is possible
+const int STATION_INDEX = 35; // changes for; when station are in range
+const int STATIONS = 2; // amount of windows i.e. stations to which can be communicated
+const int STATION_ATTRI = 3; // elements discribing window
 const int OVER_STATION[STATION_INDEX][STATIONS][STATION_ATTRI] = {
+// Start_time, End_time, active or not
 {{0, 9, 0}, {0, 1440, 1}},
 {{10, 22, 1}, {0, 9999, 0}},
 {{23, 97, 0}, {0, 9999, 0}},
@@ -61,38 +65,30 @@ const int OVER_STATION[STATION_INDEX][STATIONS][STATION_ATTRI] = {
 {{1423, 1435, 1}, {0, 9999, 0}},
 {{1436, 1440, 0}, {0, 9999, 0}}};
 
-int data_earth = 0;
-int data_storage = 0;
-int internal_transfer = 0;
-int value = 0;
+int data_earth = 0; // Amount of data units sent to Earth (for benchmarking)
+int internal_transfer = 0; // Amount of data transfered internally between satellites (for benchmarking)
+int data_gathered = 0; // Amount of data currently stored in the system (for benchmarking)
 
-typedef int[0, N-1] id_t;
-typedef int[0, R-1] id_r;
-typedef int[0, S-1] id_s;
-typedef int[0, W-1] id_w;
-
-clock t_time;
-
-urgent broadcast chan release[S], request[S], grant[S][N], preemt[S], 
-		      add_task[S], start[S], check, not_rdy_to_rec[S], go , slew_sat[S], transmit_data[S], next[S];
+clock t_time; // total amount of time passed
+urgent broadcast chan release[S], request[S], preemt[S], add_task[S], check, not_rdy_to_rec[S], go , slew_sat[S], transmit_data[S], next[S];
 
 /** Task Description */
 typedef struct {
-	bool depend_win[W];
-	int execution_time;
-	int deadline;
-	int prio;
-	int data_rate;
-	int orientation;
+	bool depend_win[W]; // what stations must is the task be in range of
+	int execution_time;  // how long does task take to execute
+	int deadline;        // task deadline
+	int prio;            // tasks priority
+	int data_rate;       // how fast the task increase or decrease storage
+	int orientation;     // what orrientation must the satellite have to perform task
 } TaskDescription;
 
 /** Satellite Description */
 typedef struct {
-	int offset;
-	int rotation;
-	int memory;
-	bool can_does[N];
-	int suggested_task;
+	int offset;            // when does the satellite "start"
+	int rotation;          // what is the current orientation of the satelite
+	int memory;            // current amount stored
+	bool available_tasks[N];      // what tasks can the satellite perform
+	int suggested_task;    // what task should be performed next
 } SatDescription;
 
 /** Remove StationDescription and replace with array over costrate */
@@ -101,6 +97,8 @@ typedef struct {
 	int end_time;
 	int price_rate;
 } StationDescription; 
+
+// Some tasks, with different propperties
 				      /* 0 = forward, 1 = earth, 2 = backwards*/
                                       /*  w     E  D   P  rate Co   Orien*/
 const TaskDescription send_data       = {{1,1}, 20,60, 9, -2, 1};
@@ -109,6 +107,7 @@ const TaskDescription transfer        = {{0,0}, 3,30,  4, -3, 2};
 const TaskDescription receive         = {{0,0}, 3,30,  5,  3, 0};
 const TaskDescription jobs[N]         = {send_data, gather_new_data, transfer, receive}; //update RECEIVE_INDEX if receive moves
 
+// some satellites performing different tasks and with different offset
 const SatDescription sat_trans = {3, 0, 0, {0,0,1,1}, -1};
 const SatDescription sat_gat = {3, 0, 0, {0,1,1,0}, -1};
 const SatDescription sat_sen = {9, 2, 0, {1,0,0,1}, -1};
@@ -122,9 +121,9 @@ const StationDescription wins[W] = {win1, win2};
 
 /** Variables */
 id_s RQ;
-bool runnable[N] = {0,0,0,0};
-bool win_active[W] = {0,0};
-clock orbit_time[S];
+bool runnable[N] = {0,0,0,0};    // can this task be performed
+bool win_active[W] = {0,0};      // it the satellite currently over a station
+//clock orbit_time[S];             // 
 int orbits[S];
 int runs[S][N] = S_ZEROES;
 const int prios[N] = {jobs[0].prio, jobs[1].prio, jobs[2].prio, jobs[3].prio};
@@ -145,10 +144,9 @@ bool empty(int q[N]){
 }
 
 bool orientation(int sat_id){
-	//if (jobs[active[sat_id]].orientation != 0){ // 0 = no specific orientation required
-		if (sats[sat_id].rotation != jobs[active[sat_id]].orientation){return false;}
-		else {return true;}//}
-	//else {return true;}
+    if (jobs[active[sat_id]].orientation == -1) return true;
+	else if (sats[sat_id].rotation != jobs[active[sat_id]].orientation) return false;
+	else return true;
 }
 
 bool validSuggestion(int id) {
@@ -632,11 +630,12 @@ void statistics(int mult, int value){
 		data_earth += value*-1;
 	}
 	else{
-		data_storage += value;
+		data_gathered += value;
 	}
 }
 
 void update_storage(int mult){
+    int value = 0;
 	//TODO introduce finer grunulairy (in case of preemption)
 	value = (jobs[task].execution_time * jobs[task].data_rate * mult)/2;
 	sats[sat_id].memory += value;
@@ -991,7 +990,7 @@ void suggest_task(){
 	selected = -1;
 
 	for (i = 0; i &lt; N; i++){
-		if (sats[sat_id].can_does[i]) { 
+		if (sats[sat_id].available_tasks[i]) { 
 			cans[i] = true; }}
 
 	for (i = 0; i &lt; N - 1; i++) {
@@ -1048,8 +1047,8 @@ void suggest_task(){
 		</location>
 		<location id="id30" x="-816" y="-576">
 			<name x="-864" y="-584">Start</name>
-			<label kind="invariant" x="-867" y="-629">orbit_time[sat_id] 
-&lt;= sats[sat_id].offset</label>
+			<label kind="invariant" x="-867" y="-629">t_time &lt;= 
+sats[sat_id].offset</label>
 		</location>
 		<location id="id31" x="-720" y="-464">
 			<name x="-768" y="-456">Slewing</name>
@@ -1061,7 +1060,7 @@ void suggest_task(){
 		</location>
 		<location id="id33" x="-528" y="-464">
 			<name x="-544" y="-448">Waiting</name>
-			<label kind="invariant" x="-544" y="-432">loc_time &lt;= TASK_SUGGEST_INTERNAL</label>
+			<label kind="invariant" x="-544" y="-432">loc_time &lt;= TASK_SUGGEST_INTERVAL</label>
 		</location>
 		<init ref="id30"/>
 		<transition>
@@ -1089,10 +1088,9 @@ void suggest_task(){
 		<transition>
 			<source ref="id30"/>
 			<target ref="id33"/>
-			<label kind="guard" x="-714" y="-629">orbit_time[sat_id] &gt;= 
+			<label kind="guard" x="-714" y="-629">t_time &gt;= 
 sats[sat_id].offset</label>
-			<label kind="assignment" x="-798" y="-576">orbit_time[sat_id] = 0,
-loc_time = 0</label>
+			<label kind="assignment" x="-705" y="-578">loc_time = 0</label>
 			<nail x="-552" y="-576"/>
 		</transition>
 		<transition>
@@ -1124,7 +1122,7 @@ suggest_task()</label>
 		<transition>
 			<source ref="id33"/>
 			<target ref="id32"/>
-			<label kind="guard" x="-496" y="-488">loc_time &gt;= TASK_SUGGEST_INTERNAL</label>
+			<label kind="guard" x="-496" y="-488">loc_time &gt;= TASK_SUGGEST_INTERVAL</label>
 			<label kind="assignment" x="-496" y="-464">RQ = sat_id</label>
 		</transition>
 		<transition>
@@ -1313,40 +1311,6 @@ allTaskChecked()</label>
 			<label kind="assignment" x="-392" y="-280">all_checked = false</label>
 		</transition>
 	</template>
-	<template>
-		<name>OrbitTimer</name>
-		<parameter>const id_s sat_id</parameter>
-		<location id="id38" x="-208" y="-696">
-			<name x="-264" y="-704">Offset</name>
-			<committed/>
-		</location>
-		<location id="id39" x="-208" y="-800">
-			<name x="-256" y="-808">Start</name>
-		</location>
-		<location id="id40" x="-208" y="-616">
-			<name x="-280" y="-624">Revolve</name>
-			<label kind="invariant" x="-192" y="-624">orbit_time[sat_id] &lt;= ORBIT_TIME</label>
-		</location>
-		<init ref="id39"/>
-		<transition>
-			<source ref="id38"/>
-			<target ref="id40"/>
-			<label kind="synchronisation" x="-208" y="-664">start[sat_id]!</label>
-		</transition>
-		<transition>
-			<source ref="id39"/>
-			<target ref="id38"/>
-		</transition>
-		<transition>
-			<source ref="id40"/>
-			<target ref="id40"/>
-			<label kind="guard" x="-296" y="-552">orbit_time[sat_id] &gt;= ORBIT_TIME</label>
-			<label kind="assignment" x="-264" y="-536">orbit_time[sat_id] = 0,
-orbits[sat_id] ++</label>
-			<nail x="-144" y="-552"/>
-			<nail x="-264" y="-552"/>
-		</transition>
-	</template>
 	<system>
 system /*OrbitTimer, */CheckRunnable, Scheduler &lt; Satellite &lt; Processor ;</system>
 	<queries>
@@ -1371,7 +1335,7 @@ system /*OrbitTimer, */CheckRunnable, Scheduler &lt; Satellite &lt; Processor ;<
 		<query>
 			<formula>E&lt;&gt; forall (i : id_t) forall (j : id_t) runs[i][j]+1 &lt; runs[i][j] &amp;&amp; t_time &lt; 600
 			</formula>
-			<comment> == runs[j] &amp;&amp; i != j
+			<comment>== runs[j] &amp;&amp; i != j
 			</comment>
 		</query>
 		<query>
