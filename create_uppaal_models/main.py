@@ -78,6 +78,8 @@ def colorCodedText(kind, code):
             formatedCode = formatedCode + "\\textcolor{sync}{" + line + "}\\\\"
         elif kind == "assignment":
             formatedCode = formatedCode + "\\textcolor{update}{" + line + "}\\\\"
+        elif kind == "invariant":
+            formatedCode = formatedCode + "\\textcolor{invariant}{" + line + "}\\\\"
     return formatedCode
 
 textOffsetX = -10
