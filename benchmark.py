@@ -53,7 +53,7 @@ if __name__ == '__main__':
             start = datetime.datetime.now()
             if linux_machine(OS):
                 subprocess.Popen([my_location + "verifyta", my_location + "models/final_models/classic_v1.xml", my_location + "models/final_models/classic.q",
-                    "-o1", t, y, s, q], stdout=output, stderr=output).wait()
+                    "-o1" + t + y + s + q], stdout=output, stderr=output).wait()
             else:
                 subprocess.Popen(my_location_windows + "verifyta.exe -o1 " + t + " " + s + " " + q + " "  + y  + " " + my_location_windows + "models\\final_models\\classic_v1.xml " + my_location_windows + "models\\final_models\\classic.q", stdout=output, stderr=output).wait()
             end = datetime.datetime.now()
