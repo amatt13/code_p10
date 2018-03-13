@@ -1,3 +1,4 @@
+#Created by Anders!
 import subprocess
 import argparse
 import os
@@ -11,12 +12,18 @@ linux = 'linux'
 def linux_machine(OS_name: str):
     return OS_name == linux
 
-def makeSenceQuestionMark(satID, clock):
+def get_clocks(satID, clock):
     bla = re.findall("(\ Processor\(" + satID + "\)." + clock +"[>=]+[0-9]+,)", line)
     if bla:
         return bla[0].split('=')[1][:-1]
     else:
         return '0'
+
+def get_delays(first):
+    return re.findall("(delayed\["+str(first)+"\]\[[0-9]+\]=[0-9]+)", line)
+
+def get_runs(first):
+    return re.findall("(runs\["+str(first)+"\]\[[0-9]+\]=[0-9]+)", line)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Benchmark tool for UPPAAL models')
@@ -70,17 +77,25 @@ if __name__ == '__main__':
                 print('internal_transfer: ' + re.findall("(internal_transfer\=[0-9]+)", line)[0].split('=')[1])
                 print('satellite one:')
 
-                print('idle clock: ' + makeSenceQuestionMark('0', 'idle'))
-                print('wait clock: ' + makeSenceQuestionMark('0', 'wait'))
-                print('work clock: ' + makeSenceQuestionMark('0', 'work'))
+                print('idle clock: ' + get_clocks('0', 'idle'))
+                print('wait clock: ' + get_clocks('0', 'wait'))
+                print('work clock: ' + get_clocks('0', 'work'))
                 print('satellite two:')
-                print('idle clock: ' + makeSenceQuestionMark('1', 'idle'))
-                print('wait clock: ' + makeSenceQuestionMark('1', 'wait'))
-                print('work clock: ' + makeSenceQuestionMark('1', 'work'))
+                print('idle clock: ' + get_clocks('1', 'idle'))
+                print('wait clock: ' + get_clocks('1', 'wait'))
+                print('work clock: ' + get_clocks('1', 'work'))
                 print('satellite three:')
-                print('idle clock: ' + makeSenceQuestionMark('2', 'idle'))
-                print('wait clock: ' + makeSenceQuestionMark('2', 'wait'))
-                print('work clock: ' + makeSenceQuestionMark('2', 'work'))
+                print('idle clock: ' + get_clocks('2', 'idle'))
+                print('wait clock: ' + get_clocks('2', 'wait'))
+                print('work clock: ' + get_clocks('2', 'work'))
+                for i in range(0, 3):
+                    items = get_delays(i)
+                    for item in items:
+                        print(item)
+                for i in range(0, 3):
+                    items = get_runs(i)
+                    for item in items:
+                        print(item)
                 break
     print("Avergae time: " + str(sum(time_measurements) / len(time_measurements)))
 
