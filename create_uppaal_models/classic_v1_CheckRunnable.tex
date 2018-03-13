@@ -12,9 +12,9 @@
 \node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-188,30) {\begin{tabular}{l}\textcolor{update}{win\_active[window\_to\_check] = can\_run,}\\\textcolor{update}{next()}\\\end{tabular}};
 \node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-188,183) {\begin{tabular}{l}\textcolor{guard}{can\_run \&\& }\\\textcolor{guard}{!station\_to\_check}\\\end{tabular}};
 \node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-188,141) {\begin{tabular}{l}\textcolor{update}{runnable[task\_to\_check] = true,}\\\textcolor{update}{win\_active[window\_to\_check] = can\_run,}\\\textcolor{update}{next()}\\\end{tabular}};
-\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (117,243) {\begin{tabular}{l}\textcolor{guard}{windowEnd() \&lt; t\_time - sats[RQ].offset}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (117,243) {\begin{tabular}{l}\textcolor{guard}{windowEnd() <; t\_time - sats[RQ].offset}\\\end{tabular}};
 \node[anchor=north west, text width=10cm, font=\tiny, align=left] at (270,217) {\begin{tabular}{l}\textcolor{update}{index[window\_to\_check]++}\\\end{tabular}};
-\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (100,149) {\begin{tabular}{l}\textcolor{guard}{windowEnd() \&gt;= t\_time - sats[RQ].offset \&\&}\\\textcolor{guard}{station\_to\_check}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (100,149) {\begin{tabular}{l}\textcolor{guard}{windowEnd() >= t\_time - sats[RQ].offset \&\&}\\\textcolor{guard}{station\_to\_check}\\\end{tabular}};
 \node[anchor=north west, text width=10cm, font=\tiny, align=left] at (92,107) {\begin{tabular}{l}\textcolor{update}{station\_to\_check = false,}\\\textcolor{update}{inWindow()}\\\end{tabular}};
 \node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-66,245) {\begin{tabular}{l}\textcolor{guard}{depends()}\\\end{tabular}};
 \node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-112,221) {\begin{tabular}{l}\textcolor{update}{station\_to\_check = true,}\\\textcolor{update}{can\_run = false}\\\end{tabular}};

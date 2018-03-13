@@ -15,7 +15,7 @@
 	% place node labels
 \node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-979,1988) {\begin{tabular}{l}\textcolor{invariant}{idle '== 0 \&\&}\\\textcolor{invariant}{work '== 0 \&\&}\\\textcolor{invariant}{wait '== 1}\\\end{tabular}};
 \node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-979,1926) {\begin{tabular}{l}\textcolor{invariant}{idle '== 0 \&\&}\\\textcolor{invariant}{work '== 1 \&\&}\\\textcolor{invariant}{wait '== 0}\\\end{tabular}};
-\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-978,2181) {\begin{tabular}{l}\textcolor{invariant}{run\_time[task]  \&lt;= }\\\textcolor{invariant}{getDeadline() \&\&}\\\textcolor{invariant}{exe\_time + time\_used[task]  \&lt;= }\\\textcolor{invariant}{getExeTime() \&\&}\\\textcolor{invariant}{idle '== 0 \&\&}\\\textcolor{invariant}{work '== 1 \&\&}\\\textcolor{invariant}{wait '== 0}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-978,2181) {\begin{tabular}{l}\textcolor{invariant}{run\_time[task]  <= }\\\textcolor{invariant}{getDeadline() \&\&}\\\textcolor{invariant}{exe\_time + time\_used[task]  <= }\\\textcolor{invariant}{getExeTime() \&\&}\\\textcolor{invariant}{idle '== 0 \&\&}\\\textcolor{invariant}{work '== 1 \&\&}\\\textcolor{invariant}{wait '== 0}\\\end{tabular}};
 \node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-968,1901) {\begin{tabular}{l}\textcolor{invariant}{idle '== 1 \&\&}\\\textcolor{invariant}{work '== 0 \&\&}\\\textcolor{invariant}{wait '== 0}\\\end{tabular}};
 	% place transition labels
 \node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-519,1977) {\begin{tabular}{l}\textcolor{sync}{request[sat\_id]?}\\\end{tabular}};
@@ -32,7 +32,7 @@
 \node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-349,1917) {\begin{tabular}{l}\textcolor{sync}{release[sat\_id]?}\\\end{tabular}};
 \node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-222,1879) {\begin{tabular}{l}\textcolor{sync}{release[sat\_id]?}\\\end{tabular}};
 \node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-278,2007) {\begin{tabular}{l}\textcolor{sync}{release[sat\_id]?}\\\end{tabular}};
-\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-230,2039) {\begin{tabular}{l}\textcolor{guard}{run\_time[task] \&gt;= getDeadline()}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-230,2039) {\begin{tabular}{l}\textcolor{guard}{run\_time[task] >= getDeadline()}\\\end{tabular}};
 \node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-746,2123) {\begin{tabular}{l}\textcolor{guard}{activeIsTrans() \&\& }\\\textcolor{guard}{orientation(sat\_id)}\\\end{tabular}};
 \node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-746,2081) {\begin{tabular}{l}\textcolor{sync}{request[sat\_id]?}\\\end{tabular}};
 \node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-748,2062) {\begin{tabular}{l}\textcolor{update}{startNew()}\\\end{tabular}};
@@ -41,7 +41,7 @@
 \node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-151,1928) {\begin{tabular}{l}\textcolor{guard}{isInternalCom() \&\&}\\\textcolor{guard}{orientation(sat\_id)}\\\end{tabular}};
 \node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-151,1894) {\begin{tabular}{l}\textcolor{sync}{slew\_sat[sat\_id]?}\\\end{tabular}};
 \node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-714,1994) {\begin{tabular}{l}\textcolor{update}{resetPriority(),}\\\textcolor{update}{resetProgress(),}\\\textcolor{update}{active[sat\_id] = waiting\_queue[0]}\\\end{tabular}};
-\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-673,1892) {\begin{tabular}{l}\textcolor{guard}{run\_time[task] \&gt;= }\\\textcolor{guard}{getDeadline() \&\& }\\\textcolor{guard}{exe\_time + time\_used[task]  \&lt; }\\\textcolor{guard}{getExeTime()}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-673,1892) {\begin{tabular}{l}\textcolor{guard}{run\_time[task] >= }\\\textcolor{guard}{getDeadline() \&\& }\\\textcolor{guard}{exe\_time + time\_used[task]  <; }\\\textcolor{guard}{getExeTime()}\\\end{tabular}};
 \node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-673,1815) {\begin{tabular}{l}\textcolor{update}{update\_storage(1)}\\\end{tabular}};
 \node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-228,1792) {\begin{tabular}{l}\textcolor{guard}{!isInternalCom() \&\&}\\\textcolor{guard}{orientation(sat\_id)}\\\end{tabular}};
 \node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-228,1758) {\begin{tabular}{l}\textcolor{sync}{slew\_sat[sat\_id]?}\\\end{tabular}};
