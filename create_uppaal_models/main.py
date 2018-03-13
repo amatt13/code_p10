@@ -67,7 +67,7 @@ currentLocation = ''
 currentTransition = ''
 
 
-def colorCodedText(kind, code):
+def colorCodedText(kind: str, code):
     formatedCode = ''
     for line in code:
         if kind == "select":
@@ -88,9 +88,9 @@ nodeOffsetX = 0
 nodeOffsetY = 0
 
 
-def GenerateTikz(name, nodes, transitions):
-    f = open(name+".tex", "w")
-    f.write("\\begin{figure}[H]\n   \\centering\n   \\begin{tikzpicture}[x=0.02cm,y=0.02cm]\n   % place nodes\n")
+def GenerateTikz(name: str, nodes: list, transitions: list):
+    f = open(name + ".tex", "w")
+    f.write("\\begin{figure}[H]\n\t\\centering\n\t\\begin{tikzpicture}[x=0.02cm,y=0.02cm]\n\t% place nodes\n")
     for l in nodes:
         symbol = ''
         if l.urgent:
@@ -98,33 +98,33 @@ def GenerateTikz(name, nodes, transitions):
         elif l.committed:
             symbol = "c"
         if l.init:
-            f.write("\\node[init] at (" + str(int(l.x)+nodeOffsetX) + ", " + str((int(l.y)+nodeOffsetY)*-1) + ")   (" + l.id + ") {" + symbol + "};\n")
+            f.write("\\node[init] at (" + str(int(l.x) + nodeOffsetX) + ", " + str((int(l.y) + nodeOffsetY) * -1) + ") (" + l.id + ") {" + symbol + "};\n")
         else:
-            f.write("\\node[location] at (" + str(int(l.x)+nodeOffsetX) + ", " + str((int(l.y)+nodeOffsetY)*-1) + ")   (" + l.id + ") {" + symbol + "};\n")
-    f.write("   % place node labels\n")
+            f.write("\\node[location] at (" + str(int(l.x)+nodeOffsetX) + ", " + str((int(l.y)+nodeOffsetY) * -1) + ") (" + l.id + ") {" + symbol + "};\n")
+    f.write("\t% place node labels\n")
     for l in nodes:
         if l.Label is not None:
             code = l.Label.code.replace("\\&amp;","\\&")
             fragments = code.split("\n")
             code = colorCodedText(l.Label.kind, fragments)
-            f.write("\\node[anchor=north west, text width=10cm, font=\\tiny, align=left] at (" + str(int(l.Label.x)+textOffsetX) + "," + str((int(l.Label.y)+textOffsetY)*-1) + ") {\\begin{tabular}{l}" + code + "\\end{tabular}};\n")
-    f.write("   % place transition labels\n")
+            f.write("\\node[anchor=north west, text width=10cm, font=\\tiny, align=left] at (" + str(int(l.Label.x) + textOffsetX) + "," + str((int(l.Label.y) + textOffsetY)*-1) + ") {\\begin{tabular}{l}" + code + "\\end{tabular}};\n")
+    f.write("\t% place transition labels\n")
     for t in transitions:
         for ts in t.labels:
             if ts is not None:
-                code =  ts.code.replace("\\&amp;","\\&")
+                code =  ts.code.replace("\\&amp;", "\\&")
                 fragments = code.split("\n")
                 code = colorCodedText(ts.kind, fragments)
-                f.write("\\node[anchor=north west, text width=10cm, font=\\tiny, align=left] at (" + str(int(ts.x)+textOffsetX) + "," + str((int(ts.y)+textOffsetY)*-1) + ") {\\begin{tabular}{l}" + code + "\\end{tabular}};\n")
-    f.write("   % place transitions\n")
+                f.write("\\node[anchor=north west, text width=10cm, font=\\tiny, align=left] at (" + str(int(ts.x) + textOffsetX) + "," + str((int(ts.y) + textOffsetY) * -1) + ") {\\begin{tabular}{l}" + code + "\\end{tabular}};\n")
+    f.write("\t% place transitions\n")
     for t in transitions:
         path = "\draw[->] (" + t.source + ") -- "
         for ns in t.nails:
-            path = path + "(" + ns.x + ", " + str(int(ns.y)*-1) + ") -- "
+            path = path + "(" + ns.x + ", " + str(int(ns.y) * -1) + ") -- "
         test = t.target
         path = path + "(" + test + ") {};\n"
         f.write(path)
-    f.write("   \\end{tikzpicture}\n   \\label{fig:t_" + name + "}\n   \\caption{" + name.replace('_','\\_') + " template}\n\end{figure}\n")
+    f.write("\t\\end{tikzpicture}\n\t\\caption{The " + name.split("_")[-1].replace('_','\\_') + " template}\n\t\\label{fig:t_" + name + "}\n\end{figure}\n")
 
 
 if __name__ == '__main__':
@@ -139,7 +139,6 @@ if __name__ == '__main__':
                 xml = xml.replace('\n', '!newline!')
                 xmlList = xml.split('<')
                 for line in xmlList:
-
                     if line[:8] == 'template':
                         inTemplate = True
                     elif line[:8] == 'location':
@@ -151,8 +150,8 @@ if __name__ == '__main__':
                         currentLocation = fragments[0][4:][:-1]
                     elif line[:4] == 'name':
                         if inTemplate:
-                            templates.append(Template(filename.split('.')[0]+"_"+line[5:], [], []))
-                            currentTemplate = filename.split('.')[0]+"_"+line[5:]
+                            templates.append(Template(filename.split('.')[0] + "_" + line[5:], [], []))
+                            currentTemplate = filename.split('.')[0] + "_" + line[5:]
                             inTemplate = False
                         elif inLocation:
                             templateFilter = filter(lambda x: x.name == currentTemplate, templates)
@@ -164,14 +163,14 @@ if __name__ == '__main__':
                             templateFilter = filter(lambda x: x.name == currentTemplate, templates)
                             transitionFilter = filter(lambda x: x.id == currentTransition, next(templateFilter).transitions)
                             fragments = re.findall("[^\ ]+", line.split('>')[0])[1:]
-                            code = line.split('>')[1].replace("!newline!", "\n").replace("&","\&").replace("_", "\_")
+                            code = line.split('>')[1].replace("!newline!", "\n").replace("&", "\&").replace("_", "\_")
                             next(transitionFilter).labels.append(
                                 Label(fragments[0][6:][:-1], fragments[1][3:][:-1], fragments[2][3:][:-1], code))
                         elif inLocation:
                             templateFilter = filter(lambda x: x.name == currentTemplate, templates)
                             locationFilter = filter(lambda x: x.id == currentLocation, next(templateFilter).nodes)
                             fragments = re.findall("[^\ ]+", line.split('>')[0])[1:]
-                            code = line.split('>')[1].replace("!newline!", "\n").replace("&","\&").replace("_", "\_")
+                            code = line.split('>')[1].replace("!newline!", "\n").replace("&", "\&").replace("_", "\_")
                             next(locationFilter).Label = Label(fragments[0][6:][:-1], fragments[1][3:][:-1],
                                                                fragments[2][3:][:-1], code)
                     elif line[:9] == 'committed':
@@ -208,8 +207,6 @@ if __name__ == '__main__':
                             inLocation = False
                         elif line[1:][:-1] == 'transition':
                             inTransition = False
-            pass
-
 
     for l in templates:
         GenerateTikz(l.name, l.nodes, l.transitions)

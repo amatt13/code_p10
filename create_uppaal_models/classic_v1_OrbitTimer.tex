@@ -1,24 +1,24 @@
 \begin{figure}[H]
-   \centering
-   \begin{tikzpicture}[x=0.02cm,y=0.02cm]
-   % place nodes
-\node[location] at (-208, 696)   (id28) {c};
-\node[init] at (-208, 800)   (id29) {};
-\node[location] at (-208, 616)   (id30) {};
-   % place node labels
+	\centering
+	\begin{tikzpicture}[x=0.02cm,y=0.02cm]
+	% place nodes
+\node[location] at (-208, 696) (id28) {c};
+\node[init] at (-208, 800) (id29) {};
+\node[location] at (-208, 616) (id30) {};
+	% place node labels
 \node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-202,821) {\begin{tabular}{l}\textcolor{invariant}{orbit\_time[sat\_id] }\\\textcolor{invariant}{\&lt;= sats[sat\_id].offset}\\\end{tabular}};
 \node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-202,629) {\begin{tabular}{l}\textcolor{invariant}{orbit\_time[sat\_id] \&lt;= ORBIT\_TIME}\\\end{tabular}};
-   % place transition labels
+	% place transition labels
 \node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-218,669) {\begin{tabular}{l}\textcolor{sync}{start[sat\_id]!}\\\end{tabular}};
 \node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-218,781) {\begin{tabular}{l}\textcolor{guard}{orbit\_time[sat\_id] \&gt;= }\\\textcolor{guard}{sats[sat\_id].offset}\\\end{tabular}};
 \node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-218,749) {\begin{tabular}{l}\textcolor{update}{orbit\_time[sat\_id] = 0}\\\end{tabular}};
 \node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-306,557) {\begin{tabular}{l}\textcolor{guard}{orbit\_time[sat\_id] \&gt;= ORBIT\_TIME}\\\end{tabular}};
 \node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-274,541) {\begin{tabular}{l}\textcolor{update}{orbit\_time[sat\_id] = 0,}\\\textcolor{update}{orbits[sat\_id] ++}\\\end{tabular}};
-   % place transitions
+	% place transitions
 \draw[->] (id28) -- (id30) {};
 \draw[->] (id29) -- (id28) {};
 \draw[->] (id30) -- (-144, 552) -- (-264, 552) -- (id30) {};
-   \end{tikzpicture}
-   \label{fig:t_classic_v1_OrbitTimer}
-   \caption{classic\_v1\_OrbitTimer template}
+	\end{tikzpicture}
+	\caption{The OrbitTimer template}
+	\label{fig:t_classic_v1_OrbitTimer}
 \end{figure}
