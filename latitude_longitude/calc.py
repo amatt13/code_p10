@@ -175,7 +175,7 @@ def generate_data_for_station(stations, orbit, schedule_length, list):
 
 
 def format_data(array):
-    output = 'const int TWINDOW[STATION_INDEX][STATIONS][STATION_ATTRI] = {\n'
+    output = 'const int OVER_STATION[STATION_INDEX][STATIONS][STATION_ATTRI] = {\n'
     complete_set = []
     for lists, aValue in enumerate(array):
         first = array[lists][0]
@@ -211,9 +211,10 @@ def format_data(array):
         x2 += 1
     output = output[:-2]
     output += '};'
-    print('const int STATION_INDEX = ' + str(x2) + ';')
-    print('const int STATIONS = ' + str(len(array)) + ';')
-    print('const int STATION_ATTRI = ' + str(3) + ';')
+    print('const int STATION_INDEX = ' + str(x2) + '; // changes for; when station are in range')
+    print('const int STATIONS = ' + str(len(array)) + '; // amount of windows i.e. stations to which can be communicated')
+    print('const int STATION_ATTRI = ' + str(3) + '; // elements discribing window')
+    print('// Start_time, End_time, active or not')
     print(output)
 
 
@@ -221,7 +222,7 @@ if __name__ == '__main__':
     orbit1 = Orbit("50.0000", "020.519", "0020247", "81.2115", "279.186", "16.30050059", "00000")
     orbit2 = Orbit("45.0000", "060.519", "0020247", "79.2115", "260.186", "16.20050059", "00000")
     orbit3 = Orbit("60.0000", "160.519", "0020247", "75.2115", "220.186", "16.40050059", "00000")
-    stations = [Station(-45.10, 50.00, 100000), Station(-32.50, 75.00, 10000000), Station(-45.10, 63.25, 75000), Station(-70.60, 20.13, 80000)]
+    stations = [Station(-45.10, 50.00, 50000), Station(-32.50, 75.00, 10000000), Station(-45.10, 63.25, 75000), Station(-70.60, 20.13, 80000)]
     locations = []
     length = 1440
     generate_data_for_station(stations, orbit1, length, locations)
