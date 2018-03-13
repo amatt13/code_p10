@@ -972,7 +972,6 @@ calc_cost()</label>
 		<name>Satellite</name>
 		<parameter>const id_s sat_id</parameter>
 		<declaration>clock loc_time, slew_time;
-bool is_queued[N] = {0,0,0,0};
 int selected = -1;
 
 /** Change satellite orientation */
@@ -983,15 +982,11 @@ void turn_satellite(){
 
 /** Suggest a new task to execute */
 void suggest_task(){
-	int i, j, k, count = 0, high = -1; bool cans[N] = {0,0,0,0};
+	int i, j, k, count = 0, high = -1;
 	selected = -1;
 
-	for (i = 0; i &lt; N; i++){
-		if (sats[sat_id].available_tasks[i]) { 
-			cans[i] = true; }}
-
 	for (i = 0; i &lt; N - 1; i++) {
-		if (cans[i]) {
+		if (sats[sat_id].available_tasks[i]) {
 			if (sats[sat_id].memory &lt;= LOW_MEMORY ) {
 				if (jobs[i].data_rate &gt; 0) {
 					if (priorities[sat_id][i]*2 &lt;= 100) {
@@ -1022,21 +1017,15 @@ void suggest_task(){
 	}
 
 	//TODO make logic for handeling ties
-	for (i = 0; i &lt; N - 1; i++){
-		if (cans[i] &amp;&amp; priorities[sat_id][i] &gt; high){
+	for (i = 0; i &lt; N - 1; i++) {
+		if (sats[sat_id].available_tasks[i] &amp;&amp; priorities[sat_id][i] &gt; high) {
 			if(i != RECEIVE_INDEX ) {  // it is invalid to suggest a reeive task (It's the transferee that takes initiatve)
 				selected = i;
 				high = priorities[sat_id][i];
 			}
 		}
 	}
-	if (selected != -1 &amp;&amp; high &gt; 0) {
-		is_queued[selected] = true;
-		sats[sat_id].suggested_task = selected;
-	}
-	else {
-	sats[sat_id].suggested_task = -1;
-	}
+	sats[sat_id].suggested_task = selected;
 }
 </declaration>
 		<location id="id29" x="-216" y="-576">
@@ -1324,7 +1313,7 @@ system /*OrbitTimer, */CheckRunnable, Scheduler &lt; Satellite &lt; Processor ;<
 			</comment>
 		</query>
 		<query>
-			<formula>E&lt;&gt;Processor(0).pre == 1
+			<formula>E&lt;&gt; Processor(0).pre == 1
 			</formula>
 			<comment>
 			</comment>
@@ -1337,6 +1326,12 @@ system /*OrbitTimer, */CheckRunnable, Scheduler &lt; Satellite &lt; Processor ;<
 		</query>
 		<query>
 			<formula>E&lt;&gt; CheckRunnable.index[0] == STATION_INDEX -1
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>E&lt;&gt; t_time &gt;= 1440
 			</formula>
 			<comment>
 			</comment>
