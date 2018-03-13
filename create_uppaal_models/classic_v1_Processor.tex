@@ -1,23 +1,23 @@
 \begin{figure}[H]
-   \centering
-   \begin{tikzpicture}[x=0.02cm,y=0.02cm]
-   % place nodes
-\node[location] at (-722, 1989)   (id18) {c};
-\node[location] at (-85, 1666)   (id19) {c};
-\node[location] at (-85, 2057)   (id20) {c};
-\node[location] at (-340, 1989)   (id21) {c};
-\node[location] at (-85, 1989)   (id22) {};
-\node[location] at (-527, 1989)   (id23) {c};
-\node[location] at (-85, 1810)   (id24) {};
-\node[location] at (-340, 1810)   (id25) {};
-\node[location] at (-340, 1666)   (id26) {c};
-\node[init] at (-722, 1666)   (id27) {};
-   % place node labels
+	\centering
+	\begin{tikzpicture}[x=0.02cm,y=0.02cm]
+	% place nodes
+\node[location] at (-722, 1989) (id18) {c};
+\node[location] at (-85, 1666) (id19) {c};
+\node[location] at (-85, 2057) (id20) {c};
+\node[location] at (-340, 1989) (id21) {c};
+\node[location] at (-85, 1989) (id22) {};
+\node[location] at (-527, 1989) (id23) {c};
+\node[location] at (-85, 1810) (id24) {};
+\node[location] at (-340, 1810) (id25) {};
+\node[location] at (-340, 1666) (id26) {c};
+\node[init] at (-722, 1666) (id27) {};
+	% place node labels
 \node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-979,1988) {\begin{tabular}{l}\textcolor{invariant}{idle '== 0 \&\&}\\\textcolor{invariant}{work '== 0 \&\&}\\\textcolor{invariant}{wait '== 1}\\\end{tabular}};
 \node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-979,1926) {\begin{tabular}{l}\textcolor{invariant}{idle '== 0 \&\&}\\\textcolor{invariant}{work '== 1 \&\&}\\\textcolor{invariant}{wait '== 0}\\\end{tabular}};
 \node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-978,2181) {\begin{tabular}{l}\textcolor{invariant}{run\_time[task]  \&lt;= }\\\textcolor{invariant}{getDeadline() \&\&}\\\textcolor{invariant}{exe\_time + time\_used[task]  \&lt;= }\\\textcolor{invariant}{getExeTime() \&\&}\\\textcolor{invariant}{idle '== 0 \&\&}\\\textcolor{invariant}{work '== 1 \&\&}\\\textcolor{invariant}{wait '== 0}\\\end{tabular}};
 \node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-968,1901) {\begin{tabular}{l}\textcolor{invariant}{idle '== 1 \&\&}\\\textcolor{invariant}{work '== 0 \&\&}\\\textcolor{invariant}{wait '== 0}\\\end{tabular}};
-   % place transition labels
+	% place transition labels
 \node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-519,1977) {\begin{tabular}{l}\textcolor{sync}{request[sat\_id]?}\\\end{tabular}};
 \node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-519,1960) {\begin{tabular}{l}\textcolor{update}{preemt\_task()}\\\end{tabular}};
 \node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-706,1964) {\begin{tabular}{l}\textcolor{guard}{!empty(waiting\_queue)}\\\end{tabular}};
@@ -57,7 +57,7 @@
 \node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-596,1747) {\begin{tabular}{l}\textcolor{guard}{!activeTrans() ||}\\\textcolor{guard}{(activeTrans() \&\&}\\\textcolor{guard}{!orientation(sat\_id))}\\\end{tabular}};
 \node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-596,1696) {\begin{tabular}{l}\textcolor{sync}{request[sat\_id]?}\\\end{tabular}};
 \node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-596,1671) {\begin{tabular}{l}\textcolor{update}{startNew(),}\\\textcolor{update}{calc\_cost()}\\\end{tabular}};
-   % place transitions
+	% place transitions
 \draw[->] (id25) -- (-391, 1921) -- (id23) {};
 \draw[->] (id18) -- (-671, 1861) -- (-680, 1751) -- (id27) {};
 \draw[->] (id18) -- (id27) {};
@@ -81,7 +81,7 @@
 \draw[->] (id26) -- (-292, 1682) -- (-292, 1786) -- (id25) {};
 \draw[->] (id25) -- (id26) {};
 \draw[->] (id27) -- (-459, 1666) -- (-459, 1810) -- (id25) {};
-   \end{tikzpicture}
-   \label{fig:t_classic_v1_Processor}
-   \caption{classic\_v1\_Processor template}
+	\end{tikzpicture}
+	\caption{The Processor template}
+	\label{fig:t_classic_v1_Processor}
 \end{figure}
