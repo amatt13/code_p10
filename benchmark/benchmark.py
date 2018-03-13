@@ -66,7 +66,7 @@ if __name__ == '__main__':
             t_time = re.findall("(t_time[>=]+[0-9]+)", line)
             if t_time:
                 print("data_earth: " + re.findall("(data_earth\=[0-9]+)", line)[0].split('=')[1])
-                print("data_storage: " + re.findall("(data_storage\=[0-9]+)", line)[0].split('=')[1])
+                print("data_storage: " + re.findall("(data_gathered\=[0-9]+)", line)[0].split('=')[1])
                 print('internal_transfer: ' + re.findall("(internal_transfer\=[0-9]+)", line)[0].split('=')[1])
                 print('satellite one:')
 

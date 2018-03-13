@@ -1,0 +1,34 @@
+BENCHMARK
+
+DEFAULT!
+- single run
+1: 79.094432
+data_earth: 162
+data_storage: 431
+internal_transfer: 405
+satellite one:
+idle clock: 6
+wait clock: 294
+work clock: 297
+satellite two:
+idle clock: 120
+wait clock: 93
+work clock: 384
+satellite three:
+idle clock: 394
+wait clock: 0
+work clock: 203
+Avergae time: 79.094432
+
+- multiple runs
+1: 0.220587
+2: 0.217078
+3: 0.222092
+4: 0.220148
+5: 0.223096
+6: 0.220359
+7: 0.218076
+8: 0.224115
+9: 0.214475
+10: 0.221573
+Avergae time: 0.2201599
