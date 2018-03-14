@@ -80,14 +80,17 @@ if __name__ == '__main__':
                 print('idle clock: ' + get_clocks('0', 'idle'))
                 print('wait clock: ' + get_clocks('0', 'wait'))
                 print('work clock: ' + get_clocks('0', 'work'))
+                print('slew clock: ' + get_clocks('0', 'slew'))
                 print('satellite two:')
                 print('idle clock: ' + get_clocks('1', 'idle'))
                 print('wait clock: ' + get_clocks('1', 'wait'))
                 print('work clock: ' + get_clocks('1', 'work'))
+                print('slew clock: ' + get_clocks('1', 'slew'))
                 print('satellite three:')
                 print('idle clock: ' + get_clocks('2', 'idle'))
                 print('wait clock: ' + get_clocks('2', 'wait'))
                 print('work clock: ' + get_clocks('2', 'work'))
+                print('slew clock: ' + get_clocks('2', 'slew'))
                 for i in range(0, 3):
                     items = get_delays(i)
                     for item in items:
