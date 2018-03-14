@@ -3,9 +3,9 @@
 /*
 
 */
-E<> TotalTime == 20
+E<> TotalTime == 10
 
 /*
 
 */
-E<> (current_task < 0 || current_task > 1 ) && TotalTime == 20
+E<>  (current_task < 0 || current_task > 1 )  && TotalTime == 10
