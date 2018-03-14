@@ -3,6 +3,7 @@ import re
 import os
 
 count = 0
+currentTransition = ''
 
 
 class Template(object):
@@ -56,17 +57,6 @@ class Nail(object):
         self.y = y
 
 
-inTemplate = False
-inLocation = False
-inTransition = False
-xml = ''
-xmlList = []
-templates = []
-currentTemplate = ''
-currentLocation = ''
-currentTransition = ''
-
-
 def colorCodedText(kind: str, code):
     formatedCode = ''
     for line in code:
@@ -88,6 +78,10 @@ nodeOffsetX = 0
 nodeOffsetY = 0
 
 
+def replace_bools(text: str):
+    return text.replace("\\&amp;","\\&").replace('\\&lt', '<').replace('\\&gt', '>').replace(';=', '=')
+
+
 def GenerateTikz(name: str, nodes: list, transitions: list):
     f = open(name + ".tex", "w")
     f.write("\\begin{figure}[H]\n\t\\centering\n\t\\begin{tikzpicture}[x=0.02cm,y=0.02cm]\n\t% place nodes\n")
@@ -100,11 +94,11 @@ def GenerateTikz(name: str, nodes: list, transitions: list):
         if l.init:
             f.write("\\node[init] at (" + str(int(l.x) + nodeOffsetX) + ", " + str((int(l.y) + nodeOffsetY) * -1) + ") (" + l.id + ") {" + symbol + "};\n")
         else:
-            f.write("\\node[location] at (" + str(int(l.x)+nodeOffsetX) + ", " + str((int(l.y)+nodeOffsetY) * -1) + ") (" + l.id + ") {" + symbol + "};\n")
+            f.write("\\node[location] at (" + str(int(l.x) + nodeOffsetX) + ", " + str((int(l.y)+nodeOffsetY) * -1) + ") (" + l.id + ") {" + symbol + "};\n")
     f.write("\t% place node labels\n")
     for l in nodes:
         if l.Label is not None:
-            code = l.Label.code.replace("\\&amp;","\\&")
+            code = replace_bools(l.Label.code)
             fragments = code.split("\n")
             code = colorCodedText(l.Label.kind, fragments)
             f.write("\\node[anchor=north west, text width=10cm, font=\\tiny, align=left] at (" + str(int(l.Label.x) + textOffsetX) + "," + str((int(l.Label.y) + textOffsetY)*-1) + ") {\\begin{tabular}{l}" + code + "\\end{tabular}};\n")
@@ -112,7 +106,7 @@ def GenerateTikz(name: str, nodes: list, transitions: list):
     for t in transitions:
         for ts in t.labels:
             if ts is not None:
-                code =  ts.code.replace("\\&amp;", "\\&")
+                code =  replace_bools(ts.code)
                 fragments = code.split("\n")
                 code = colorCodedText(ts.kind, fragments)
                 f.write("\\node[anchor=north west, text width=10cm, font=\\tiny, align=left] at (" + str(int(ts.x) + textOffsetX) + "," + str((int(ts.y) + textOffsetY) * -1) + ") {\\begin{tabular}{l}" + code + "\\end{tabular}};\n")
@@ -127,7 +121,23 @@ def GenerateTikz(name: str, nodes: list, transitions: list):
     f.write("\t\\end{tikzpicture}\n\t\\caption{The " + name.split("_")[-1].replace('_','\\_') + " template}\n\t\\label{fig:t_" + name + "}\n\end{figure}\n")
 
 
+def my_filter(current_template, template):
+    return filter(lambda x: x.name == current_template, templates)
+
+
+def my_filter_next(current_location, elements):
+    return filter(lambda x: x.id == current_location, elements)
+
+def find_fragments(line: str):
+    return re.findall("[^\ ]+", line)[1:]
+
 if __name__ == '__main__':
+    inTemplate = inLocation = inTransition = False
+    xml = ''
+    xmlList = []
+    templates = []
+    currentTemplate = ''
+    currentLocation = ''
     for filename in os.listdir(os.getcwd()):
         if filename.split('.')[1] == 'xml':
             with open(filename) as f:
@@ -144,7 +154,7 @@ if __name__ == '__main__':
                     elif line[:8] == 'location':
                         inLocation = True
                         fragments = line.split(' ')[1:]
-                        templateFilter = filter(lambda x: x.name == currentTemplate, templates)
+                        templateFilter = my_filter(currentTemplate, templates)
                         next(templateFilter).nodes.append(
                             Location(fragments[0][4:][:-1], fragments[1][3:][:-1], fragments[2][3:][:-2]))
                         currentLocation = fragments[0][4:][:-1]
@@ -154,53 +164,53 @@ if __name__ == '__main__':
                             currentTemplate = filename.split('.')[0] + "_" + line[5:]
                             inTemplate = False
                         elif inLocation:
-                            templateFilter = filter(lambda x: x.name == currentTemplate, templates)
-                            locationFilter = filter(lambda x: x.id == currentLocation, next(templateFilter).nodes)
+                            templateFilter = my_filter(currentTemplate, templates)
+                            locationFilter = my_filter_next(currentLocation, next(templateFilter).nodes)
                             fragments = re.findall("[^\ |\>]+", line)[1:]
                             next(locationFilter).Name = Name(fragments[0][3:][:-1], fragments[1][3:][:-1], fragments[2])
                     elif line[:5] == 'label':
                         if inTransition:
-                            templateFilter = filter(lambda x: x.name == currentTemplate, templates)
-                            transitionFilter = filter(lambda x: x.id == currentTransition, next(templateFilter).transitions)
-                            fragments = re.findall("[^\ ]+", line.split('>')[0])[1:]
+                            templateFilter = my_filter(currentTemplate, templates)
+                            transitionFilter = my_filter_next(currentTransition, next(templateFilter).transitions)
+                            fragments = find_fragments(line.split('>')[0])
                             code = line.split('>')[1].replace("!newline!", "\n").replace("&", "\&").replace("_", "\_")
                             next(transitionFilter).labels.append(
                                 Label(fragments[0][6:][:-1], fragments[1][3:][:-1], fragments[2][3:][:-1], code))
                         elif inLocation:
-                            templateFilter = filter(lambda x: x.name == currentTemplate, templates)
-                            locationFilter = filter(lambda x: x.id == currentLocation, next(templateFilter).nodes)
-                            fragments = re.findall("[^\ ]+", line.split('>')[0])[1:]
+                            templateFilter = my_filter(currentTemplate, templates)
+                            locationFilter = my_filter_next(currentLocation, next(templateFilter).nodes)
+                            fragments = find_fragments(line.split('>')[0])
                             code = line.split('>')[1].replace("!newline!", "\n").replace("&", "\&").replace("_", "\_")
                             next(locationFilter).Label = Label(fragments[0][6:][:-1], fragments[1][3:][:-1],
                                                                fragments[2][3:][:-1], code)
                     elif line[:9] == 'committed':
-                        templateFilter = filter(lambda x: x.name == currentTemplate, templates)
-                        locationFilter = filter(lambda x: x.id == currentLocation, next(templateFilter).nodes)
+                        templateFilter = my_filter(currentTemplate, templates)
+                        locationFilter = my_filter_next(currentLocation, next(templateFilter).nodes)
                         next(locationFilter).committed = True
                     elif line[:6] == 'urgent':
-                        templateFilter = filter(lambda x: x.name == currentTemplate, templates)
-                        locationFilter = filter(lambda x: x.id == currentLocation, next(templateFilter).nodes)
+                        templateFilter = my_filter(currentTemplate, templates)
+                        locationFilter = my_filter_next(currentLocation, next(templateFilter).nodes)
                         next(locationFilter).urgent = True
                     elif line[:10] == 'transition':
                         inTransition = True
-                        templateFilter = filter(lambda x: x.name == currentTemplate, templates)
+                        templateFilter = my_filter(currentTemplate, templates)
                         next(templateFilter).transitions.append(Transition())
                     elif line[:4] == 'nail':
                         fragments = line.split(' ')[1:]
-                        templateFilter = filter(lambda x: x.name == currentTemplate, templates)
-                        transitionFilter = filter(lambda x: x.id == currentTransition, next(templateFilter).transitions)
+                        templateFilter = my_filter(currentTemplate, templates)
+                        transitionFilter = my_filter_next(currentTransition, next(templateFilter).transitions)
                         next(transitionFilter).nails.append(Nail(fragments[0][3:][:-1], fragments[1][3:][:-3]))
                     elif line[:6] == 'source':
-                        templateFilter = filter(lambda x: x.name == currentTemplate, templates)
-                        transitionFilter = filter(lambda x: x.id == currentTransition, next(templateFilter).transitions)
+                        templateFilter = my_filter(currentTemplate, templates)
+                        transitionFilter = my_filter_next(currentTransition, next(templateFilter).transitions)
                         next(transitionFilter).source = line[12:][:-3]
                     elif line[:6] == 'target':
-                        templateFilter = filter(lambda x: x.name == currentTemplate, templates)
-                        transitionFilter = filter(lambda x: x.id == currentTransition, next(templateFilter).transitions)
+                        templateFilter = my_filter(currentTemplate, templates)
+                        transitionFilter = my_filter_next(currentTransition, next(templateFilter).transitions)
                         next(transitionFilter).target = line[12:][:-3]
                     elif line[:4] == 'init':
-                        templateFilter = filter(lambda x: x.name == currentTemplate, templates)
-                        locationFilter = filter(lambda x: x.id == line[10:][:-3], next(templateFilter).nodes)
+                        templateFilter = my_filter(currentTemplate, templates)
+                        locationFilter = my_filter_next(line[10:][:-3], next(templateFilter).nodes)
                         next(locationFilter).init = True
                     elif line[:1] == '/':
                         if line[1:][:-1] == 'location':
