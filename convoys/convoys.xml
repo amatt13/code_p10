@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?><!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.1//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_1.dtd'><nta><declaration>// Place global declarations here.
+const int CONVOYS = 2;
+const int CHOICE = 2;
+const int STATIONS = 2;
+const int TASKS = 2;
+const int TASKS_ZERO[TASKS] = {0,0};
+typedef int[0, CONVOYS - 1] id_t;
+
+broadcast chan start_data_transfer;
+broadcast chan move;
+
+typedef struct {
+	int processors;
+	int send_to_station[STATIONS];
+	int send_to_convoy[CONVOYS];
+} ConvoyDescription;
+
+typedef struct {
+	int execution_time;
+} TaskDescription;
+
+typedef struct {
+	int cost;
+} StationDescription;
+
+const ConvoyDescription c1 = {10,{2,1},{0,3}};
+const ConvoyDescription c2 = {15,{0,3},{2,0}};
+const ConvoyDescription convoys[CONVOYS] = {c1, c2};
+
+const TaskDescription t1 = {10};
+const TaskDescription t2 = {5};
+
+int task_finishes[c1.processors] = {0,0,0,0,0,0,0,0,0,0};
+int current_task = 0;
+
+clock TotalTime;
+
+
+
+</declaration><template><name>Scheduler</name><declaration>clock time;
+</declaration><location id="id0" x="-464" y="-16"><name x="-474" y="-46">WaitingForTasks</name><label kind="invariant" x="-456" y="-8">time &lt;= 5</label></location><location id="id1" x="24" y="-16"><committed/></location><location id="id2" x="-256" y="-16"><name x="-312" y="-48">ScheduleTask</name><committed/></location><init ref="id0"/><transition><source ref="id1"/><target ref="id2"/><label kind="guard" x="-152" y="-200">current_task &lt; TASKS-1</label><label kind="synchronisation" x="-176" y="-31">move!</label><label kind="assignment" x="-152" y="-184">current_task++</label><nail x="-112" y="-152"/></transition><transition><source ref="id0"/><target ref="id2"/><label kind="guard" x="-384" y="-32">time == 5</label><label kind="assignment" x="-384" y="-16">current_task = 0</label></transition><transition><source ref="id1"/><target ref="id0"/><label kind="guard" x="-112" y="39">current_task == TASKS-1</label><label kind="synchronisation" x="-280" y="-31">move!</label><label kind="assignment" x="-264" y="39">time = 0</label><nail x="24" y="39"/><nail x="-464" y="39"/></transition><transition><source ref="id2"/><target ref="id1"/><label kind="synchronisation" x="-176" y="-40">start_data_transfer!</label></transition></template><template><name>Convoy</name><parameter>const id_t id</parameter><declaration>int do_task[TASKS] = TASKS_ZERO;
+int not_do_task[TASKS] = TASKS_ZERO;
+int convoy_cost = 0;
+
+void insert_task(int end_time){
+	int i;	
+	for (i = 0; i &lt; convoys[id].processors; i++){
+		if (task_finishes[i] == 0){
+			task_finishes[i] = end_time;
+		}
+	}
+}
+
+
+
+</declaration><location id="id3" x="-168" y="16"><committed/></location><location id="id4" x="-168" y="-120"><committed/></location><location id="id5" x="-392" y="-40"></location><init ref="id5"/><transition><source ref="id4"/><target ref="id5"/><label kind="synchronisation" x="-320" y="-192">move?</label><nail x="-168" y="-168"/><nail x="-392" y="-168"/></transition><transition><source ref="id3"/><target ref="id5"/><label kind="synchronisation" x="-328" y="56">move?</label><nail x="-168" y="56"/><nail x="-392" y="56"/></transition><transition><source ref="id5"/><target ref="id3"/><label kind="synchronisation" x="-360" y="-8">start_data_transfer?</label><label kind="assignment" x="-352" y="16">do_task[current_task]++</label><nail x="-368" y="16"/></transition><transition><source ref="id5"/><target ref="id4"/><label kind="synchronisation" x="-368" y="-144">start_data_transfer?</label><label kind="assignment" x="-360" y="-120">not_do_task[current_task]++</label><nail x="-376" y="-120"/></transition></template><system>
+system Convoy, Scheduler;</system></nta>
