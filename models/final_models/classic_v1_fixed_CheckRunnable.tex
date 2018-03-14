@@ -1,0 +1,48 @@
+\begin{figure}[H]
+	\centering
+	\begin{tikzpicture}[x=0.02cm,y=0.02cm]
+	% place nodes
+\node[location] at (102, 212) (id35) {c};
+\node[init] at (-306, 357) (id36) {};
+\node[location] at (-119, 212) (id37) {c};
+\node[location] at (-306, 212) (id38) {c};
+	% place node labels
+	% place transition labels
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (126,413) {\begin{tabular}{l}\textcolor{guard}{windowEnd() >= t\_time - sats[RQ].offset \&\&}\\\textcolor{guard}{windowEnd() <; t\_time - sats[RQ].offset +}\\\textcolor{guard}{jobs[task\_to\_check].execution\_time }\\\textcolor{guard}{\&\& windowStart() <= t\_time - sats[RQ].offset}\\\textcolor{guard}{\&\& station\_to\_check}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (126,319) {\begin{tabular}{l}\textcolor{update}{station\_to\_check = false,}\\\textcolor{update}{can\_run = false}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-205,107) {\begin{tabular}{l}\textcolor{guard}{!station\_to\_check \&\& !can\_run}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-231,81) {\begin{tabular}{l}\textcolor{update}{win\_active[window\_to\_check] = can\_run,}\\\textcolor{update}{next()}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-205,183) {\begin{tabular}{l}\textcolor{guard}{can\_run \&\& !station\_to\_check}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-231,158) {\begin{tabular}{l}\textcolor{update}{runnable[task\_to\_check] = true, next(),}\\\textcolor{update}{win\_active[window\_to\_check] = can\_run}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (126,268) {\begin{tabular}{l}\textcolor{guard}{windowEnd() <; t\_time - sats[RQ].offset}\\\textcolor{guard}{\&\& index[RQ][window\_to\_check] <; STATION\_INDEX-1}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (270,217) {\begin{tabular}{l}\textcolor{update}{index[RQ][window\_to\_check]++}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (134,141) {\begin{tabular}{l}\textcolor{guard}{windowEnd() >= t\_time - sats[RQ].offset +}\\\textcolor{guard}{jobs[task\_to\_check].execution\_time  \&\&}\\\textcolor{guard}{windowStart() <= t\_time - sats[RQ].offset}\\\textcolor{guard}{\&\& station\_to\_check}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (134,64) {\begin{tabular}{l}\textcolor{update}{station\_to\_check = false,}\\\textcolor{update}{overStation()}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-66,245) {\begin{tabular}{l}\textcolor{guard}{depends()}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-112,221) {\begin{tabular}{l}\textcolor{update}{station\_to\_check = true,}\\\textcolor{update}{can\_run = false}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-392,166) {\begin{tabular}{l}\textcolor{guard}{independent()}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-409,149) {\begin{tabular}{l}\textcolor{update}{skipWindowCheck(),}\\\textcolor{update}{allTaskChecked()}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-401,311) {\begin{tabular}{l}\textcolor{sync}{check?}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-443,294) {\begin{tabular}{l}\textcolor{update}{resetRunnable()}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-282,277) {\begin{tabular}{l}\textcolor{guard}{!depends()}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-205,277) {\begin{tabular}{l}\textcolor{update}{next()}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-273,234) {\begin{tabular}{l}\textcolor{guard}{!all\_checked \&\&}\\\textcolor{guard}{!independent()}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-307,336) {\begin{tabular}{l}\textcolor{guard}{all\_checked}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-307,319) {\begin{tabular}{l}\textcolor{sync}{check!}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-307,302) {\begin{tabular}{l}\textcolor{update}{all\_checked = false}\\\end{tabular}};
+	% place transitions
+\draw[->] (id35) -- (68, 383) -- (127, 383) -- (id35) {};
+\draw[->] (id35) -- (25, 76) -- (-229, 76) -- (id38) {};
+\draw[->] (id35) -- (25, 153) -- (-238, 153) -- (id38) {};
+\draw[->] (id35) -- (450, 212) -- (450, 169) -- (id35) {};
+\draw[->] (id35) -- (136, 25) -- (85, 25) -- (id35) {};
+\draw[->] (id37) -- (id35) {};
+\draw[->] (id38) -- (-370, 196) -- (-346, 156) -- (id38) {};
+\draw[->] (id36) -- (-399, 357) -- (-399, 212) -- (id38) {};
+\draw[->] (id37) -- (-212, 255) -- (id38) {};
+\draw[->] (id38) -- (id37) {};
+\draw[->] (id38) -- (id36) {};
+	\end{tikzpicture}
+	\caption{The CheckRunnable template}
+	\label{fig:t_classic_v1_fixed_CheckRunnable}
+\end{figure}
