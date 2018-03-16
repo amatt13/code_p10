@@ -3,7 +3,7 @@
 /*
 
 */
-E<> TotalTime == 10
+E<> TotalTime >= 25
 
 /*
 
