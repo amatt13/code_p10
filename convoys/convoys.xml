@@ -2,7 +2,7 @@
 const int CONVOYS = 1;
 const int ZEROS[CONVOYS] = {0};
 //const int CHOICE = 2;
-const int STATIONS = 2;
+const int STATIONS = 3;
 const int TASKS = 2;
 const int TASKS_ZERO[TASKS] = {0,0};
 const int MAX_PROCESSORS = 10;
@@ -37,15 +37,22 @@ typedef struct {
 } ExecutionDescription;
 
 //const ConvoyDescription c2 = {15,{0,3},{0}};
-const ConvoyDescription convoys[CONVOYS] = {{10,{2,1},{0}, 10, 3600}};
+const ConvoyDescription convoys[CONVOYS] = {{9,{2,1,0},{0}, 10, 3600}};
 const TaskDescription t1 = {0,10, 5}; // Gather data
-const TaskDescription t2 = {1,5, 10}; // Send to Earth
+const TaskDescription t2 = {1,5, 10}; // Send to Station
 const TaskDescription tasks[TASKS] = {t1,t2};
+
+StationDescription stations[STATIONS] = {{2,0},{5,0},{10,0}};
 int storages[CONVOYS] = {0};
 int to_be_stored[CONVOYS] = {0};
-ExecutionDescription convoy_tasks[CONVOYS][MAX_PROCESSORS] = {{{-1,0,0},{-1,0,0},{-1,0,0},{-1,0,0},{-1,0,0},{-1,0,0},{-1,0,0},{-1,0,0},{-1,0,0},{-1,0,0}}};
+ExecutionDescription convoy_tasks[CONVOYS][MAX_PROCESSORS] = {{{-1,9999,-1},{-1,9999,-1},{-1,9999,-1},{-1,9999,-1},{-1,9999,-1},{-1,9999,-1},{-1,9999,-1},{-1,9999,-1},{-1,9999,-1},{-1,-1,-1}}};
 
 int current_task = 0;
+
+int proc_in_use[CONVOYS] = ZEROS;
+int gather_in_use[CONVOYS] = ZEROS;
+int send_to_station[CONVOYS][STATIONS] = {{0,0,0}};
+int send_to_convoy[CONVOYS] = ZEROS;
 
 clock TotalTime;
 int schedule_length = 200;
@@ -71,17 +78,14 @@ int calculated_cost = 0;
 
 void sort_lists(){
 	int i,c,j;
-	ExecutionDescription place_holder = {0,0,0};
-	bool found_greater = false;
+	ExecutionDescription swap = {0,0,0};
 	for (c = 0 ; c &lt; CONVOYS ; c++){
-		for (i = 0 ; i &lt; convoys[c].processors ; i++){
-			found_greater = false;
-			for (j = 0 ; j &lt; convoys[c].processors ; j++){
-				if (convoy_tasks[c][i].execution_time &lt; convoy_tasks[c][j].execution_time &amp;&amp; !found_greater){
-					place_holder = convoy_tasks[c][i];
-					convoy_tasks[c][i] = convoy_tasks[c][j];
-					convoy_tasks[c][j] = convoy_tasks[c][i];
-					found_greater = true;
+		for (i = 0 ; i &lt; convoys[c].processors - 1 ; i++){
+			for (j = 0 ; j &lt; convoys[c].processors - i - 1 ; j++){
+				if (convoy_tasks[c][j].execution_time &gt;= convoy_tasks[c][j+1].execution_time){
+					swap = convoy_tasks[c][j];
+					convoy_tasks[c][j] = convoy_tasks[c][j+1];
+					convoy_tasks[c][j+1] = swap;
 				}
 			}	
 		}
@@ -99,8 +103,8 @@ void closest_task_to_finish(){
 			lowest = convoy_tasks[i][0].execution_time;
 		}
 	}
-	if (lowest == 0){
-		lowest++;
+	if (lowest == 9999){
+		lowest = 1;
 	}
 }
 
@@ -112,7 +116,16 @@ void update_processors(){
 				convoy_tasks[c][i].execution_time -= lowest;
 			}
 			if (convoy_tasks[c][i].execution_time == 0){
+				if (convoy_tasks[c][i].to_station != -1){
+					send_to_station[c][convoy_tasks[c][i].to_station]--;
+				}
+				if (convoy_tasks[c][i].task_type == 0){
+					gather_in_use[c]--;
+				}
+				proc_in_use[c]--;
+				convoy_tasks[c][i].to_station = -1;
 				convoy_tasks[c][i].task_type = -1;
+				convoy_tasks[c][i].execution_time = 9999;
 			}
 			else if (convoy_tasks[c][i].execution_time-lowest &lt; 0){
 				execution_being_negative = true;
@@ -136,45 +149,28 @@ void update_storage(){
 	}
 }
 int ma;
-int mb[STATIONS] = {0,0};
+int mb[STATIONS] = {0,0,0};
 
 void calc_cost(){
 	int i, c, s;
-	int proc_in_use[CONVOYS] = ZEROS;
-	int gather_in_use[CONVOYS] = ZEROS;
-	int send_to_earth[CONVOYS][STATIONS] = {{0,0}};
-	int send_to_convoy[CONVOYS] = ZEROS;
 	calculated_cost = 0;
 	for (c = 0; c &lt; CONVOYS; c++){
-		for (i = 0; i &lt; MAX_PROCESSORS; i++){
-			if (convoy_tasks[c][i].execution_time != -1){ //if execution time is -1 indicate that the processor is not available for the convoy
-				proc_in_use[c]++;
-				if (convoy_tasks[c][i].task_type == 0){
-					gather_in_use[c]++;
-				}
-				else if (convoy_tasks[c][i].task_type == 1){
-					send_to_earth[c][convoy_tasks[c][i].to_station]++;
-				}
-			}
-		}
-	}
-	for (c = 0; c &lt; CONVOYS; c++){
 		//Cost goes up if we have low storage and no processes gathering data.
-		//if ((100-storages[c]*100/convoys[c].storage)*(100-gather_in_use[c]*100/convoys[c].processors)/1000 &gt;=
-		//    (storages[c]*100/convoys[c].storage)*(gather_in_use[c]*100/convoys[c].processors)/1000){
-		//	ma = (100-storages[c]*100/convoys[c].storage)*(100-gather_in_use[c]*100/convoys[c].processors)/1000;
-		//}
-		//else {
-		//	ma = (storages[c]*100/convoys[c].storage)*(gather_in_use[c]*100/convoys[c].processors)/1000;
-		//}
+		if ((100-storages[c]*100/convoys[c].storage)*(100-gather_in_use[c]*100/convoys[c].processors)/1000 &gt;=
+		    (storages[c]*100/convoys[c].storage)*(gather_in_use[c]*100/convoys[c].processors)/1000){
+			ma = (100-storages[c]*100/convoys[c].storage)*(100-gather_in_use[c]*100/convoys[c].processors)/1000;
+		}
+		else {
+			ma = (storages[c]*100/convoys[c].storage)*(gather_in_use[c]*100/convoys[c].processors)/1000;
+		}
 		//Cost goes up if we have high storage and no procceses sending to other convoys or stations on Earth
 		//for (s = 0; s &lt; STATIONS; s++){
-		//	if ((100-storages[c]*100/convoys[c].storage)*(100-send_to_earth[c][s]*100/convoys[c].send_to_station[s])/1000 &gt;=
-		//	    (storages[c]*100/convoys[c].storage)*(send_to_earth[c][s]*100/convoys[c].send_to_station[s])/1000){
-		//		mb[s] = (100-storages[c]*100/convoys[c].storage)*(100-send_to_earth[c][s]*100/convoys[c].send_to_station[s])/1000;
+		//	if ((100-storages[c]*100/convoys[c].storage)*(100-send_to_station[c][s]*100/convoys[c].send_to_station[s])/1000 &gt;=
+		//	    (storages[c]*100/convoys[c].storage)*(send_to_station[c][s]*100/convoys[c].send_to_station[s])/1000){
+		//		mb[s] = (100-storages[c]*100/convoys[c].storage)*(100-send_to_station[c][s]*100/convoys[c].send_to_station[s])/1000;
 		//	}
 		//	else {
-		//		mb[s] = (storages[c]*100/convoys[c].storage)*(send_to_earth[c][s]*100/convoys[c].send_to_station[s])/1000;
+		//		mb[s] = (storages[c]*100/convoys[c].storage)*(send_to_station[c][s]*100/convoys[c].send_to_station[s])/1000;
 		//	}
 		//}
 	}
@@ -188,7 +184,7 @@ accumulated_cost += current_cost,
 update_storage(),
 update_processors(),
 sort_lists()</label></transition><transition><source ref="id2"/><target ref="id0"/><label kind="guard" x="-32" y="0">current_task == TASKS-1</label><label kind="synchronisation" x="-32" y="-16">move!</label><label kind="assignment" x="-32" y="24">time = 0,
-step++,
+sort_lists(),
 closest_task_to_finish(),
 calc_cost()</label></transition><transition><source ref="id3"/><target ref="id2"/><label kind="synchronisation" x="-240" y="-40">start_data_transfer!</label></transition></template><template><name>Convoy</name><parameter>const id_t id</parameter><declaration>int do_task[TASKS] = TASKS_ZERO;
 int not_do_task[TASKS] = TASKS_ZERO;
@@ -208,14 +204,38 @@ int amount_of_tasks_to_execute(){
 	}
 }
 
+int cheapest_available_station(){
+	int i, j;
+	int lowest = 9999;
+	int position = 2;
+	for (i = 0; i &lt; STATIONS; i++){
+		if (convoys[id].send_to_station[i] &lt; send_to_station[id][i] &amp;&amp; lowest &gt; stations[i].cost){
+			lowest = stations[i].cost;
+			position = i;
+		}
+	}
+	return position;	
+}
+
 void insert_task(TaskDescription item){
 	int i;
 	for(i = 0; i &lt; convoys[id].processors; i++){
 		if (convoy_tasks[id][i].task_type == -1){
-			convoy_tasks[id][i].task_type = item.task_type;
-			convoy_tasks[id][i].execution_time = item.execution_time;
-			convoy_tasks[id][i].to_station = 1;
-			return;
+			proc_in_use[id]++;
+			if (item.task_type == 0){// Gather data
+				convoy_tasks[id][i].task_type = item.task_type;
+				convoy_tasks[id][i].execution_time = item.execution_time;
+				convoy_tasks[id][i].to_station = -1;
+				gather_in_use[id]++;
+				return;
+			}
+			else if (item.task_type == 1){//Send to station
+				convoy_tasks[id][i].task_type = item.task_type;
+				convoy_tasks[id][i].execution_time = item.execution_time;
+				convoy_tasks[id][i].to_station = cheapest_available_station();
+				send_to_station[id][convoy_tasks[id][i].to_station]++;
+				return;
+			}			
 		}
 	}
 	illegal_move = true;
@@ -227,8 +247,9 @@ void add_tasks(TaskDescription task){
 		insert_task(task);
 		i--;
 	}	
-	sort_lists();
 }
+
+
 
 
 
