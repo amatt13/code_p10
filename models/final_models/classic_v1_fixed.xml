@@ -1428,16 +1428,19 @@ allTaskChecked()</label>
 	<system>p0 = Processor(0);
 p1 = Processor(1);
 p2 = Processor(2);
-system CheckRunnable, Scheduler &lt; Satellite &lt; p0 &lt; p1 &lt; p2 ;</system>
+s0 = Satellite(0);
+s1 = Satellite(1);
+s2 = Satellite(2);
+system CheckRunnable &lt; Scheduler &lt; s0 &lt; s1 &lt; s2 &lt; p0 &lt; p1 &lt; p2;</system>
 	<queries>
 		<query>
-			<formula>E&lt;&gt; p0.Free &amp;&amp; p1.Free &amp;&amp;  delayed[2][3] == 1 
+			<formula>E&lt;&gt; p0.Free &amp;&amp; p1.Free &amp;&amp;  delayed[2][3] == 1
 			</formula>
 			<comment>
 			</comment>
 		</query>
 		<query>
-			<formula>E&lt;&gt; p0.Free &amp;&amp; p1.Free &amp;&amp; runs[1][2] &gt; runs[2][3] 
+			<formula>E&lt;&gt; p0.Free &amp;&amp; p1.Free &amp;&amp; runs[1][2] &gt; runs[2][3]
 			</formula>
 			<comment>Don't fucking delete me!
 			</comment>
@@ -1473,7 +1476,7 @@ system CheckRunnable, Scheduler &lt; Satellite &lt; p0 &lt; p1 &lt; p2 ;</system
 			</comment>
 		</query>
 		<query>
-			<formula>E&lt;&gt; delayed[1][2] &gt; delayed[2][3] +1 &amp;&amp; p2.Free &amp;&amp; p1.Free 
+			<formula>E&lt;&gt; delayed[1][2] &gt; delayed[2][3] +1 &amp;&amp; p2.Free &amp;&amp; p1.Free
 			</formula>
 			<comment>
 			</comment>
@@ -1503,7 +1506,7 @@ system CheckRunnable, Scheduler &lt; Satellite &lt; p0 &lt; p1 &lt; p2 ;</system
 			</comment>
 		</query>
 		<query>
-			<formula>E&lt;&gt; t_time &gt;=1400
+			<formula>E&lt;&gt; t_time &gt;=720
 			</formula>
 			<comment>
 			</comment>
