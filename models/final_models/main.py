@@ -57,7 +57,7 @@ class Nail(object):
         self.y = y
 
 
-def colorCodedText(kind: str, code):
+def colorCodedText(kind, code):
     formatedCode = ''
     for line in code:
         if kind == "select":
@@ -78,11 +78,11 @@ nodeOffsetX = 0
 nodeOffsetY = 0
 
 
-def replace_bools(text: str):
-    return text.replace("\\&amp;","\\&").replace('\\&lt', '<').replace('\\&gt', '>').replace(';=', '=')
+def replace_bools(str):
+    return str.replace("\\&amp;","\\&").replace('\\&lt', '<').replace('\\&gt', '>').replace(';=', '=')
 
 
-def GenerateTikz(name: str, nodes: list, transitions: list):
+def GenerateTikz(name, nodes, transitions):
     f = open(name + ".tex", "w")
     f.write("\\begin{figure}[H]\n\t\\centering\n\t\\begin{tikzpicture}[x=0.02cm,y=0.02cm]\n\t% place nodes\n")
     for l in nodes:
@@ -128,8 +128,9 @@ def my_filter(current_template, template):
 def my_filter_next(current_location, elements):
     return filter(lambda x: x.id == current_location, elements)
 
-def find_fragments(line: str):
-    return re.findall("[^\ ]+", line)[1:]
+def find_fragments(str):
+    return re.findall("[^\ ]+", str)[1:]
+
 
 if __name__ == '__main__':
     inTemplate = inLocation = inTransition = False
@@ -219,4 +220,5 @@ if __name__ == '__main__':
                             inTransition = False
 
     for l in templates:
+        print(l.name)
         GenerateTikz(l.name, l.nodes, l.transitions)

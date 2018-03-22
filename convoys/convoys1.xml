@@ -37,9 +37,9 @@ typedef struct {
 } ExecutionDescription;
 
 //const ConvoyDescription c2 = {15,{0,3},{0}};
-const ConvoyDescription convoys[CONVOYS] = {{9,{4,3,0},{0}, 10, 1500}};
-const TaskDescription t1 = {0,30, 5}; // Gather data
-const TaskDescription t2 = {1,15, 5}; // Send to Station
+const ConvoyDescription convoys[CONVOYS] = {{9,{3,3,0},{0}, 10, 1000}};
+const TaskDescription t1 = {0,15, 2}; // Gather data
+const TaskDescription t2 = {1,10, 2}; // Send to Station
 const TaskDescription tasks[TASKS] = {t1,t2};
 
 StationDescription stations[STATIONS] = {{2,0},{5,0},{10,0}};
@@ -55,12 +55,13 @@ int send_to_station[CONVOYS][STATIONS] = {{0,0,0}};
 int send_to_convoy[CONVOYS] = ZEROS;
 
 clock TotalTime;
-int schedule_length = 200;
+int schedule_length = 810;
 int step = 0;
 bool illegal_move = false;
 bool execution_being_negative = false;
 bool storage_overflow = false;
 bool storage_underflow = false;
+bool no_idle = false;
 
 bool high_storage(ConvoyDescription&amp; convoy, int id){
 	return convoy.storage * 75/100 &gt; storages[id];
@@ -106,7 +107,8 @@ void closest_task_to_finish(){
 		}
 	}
 	if (lowest == 9999){
-		lowest = 9999;
+		no_idle = true;
+		lowest = 1;
 	}
 }
 
@@ -228,6 +230,9 @@ bool check_constrains(){
 	else if (storage_underflow){
 		return false;
 	}
+	else if (no_idle){
+		return false;
+	}
 	return true;
 }
 </declaration><location id="id0" x="-64" y="80"><committed/></location><location id="id1" x="-256" y="184"><name x="-248" y="152">WaitingForTasks</name><label kind="invariant" x="-266" y="199">time &lt;= lowest &amp;&amp;
@@ -275,8 +280,10 @@ int cheapest_available_station(){
 	int position = 2;
 	for (i = 0; i &lt; STATIONS; i++){
 		if (convoys[id].send_to_station[i] &gt; send_to_station[id][i]){
-			lowest = stations[i].cost;
-			position = i;
+			if (stations[i].cost &lt; lowest){
+				lowest = stations[i].cost;
+				position = i;
+			}
 		}
 	}
 	if (lowest == 9999){
