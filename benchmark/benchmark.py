@@ -5,7 +5,7 @@ import os
 import datetime
 import re
 
-my_location = os.path.dirname(os.path.realpath(__file__)) + '/'
+my_location = os.path.dirname(os.path.realpath(__file__)) + "/"
 linux = 'linux'
 
 
@@ -50,7 +50,7 @@ if __name__ == '__main__':
     time_measurements = []
     my_location_windows = my_location.replace("/", "\\")
     i = 0
-    with open(my_location + "/benchmark_trace", 'w') as trace_file:
+    with open(my_location + "benchmark_trace", 'w') as trace_file:
         while i < args.i:
             i += 1
             output = None
@@ -59,7 +59,7 @@ if __name__ == '__main__':
             p1 = None
             start = datetime.datetime.now()
             if linux_machine(OS):
-                subprocess.Popen([my_location + "verifyta", my_location + "models/final_models/classic_v1.xml", my_location + "models/final_models/classic.q",
+                subprocess.Popen([my_location + "./verifyta", my_location + "classic_v1.xml", my_location + "classic.q",
                     "-o1" + t + y + s + q], stdout=output, stderr=output).wait()
             else:
                 subprocess.Popen(my_location_windows + "verifyta.exe -o1 " + t + " " + s + " " + q + " "  + y  + " " + my_location_windows + "classic_v1.xml " + my_location_windows + "classic.q", stdout=output, stderr=output).wait()
