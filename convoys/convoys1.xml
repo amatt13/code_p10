@@ -1,16 +1,61 @@
-<?xml version="1.0" encoding="utf-8"?><!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.1//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_1.dtd'><nta><declaration>// Place global declarations here.
-const int CONVOYS = 1;
-const int ZEROS[CONVOYS] = {0};
-//const int CHOICE = 2;
-const int STATIONS = 3;
-const int TASKS = 2;
-const int TASKS_ZERO[TASKS] = {0,0};
-const int MAX_PROCESSORS = 10;
+<?xml version="1.0" encoding="utf-8"?><!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.1//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_1.dtd'><nta><declaration>//STATIONS
+//Generated wih python script using TLE
+const int STATION_INDEX = 34; // changes for; when station are in range
+const int STATIONS = 3; // amount of windows i.e. stations to which can be communicated
+const int STATION_ATTRI = 3; // elements discribing window
+// Start_time, End_time, active or not
+const int OVER_STATION[STATION_INDEX][STATIONS][STATION_ATTRI] = {
+{{0, 51, 1}, {0, 30, 1}, {0, 4, 0}},
+{{52, 68, 0}, {31, 88, 0}, {5, 27, 1}},
+{{69, 139, 1}, {89, 118, 1}, {28, 92, 0}},
+{{140, 156, 0}, {119, 176, 0}, {93, 116, 1}},
+{{157, 227, 1}, {177, 207, 1}, {117, 181, 0}},
+{{228, 245, 0}, {208, 265, 0}, {182, 204, 1}},
+{{246, 316, 1}, {266, 295, 1}, {205, 269, 0}},
+{{317, 333, 0}, {296, 353, 0}, {270, 292, 1}},
+{{334, 404, 1}, {354, 383, 1}, {293, 357, 0}},
+{{405, 421, 0}, {384, 441, 0}, {358, 380, 1}},
+{{422, 492, 1}, {442, 472, 1}, {381, 446, 0}},
+{{493, 510, 0}, {473, 530, 0}, {447, 469, 1}},
+{{511, 581, 1}, {531, 560, 1}, {470, 534, 0}},
+{{582, 598, 0}, {561, 618, 0}, {535, 557, 1}},
+{{599, 669, 1}, {619, 648, 1}, {558, 622, 0}},
+{{670, 686, 0}, {649, 706, 0}, {623, 645, 1}},
+{{687, 757, 1}, {707, 736, 1}, {646, 711, 0}},
+{{758, 775, 0}, {737, 795, 0}, {712, 734, 1}},
+{{776, 846, 1}, {796, 825, 1}, {735, 799, 0}},
+{{847, 863, 0}, {826, 883, 0}, {800, 822, 1}},
+{{864, 934, 1}, {884, 913, 1}, {823, 887, 0}},
+{{935, 951, 0}, {914, 971, 0}, {888, 910, 1}},
+{{952, 1022, 1}, {972, 1001, 1}, {911, 975, 0}},
+{{1023, 1040, 0}, {1002, 1059, 0}, {976, 999, 1}},
+{{1041, 1111, 1}, {1060, 1090, 1}, {1000, 1064, 0}},
+{{1112, 1128, 0}, {1091, 1148, 0}, {1065, 1087, 1}},
+{{1129, 1199, 1}, {1149, 1178, 1}, {1088, 1152, 0}},
+{{1200, 1216, 0}, {1179, 1236, 0}, {1153, 1175, 1}},
+{{1217, 1287, 1}, {1237, 1266, 1}, {1176, 1240, 0}},
+{{1288, 1305, 0}, {1267, 1324, 0}, {1241, 1264, 1}},
+{{1306, 1376, 1}, {1325, 1355, 1}, {1265, 1329, 0}},
+{{1377, 1393, 0}, {1356, 1413, 0}, {1330, 1352, 1}},
+{{1394, 1440, 1}, {1414, 1440, 1}, {1353, 1417, 0}},
+{{0, 9999, 0}, {0, 9999, 0}, {1418, 1440, 1}}};
+
+typedef struct {
+	int cost;
+	int data_recieved;
+} StationDescription;
+
+// #Station0 // #Station1 // #Station2
+StationDescription stations[STATIONS] = {{2,0},{4,0},{8,0}};
+const int STATION_ZEROS[STATIONS] = {0,0,0};
+
+//CONVOYS
+const int CONVOYS = 2;
 typedef int[0, CONVOYS - 1] id_t;
-
-broadcast chan start_data_transfer;
-broadcast chan move;
-
+const int CONVOY_ZEROS[CONVOYS] = {0,0};
+const int MAX_PROCESSORS = 10;
+const int TASKS = 2;
+const int TASKS_ZEROS[TASKS] = {0,0};
 typedef struct {
 	int processors; // Number of task the convoy is allowed to perform in parallel
 	int send_to_station[STATIONS]; // Number of stations the convoy is allowed to send to in parallel
@@ -18,50 +63,49 @@ typedef struct {
 	int gather_data;
 	int storage;
 } ConvoyDescription;
-
 typedef struct {
 	int task_type;
 	int execution_time;
 	int data_rate;
 } TaskDescription;
+// #Convoy1
+const ConvoyDescription convoys[CONVOYS] = {{9,{3,3,0},{0,3}, 9, 1000}, {9,{3,0,3},{2,0}, 9, 2000}};
+// #0 Gather data  // #1 Send to station // #2 Send to convoy
+const TaskDescription tasks[TASKS] = {{0,15, 2},{1,10, 2}};
+// Observe storage on each of the convoys
+int storages[CONVOYS] = CONVOY_ZEROS;
 
-typedef struct {
-	int cost;
-	int data_recieved;
-} StationDescription;
-
+//SCHEDULER
 typedef struct {
 	int task_type;
 	int execution_time;
-	int to_station;
+	int to;
 } ExecutionDescription;
-
-//const ConvoyDescription c2 = {15,{0,3},{0}};
-const ConvoyDescription convoys[CONVOYS] = {{9,{3,3,0},{0}, 10, 1000}};
-const TaskDescription t1 = {0,15, 2}; // Gather data
-const TaskDescription t2 = {1,10, 2}; // Send to Station
-const TaskDescription tasks[TASKS] = {t1,t2};
-
-StationDescription stations[STATIONS] = {{2,0},{5,0},{10,0}};
-int storages[CONVOYS] = {0};
-int to_be_stored[CONVOYS] = {0};
-ExecutionDescription convoy_tasks[CONVOYS][MAX_PROCESSORS] = {{{-1,9999,-1},{-1,9999,-1},{-1,9999,-1},{-1,9999,-1},{-1,9999,-1},{-1,9999,-1},{-1,9999,-1},{-1,9999,-1},{-1,9999,-1},{-1,-1,-1}}};
-
+ExecutionDescription convoy_tasks[CONVOYS][MAX_PROCESSORS] = {{{-1,9999,-1},{-1,9999,-1},{-1,9999,-1},{-1,9999,-1},{-1,9999,-1},{-1,9999,-1},{-1,9999,-1},{-1,9999,-1},{-1,9999,-1},{-1,-1,-1}},
+							      {{-1,9999,-1},{-1,9999,-1},{-1,9999,-1},{-1,9999,-1},{-1,9999,-1},{-1,9999,-1},{-1,9999,-1},{-1,9999,-1},{-1,9999,-1},{-1,-1,-1}}};
 int current_task = 0;
+int proc_in_use[CONVOYS] = CONVOY_ZEROS;
+int gather_in_use[CONVOYS] = CONVOY_ZEROS;
+int send_to_station[CONVOYS][STATIONS] = {STATION_ZEROS,STATION_ZEROS};
+int send_to_convoy[CONVOYS] = CONVOY_ZEROS;
+int schedule_length = 120;
 
-int proc_in_use[CONVOYS] = ZEROS;
-int gather_in_use[CONVOYS] = ZEROS;
-int send_to_station[CONVOYS][STATIONS] = {{0,0,0}};
-int send_to_convoy[CONVOYS] = ZEROS;
+//CHANNELS
+broadcast chan start_data_transfer;
+broadcast chan move;
 
+//CLOCKS
 clock TotalTime;
-int schedule_length = 810;
-int step = 0;
+
+//Bools used to deadlock if constrains are violated
 bool illegal_move = false;
 bool execution_being_negative = false;
 bool storage_overflow = false;
 bool storage_underflow = false;
 bool no_idle = false;
+
+//UTILITY METHODS
+const int MAX_VALUE = 9999;
 
 bool high_storage(ConvoyDescription&amp; convoy, int id){
 	return convoy.storage * 75/100 &gt; storages[id];
@@ -74,10 +118,6 @@ bool medium_storage(ConvoyDescription&amp; convoy, int id){
 bool low_storage(ConvoyDescription&amp; convoy, int id){
 	return convoy.storage * 25/100 &gt; storages[id];
 }
-
-int accumulated_cost = 0;
-int current_cost = 0;
-int calculated_cost = 0;
 
 void sort_lists(){
 	int i,c,j;
@@ -96,17 +136,22 @@ void sort_lists(){
 }
 
 
+
 </declaration><template><name>Scheduler</name><declaration>clock time;
 int lowest;
+int calculated_cost = 0;
+int obs_gather_cost[CONVOYS] = CONVOY_ZEROS;
+int obs_sender_cost[CONVOYS] = CONVOY_ZEROS;
+
 void closest_task_to_finish(){	
 	int i;
-	lowest = 9999;	
+	lowest = MAX_VALUE;	
 	for (i = 0; i &lt; CONVOYS; i++){
 		if (convoy_tasks[i][0].execution_time &lt; lowest){
 			lowest = convoy_tasks[i][0].execution_time;
 		}
 	}
-	if (lowest == 9999){
+	if (lowest == MAX_VALUE){
 		no_idle = true;
 		lowest = 1;
 	}
@@ -120,33 +165,29 @@ void update_processors(){
 				convoy_tasks[c][i].execution_time -= lowest;
 			}
 			if (convoy_tasks[c][i].execution_time == 0){
-				if (convoy_tasks[c][i].to_station != -1){
-					send_to_station[c][convoy_tasks[c][i].to_station]--;
+				if (convoy_tasks[c][i].to != -1){
+					send_to_station[c][convoy_tasks[c][i].to]--;
 				}
 				if (convoy_tasks[c][i].task_type == 0){
 					gather_in_use[c]--;
 				}
 				proc_in_use[c]--;
-				convoy_tasks[c][i].to_station = -1;
+				convoy_tasks[c][i].to = -1;
 				convoy_tasks[c][i].task_type = -1;
-				convoy_tasks[c][i].execution_time = 9999;
+				convoy_tasks[c][i].execution_time = MAX_VALUE;
 			}
-			else if (convoy_tasks[c][i].execution_time-lowest &lt; 0){
+			else if (convoy_tasks[c][i].execution_time &lt; 0 &amp;&amp; convoy_tasks[c][i].task_type != -1){
 				execution_being_negative = true;
 			}
 		}
 	}
 }
 
-
-
 void update_storage(){
 	int i, c;
 	for (c = 0; c &lt; CONVOYS; c++){
-		to_be_stored[c] = 0;
 		for (i = 0; i &lt; MAX_PROCESSORS; i++){
 			if (convoy_tasks[c][i].task_type == 0){ //Gather data
-				to_be_stored[c] += tasks[convoy_tasks[c][i].task_type].data_rate * lowest;
 				storages[c] += tasks[convoy_tasks[c][i].task_type].data_rate * lowest;
 				if (storages[c] &gt; convoys[c].storage){
 					storage_overflow = true;
@@ -154,7 +195,7 @@ void update_storage(){
 			}
 			else if (convoy_tasks[c][i].task_type == 1){ //Send data to Earth
 				storages[c] -= tasks[convoy_tasks[c][i].task_type].data_rate * lowest;
-				stations[convoy_tasks[c][i].to_station].data_recieved += tasks[convoy_tasks[c][i].task_type].data_rate * lowest;
+				stations[convoy_tasks[c][i].to].data_recieved += tasks[convoy_tasks[c][i].task_type].data_rate * lowest;
 				if (storages[c] &lt; 0){
 					storage_underflow = true;
 				}
@@ -174,46 +215,45 @@ int find_highest_cost(int c){
 	return highest;
 }
 
+
+
 void calc_cost(){
 	int i, c, s, p;
-	calculated_cost = 0;
+	int sender_cost[CONVOYS][STATIONS] = {STATION_ZEROS, STATION_ZEROS};
+	int total_cost = 0;
+	int internal_cost = 0;
+	calculated_cost = 0;	
 	for (c = 0; c &lt; CONVOYS; c++){
+		total_cost = 0;
+		obs_sender_cost[c] = 0;
 		//Cost goes up if we have low storage and no processes gathering data.
 		if ((100-storages[c]*100/convoys[c].storage)*(100-gather_in_use[c]*100/convoys[c].processors)/1000 &gt;=
 		    (storages[c]*100/convoys[c].storage)*(gather_in_use[c]*100/convoys[c].processors)/1000){
 			calculated_cost += (100-storages[c]*100/convoys[c].storage)*(100-gather_in_use[c]*100/convoys[c].processors)/1000;
+			obs_gather_cost[c] = (100-storages[c]*100/convoys[c].storage)*(100-gather_in_use[c]*100/convoys[c].processors)/1000;
 		}
 		else {
 			calculated_cost += (storages[c]*100/convoys[c].storage)*(gather_in_use[c]*100/convoys[c].processors)/1000;
-		}
-		//Add cost of each processor sending to a station, in respect to the individial station's cost
-		for (p = 0; p &lt; convoys[c].processors; p++){
-			if (convoy_tasks[c][p].task_type == 1){
-				calculated_cost += stations[convoy_tasks[c][p].to_station].cost;
-			}
+			obs_gather_cost[c] = (storages[c]*100/convoys[c].storage)*(gather_in_use[c]*100/convoys[c].processors)/1000;
 		}
 		//Cost goes up if we have high storage and no procceses sending to other convoys or stations on Earth
+		internal_cost = find_highest_cost(c);
 		for (s = 0; s &lt; STATIONS ; s++){
-			int internal_cost = find_highest_cost(c);
-			if (send_to_station[c][s] == 0){
-				if (((100-storages[c]*100/convoys[c].storage)*(stations[s].cost*10/internal_cost))/1000 &lt;
-				    ((storages[c]*100/convoys[c].storage)*(stations[s].cost*10/internal_cost))/1000){
-					calculated_cost += ((100-storages[c]*100/convoys[c].storage)*(stations[s].cost*10/internal_cost))/1000;
+			sender_cost[c][s] = 0;
+			if (convoys[c].send_to_station[s] != 0){
+				if (((100-storages[c]*100/convoys[c].storage) * ((internal_cost*10)/stations[s].cost)) + (((internal_cost*10)/stations[s].cost) * (100-send_to_station[c][s]*100/convoys[c].send_to_station[s])) &lt;
+				    ((storages[c]*100/convoys[c].storage) * ((internal_cost*10)/stations[s].cost)) + (((internal_cost*10)/stations[s].cost) * (send_to_station[c][s]*100/convoys[c].send_to_station[s]))){
+					sender_cost[c][s] = ((100-storages[c]*100/convoys[c].storage) * ((internal_cost*10)/stations[s].cost)) + (((internal_cost*10)/stations[s].cost) * (100-send_to_station[c][s]*100/convoys[c].send_to_station[s]));
 				}
 				else{
-					calculated_cost += ((storages[c]*100/convoys[c].storage)*(stations[s].cost*10/internal_cost))/1000;
+					sender_cost[c][s] = ((storages[c]*100/convoys[c].storage) * ((internal_cost*10)/stations[s].cost)) + (((internal_cost*10)/stations[s].cost) * (send_to_station[c][s]*100/convoys[c].send_to_station[s]));
 				}
 			}
-			else{
-				if (((100-storages[c]*100/convoys[c].storage)*(stations[s].cost*10/internal_cost)+(stations[s].cost*10/internal_cost)*(100-send_to_station[c][s]*100/convoys[c].send_to_station[s]))/1000 &lt;
-				    ((storages[c]*100/convoys[c].storage)*(stations[s].cost*10/internal_cost)+(stations[s].cost*10/internal_cost)*(send_to_station[c][s]*100/convoys[c].send_to_station[s]))/1000){
-					calculated_cost += ((100-storages[c]*100/convoys[c].storage)*(stations[s].cost*10/internal_cost)+(stations[s].cost*10/internal_cost)*(100-send_to_station[c][s]*100/convoys[c].send_to_station[s]))/1000;
-				}
-				else{
-					calculated_cost += ((storages[c]*100/convoys[c].storage)*(stations[s].cost*10/internal_cost)+(stations[s].cost*10/internal_cost)*(send_to_station[c][s]*100/convoys[c].send_to_station[s]))/1000;
-				}
-			}
+			total_cost += (internal_cost*10)/stations[s].cost;
+			obs_sender_cost[c] += sender_cost[c][s]/100;
 		}
+		obs_sender_cost[c] /= total_cost/10;
+		calculated_cost += obs_sender_cost[c];
 	}
 }
 
@@ -240,7 +280,6 @@ TotalTime &lt; schedule_length &amp;&amp;
 lowest != 0 &amp;&amp;
 check_constrains() &amp;&amp;
 cost '== calculated_cost</label></location><location id="id2" x="-64" y="-16"><committed/></location><location id="id3" x="-256" y="-16"><name x="-352" y="-56">ScheduleTask</name><committed/></location><init ref="id3"/><transition><source ref="id0"/><target ref="id1"/><nail x="-64" y="184"/></transition><transition><source ref="id2"/><target ref="id3"/><label kind="guard" x="-240" y="-96">current_task &lt; TASKS-1</label><label kind="synchronisation" x="-240" y="-112">move!</label><label kind="assignment" x="-240" y="-72">current_task++</label><nail x="-64" y="-72"/><nail x="-256" y="-72"/></transition><transition><source ref="id1"/><target ref="id3"/><label kind="guard" x="-368" y="24">time == lowest</label><label kind="assignment" x="-368" y="40">current_task = 0,
-accumulated_cost += current_cost,
 update_storage(),
 update_processors(),
 sort_lists()</label></transition><transition><source ref="id2"/><target ref="id0"/><label kind="guard" x="-32" y="0">current_task == TASKS-1</label><label kind="synchronisation" x="-32" y="-16">move!</label><label kind="assignment" x="-32" y="24">time = 0,
@@ -276,7 +315,7 @@ calc_cost()</label></transition><transition><source ref="id3"/><target ref="id2"
 
 int cheapest_available_station(){
 	int i;
-	int lowest = 9999;
+	int lowest = MAX_VALUE;
 	int position = 2;
 	for (i = 0; i &lt; STATIONS; i++){
 		if (convoys[id].send_to_station[i] &gt; send_to_station[id][i]){
@@ -286,8 +325,8 @@ int cheapest_available_station(){
 			}
 		}
 	}
-	if (lowest == 9999){
-		position = 9999;
+	if (lowest == MAX_VALUE){
+		position = MAX_VALUE;
 	}
 	return position;	
 }
@@ -300,7 +339,7 @@ void insert_task(TaskDescription item){
 			if (item.task_type == 0){// Gather data
 				convoy_tasks[id][i].task_type = item.task_type;
 				convoy_tasks[id][i].execution_time = item.execution_time;
-				convoy_tasks[id][i].to_station = -1;
+				convoy_tasks[id][i].to = -1;
 				gather_in_use[id]++;
 				return;
 			}
@@ -312,8 +351,8 @@ void insert_task(TaskDescription item){
 				else{
 					convoy_tasks[id][i].task_type = item.task_type;
 					convoy_tasks[id][i].execution_time = item.execution_time;
-					convoy_tasks[id][i].to_station = station_index;
-					send_to_station[id][convoy_tasks[id][i].to_station]++;
+					convoy_tasks[id][i].to = station_index;
+					send_to_station[id][convoy_tasks[id][i].to]++;
 					return;
 				}
 			}			
@@ -330,6 +369,37 @@ void add_tasks(TaskDescription task){
 	}	
 }
 
+bool gather_data(){
+	if (current_task == 0){
+		if (storages[id] &gt; convoys[id].storage/2){
+			return true;
+		}
+		else{
+			return false;
+		}
+	}
+	else{
+		return true;
+	}
+}
+
+bool send_data_to_earth(){
+	if (current_task == 1){
+		if (storages[id] &lt; convoys[id].storage/2){
+			return true;
+		}
+		else{
+			return false;
+		}
+	}
+	else{
+		return true;	
+	}
+}
+
+bool check_station_windows(){
+	return true;
+}
 
 
 
@@ -337,5 +407,7 @@ void add_tasks(TaskDescription task){
 
 
 
-</declaration><location id="id4" x="-160" y="0"><committed/></location><location id="id5" x="-160" y="-72"><committed/></location><location id="id6" x="-392" y="-40"></location><init ref="id6"/><transition><source ref="id5"/><target ref="id6"/><label kind="synchronisation" x="-360" y="-128">move?</label><nail x="-160" y="-104"/><nail x="-392" y="-104"/></transition><transition><source ref="id4"/><target ref="id6"/><label kind="synchronisation" x="-360" y="40">move?</label><nail x="-160" y="56"/><nail x="-392" y="56"/></transition><transition><source ref="id6"/><target ref="id4"/><label kind="synchronisation" x="-360" y="-24">start_data_transfer?</label><label kind="assignment" x="-360" y="0">add_tasks(tasks[current_task])</label><nail x="-368" y="0"/></transition><transition><source ref="id6"/><target ref="id5"/><label kind="synchronisation" x="-360" y="-96">start_data_transfer?</label><nail x="-376" y="-72"/></transition></template><system>
+
+</declaration><location id="id4" x="-160" y="0"><committed/></location><location id="id5" x="-160" y="-72"><committed/></location><location id="id6" x="-392" y="-40"></location><init ref="id6"/><transition><source ref="id5"/><target ref="id6"/><label kind="synchronisation" x="-360" y="-160">move?</label><nail x="-160" y="-136"/><nail x="-392" y="-136"/></transition><transition><source ref="id4"/><target ref="id6"/><label kind="synchronisation" x="-360" y="40">move?</label><nail x="-160" y="56"/><nail x="-392" y="56"/></transition><transition><source ref="id6"/><target ref="id4"/><label kind="guard" x="-360" y="-40">check_station_windows()</label><label kind="synchronisation" x="-360" y="-56">start_data_transfer?</label><label kind="assignment" x="-360" y="0">add_tasks(tasks[current_task])</label><nail x="-368" y="0"/></transition><transition><source ref="id6"/><target ref="id5"/><label kind="guard" x="-360" y="-112">gather_data() &amp;&amp;
+send_data_to_earth()</label><label kind="synchronisation" x="-360" y="-128">start_data_transfer?</label><nail x="-376" y="-72"/></transition></template><system>
 system Convoy, Scheduler;</system></nta>
