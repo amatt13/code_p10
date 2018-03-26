@@ -90,7 +90,7 @@ int proc_in_use[CONVOYS] = CONVOY_ZEROS;
 int gather_in_use[CONVOYS] = CONVOY_ZEROS;
 int send_to_station[CONVOYS][STATIONS] = {STATION_ZEROS,STATION_ZEROS};
 int send_to_convoy[CONVOYS] = CONVOY_ZEROS;
-int schedule_length = 120;
+int schedule_length = 450;
 
 //CHANNELS
 broadcast chan start_data_transfer;
@@ -104,7 +104,7 @@ bool illegal_move = false;
 bool execution_being_negative = false;
 bool storage_overflow = false;
 bool storage_underflow = false;
-bool no_idle = false;
+bool idle = false;
 
 //UTILITY METHODS
 const int MAX_VALUE = 9999;
@@ -145,6 +145,21 @@ int fake_clock = 0;
 int calculated_cost = 0;
 int obs_gather_cost[CONVOYS] = CONVOY_ZEROS;
 int obs_sender_cost[CONVOYS] = CONVOY_ZEROS;
+int tm = MAX_VALUE;
+int window_count = 0;
+
+int nearest_window(){
+	int s;
+	tm = MAX_VALUE;
+	if (true){ // Check if any of the convoys has any tasked queued
+		for (s = 0; s &lt; STATIONS; s++){
+			if (STATION_INDEX &gt;= s_indexes[s] &amp;&amp; tm &gt; OVER_STATION[s_indexes[s]][s][1]+1){
+				tm = OVER_STATION[s_indexes[s]][s][1]+1;
+			}	
+		}
+		return tm;
+	}
+}
 
 void closest_task_to_finish(){	
 	int i;
@@ -155,8 +170,9 @@ void closest_task_to_finish(){
 		}
 	}
 	if (lowest == MAX_VALUE){
-		no_idle = true;
-		lowest = 1;
+		idle = true;
+		window_count++;
+		lowest = nearest_window()- fake_clock;
 	}
 }
 
@@ -258,6 +274,10 @@ void calc_cost(){
 		obs_sender_cost[c] /= total_cost/10;
 		calculated_cost += obs_sender_cost[c];
 	}
+	if (idle){
+		calculated_cost += 1000;
+		idle = false;
+	}
 }
 
 bool check_constrains(){
@@ -273,9 +293,6 @@ bool check_constrains(){
 	else if (storage_underflow){
 		return false;
 	}
-	else if (no_idle){
-		return false;
-	}
 	return true;
 }
 
@@ -287,16 +304,16 @@ void update_windows(){
 		}
 	}
 }
-</declaration><location id="id0" x="-64" y="80"><committed/></location><location id="id1" x="-256" y="184"><name x="-248" y="152">WaitingForTasks</name><label kind="invariant" x="-266" y="199">time &lt;= lowest &amp;&amp;
+</declaration><location id="id0" x="-64" y="80"><name x="-32" y="88">ImRightHere</name><committed/></location><location id="id1" x="-256" y="184"><name x="-248" y="152">WaitingForTasks</name><label kind="invariant" x="-266" y="199">time &lt;= lowest &amp;&amp;
 TotalTime &lt; schedule_length &amp;&amp;
 lowest != 0 &amp;&amp;
 check_constrains() &amp;&amp;
 cost '== calculated_cost</label></location><location id="id2" x="-64" y="-16"><committed/></location><location id="id3" x="-256" y="-16"><name x="-352" y="-56">ScheduleTask</name><committed/></location><init ref="id3"/><transition><source ref="id0"/><target ref="id1"/><nail x="-64" y="184"/></transition><transition><source ref="id2"/><target ref="id3"/><label kind="guard" x="-240" y="-96">current_task &lt; TASKS-1</label><label kind="synchronisation" x="-240" y="-112">move!</label><label kind="assignment" x="-240" y="-72">current_task++</label><nail x="-64" y="-72"/><nail x="-256" y="-72"/></transition><transition><source ref="id1"/><target ref="id3"/><label kind="guard" x="-368" y="24">time == lowest</label><label kind="assignment" x="-368" y="40">current_task = 0,
+fake_clock += lowest,
 update_storage(),
 update_processors(),
 update_windows(),
-sort_lists(),
-fake_clock += lowest</label></transition><transition><source ref="id2"/><target ref="id0"/><label kind="guard" x="-32" y="0">current_task == TASKS-1</label><label kind="synchronisation" x="-32" y="-16">move!</label><label kind="assignment" x="-32" y="24">time = 0,
+sort_lists()</label></transition><transition><source ref="id2"/><target ref="id0"/><label kind="guard" x="-32" y="0">current_task == TASKS-1</label><label kind="synchronisation" x="-32" y="-16">move!</label><label kind="assignment" x="-32" y="24">time = 0,
 sort_lists(),
 closest_task_to_finish(),
 calc_cost()</label></transition><transition><source ref="id3"/><target ref="id2"/><label kind="synchronisation" x="-240" y="-40">start_data_transfer!</label></transition></template><template><name>Convoy</name><parameter>const id_t id</parameter><declaration>int amount_of_tasks_to_execute(){
@@ -412,7 +429,7 @@ bool send_data_to_earth(){
 }
 
 bool check_station_windows(){
-	int t, s;
+	int s;
 	for (s = 0; s &lt; STATIONS; s++){
 		if (convoys[id].tasks_depending_on_window[current_task][s] == 1 &amp;&amp; OVER_STATION[s_indexes[s]][s][2]){
 			return true;
@@ -420,6 +437,8 @@ bool check_station_windows(){
 	}
 	return false;
 }
+
+
 
 
 
