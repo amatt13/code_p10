@@ -13,14 +13,14 @@ def linux_machine(OS_name: str):
     return OS_name == linux
 
 def get_clocks(satID, clock):
-    bla = re.findall("(\ Processor\(" + satID + "\)." + clock +"[>=]+[0-9]+,)", line)
+    bla = re.findall("(\ p" + satID + "." + clock +"[>]+[=]*[0-9]+)", line)
     if bla:
-        return bla[0].split('=')[1][:-1]
+        return bla[0].split('>')[1]
     else:
         return '0'
 
 def get_delays(first):
-    return re.findall("(delayed\["+str(first)+"\]\[[0-9]+\]=[0-9]+)", line)
+    return re.findall("(delays\["+str(first)+"\]\[[0-9]+\]=[0-9]+)", line)
 
 def get_runs(first):
     return re.findall("(runs\["+str(first)+"\]\[[0-9]+\]=[0-9]+)", line)
@@ -60,7 +60,7 @@ if __name__ == '__main__':
             start = datetime.datetime.now()
             if linux_machine(OS):
                 subprocess.Popen([my_location + "./verifyta", my_location + "classic_v1.xml", my_location + "classic.q",
-                    "-o1" + t + y + s + q], stdout=output, stderr=output).wait()
+                                  "-o1", t, y], stdout=output, stderr=output).wait()
             else:
                 subprocess.Popen(my_location_windows + "verifyta.exe -o1 " + t + " " + s + " " + q + " "  + y  + " " + my_location_windows + "classic_v1.xml " + my_location_windows + "classic.q", stdout=output, stderr=output).wait()
             end = datetime.datetime.now()
@@ -74,7 +74,7 @@ if __name__ == '__main__':
             if t_time:
                 print("data_earth: " + re.findall("(data_earth\=[0-9]+)", line)[0].split('=')[1])
                 print("data_storage: " + re.findall("(data_gathered\=[0-9]+)", line)[0].split('=')[1])
-                print('internal_transfer: ' + re.findall("(internal_transfer\=[0-9]+)", line)[0].split('=')[1])
+                print('data_internal: ' + re.findall("(data_internal\=[0-9]+)", line)[0].split('=')[1])
                 print('satellite one:')
 
                 print('idle clock: ' + get_clocks('0', 'idle'))
