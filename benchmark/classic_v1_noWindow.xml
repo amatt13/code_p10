@@ -2,8 +2,8 @@
 <!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.1//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_2.dtd'>
 <nta>
 	<declaration>const int N = 4; // Amount of tasks
-const int S = 10; // Amount of satellites
-const int SCHEDULE_LENGHT = 1440; // Length of schedule
+const int S = 3; // Amount of satellites
+const int SCHEDULE_LENGHT = 360; // Length of schedule
 const int ORBIT_TIME = 60; // duration of one orbit
 const int MAX_MEMORY = 100; // satellites maximum storage capacity
 const int LOW_MEMORY = MAX_MEMORY * 30/100; // threshold for when  little memory is used
@@ -15,10 +15,10 @@ const int TASK_SUGGEST_INTERVAL = 3; // how often should a task be suggested
 
 // used for common instansiations of arrays
 const int ZEROES[N] = {0,0,0,0};
-const int S_ZEROES[S][N] = {ZEROES,ZEROES,ZEROES,ZEROES,ZEROES,ZEROES,ZEROES,ZEROES,ZEROES,ZEROES};
+const int S_ZEROES[S][N] = {ZEROES, ZEROES, ZEROES};
 const int MINUSSES[N] = {-1,-1,-1,-1};
-const int S_MINUSSES[S][N] = {MINUSSES,MINUSSES,MINUSSES,MINUSSES,MINUSSES,MINUSSES,MINUSSES,MINUSSES,MINUSSES,MINUSSES};
-const int ACTIVE_INIT[S] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
+const int S_MINUSSES[S][N] = {MINUSSES, MINUSSES, MINUSSES};
+const int ACTIVE_INIT[S] = {-1,-1,-1};
 
 typedef int[0, N-1] id_t;
 typedef int[0, S-1] id_s;
@@ -92,19 +92,18 @@ typedef struct {
 // Some tasks, with different propperties
 				      /* 0 = forward, 1 = earth, 2 = backwards*/
                                       /*  w     E  D   P  rate Co   Orien*/
-const TaskDescription send_data       = {{1,0}, 20,26, 9, -2, 1};
-const TaskDescription gather_new_data = {{1,1}, 15,21,  6,  5, 0};
+const TaskDescription send_data       = {{0,0}, 20,26, 9, -2, 1};
+const TaskDescription gather_new_data = {{0,0}, 15,21,  6,  5, 0};
 const TaskDescription transfer        = {{0,0}, 5,17,  5, -3, 2};
 const TaskDescription receive         = {{0,0}, 5,11,  4,  3, 0};
 const TaskDescription jobs[N]         = {send_data, gather_new_data, transfer, receive}; //update RECEIVE_INDEX if receive moves
 const int PRIOS[N] = {jobs[0].prio, jobs[1].prio, jobs[2].prio, jobs[3].prio};
 
 // some satellites performing different tasks and with different offset
-const SatDescription sat_gat = {0, 0, 80, {0,1,1,0}, -1};
-const SatDescription sat_work = {6, 0, 20, {0,1,1,1}, -1};
-const SatDescription sat_trans = {12, 0, 20, {0,0,1,1}, -1};
-const SatDescription sat_sen = {18, 2, 0, {1,0,0,1}, -1};
-SatDescription sats[S] = {sat_gat, sat_work, sat_sen, sat_gat, sat_trans, sat_sen, sat_gat, sat_trans, sat_work, sat_sen};
+const SatDescription sat_gat = {3, 0, 80, {0,1,1,0}, -1};
+const SatDescription sat_trans = {3, 0, 20, {0,1,1,1}, -1};
+const SatDescription sat_sen = {9, 2, 0, {1,0,0,1}, -1};
+SatDescription sats[S] = {sat_gat, sat_trans, sat_sen};
 
 /** Remove StationDescription and replace with array over costrate */
 const int station_price_rate[STATIONS] = {13, 8};
@@ -115,7 +114,7 @@ id_s RQ;
 bool runnable[N] = {0,0,0,0};    // can this task be performed
 bool win_active[STATIONS] = {0,0};      // it the satellite currently over a station
 int runs[S][N] = S_ZEROES;       // how many times have each task been run on each satellite (for benchmarking)
-int priorities[S][N] = {PRIOS,PRIOS,PRIOS,PRIOS,PRIOS,PRIOS,PRIOS,PRIOS,PRIOS,PRIOS};
+int priorities[S][N] = {PRIOS, PRIOS, PRIOS};
 int active[S] = ACTIVE_INIT;
 int queue[S][N] = S_MINUSSES;
 int sender = -1;
@@ -123,8 +122,7 @@ int delays[S][N] = S_ZEROES; //(for benchmarking)
 int data_earth = 0; // Amount of data units sent to Earth (for benchmarking)
 int data_internal = 0; // Amount of data sent internaly between satellites (for benchmarking)
 int data_gathered = 0; // Amount of data currently stored in the system (for benchmarking)
-bool in_orbit[S] = {false,false,false,false,false,false,false,false,false,false};
-
+bool in_orbit[S] = {false,false,false};
 
 
 bool empty(int q[N]){
@@ -279,7 +277,7 @@ bool internalCom() {
 
 
 </declaration>
-		<location id="id0" x="102" y="-246">
+		<location id="id0" x="110" y="-246">
 			<committed/>
 		</location>
 		<location id="id1" x="433" y="459">
@@ -355,15 +353,15 @@ bool internalCom() {
 		<transition>
 			<source ref="id0"/>
 			<target ref="id6"/>
-			<label kind="synchronisation" x="153" y="-263">not_rdy_to_rec[sat_id]!</label>
+			<label kind="synchronisation" x="178" y="-263">not_rdy_to_rec[sat_id]!</label>
 			<nail x="357" y="-246"/>
 		</transition>
 		<transition>
 			<source ref="id22"/>
 			<target ref="id0"/>
-			<label kind="guard" x="-42" y="-246">!hasSpace() || !in_orbit[sat_id]</label>
+			<label kind="guard" x="-51" y="-246">!hasSpace() || !in_orbit[sat_id]</label>
 			<label kind="synchronisation" x="-42" y="-229">transmit_data[sat_id]?</label>
-			<nail x="-17" y="-229"/>
+			<nail x="-17" y="-246"/>
 		</transition>
 		<transition>
 			<source ref="id2"/>
@@ -386,9 +384,9 @@ bool internalCom() {
 		<transition>
 			<source ref="id1"/>
 			<target ref="id20"/>
-			<label kind="guard" x="518" y="229">lowerPriority() &amp;&amp;
+			<label kind="guard" x="518" y="229">lowerPriority()&amp;&amp;
 active[sat_id] != RECEIVE_INDEX</label>
-			<label kind="synchronisation" x="518" y="263">not_rdy_to_rec[sat_id]!</label>
+			<label kind="synchronisation" x="518" y="272">not_rdy_to_rec[sat_id]!</label>
 			<nail x="510" y="459"/>
 			<nail x="510" y="221"/>
 			<nail x="306" y="221"/>
@@ -396,7 +394,7 @@ active[sat_id] != RECEIVE_INDEX</label>
 		<transition>
 			<source ref="id1"/>
 			<target ref="id20"/>
-			<label kind="guard" x="391" y="289">lowerPriority() &amp;&amp;
+			<label kind="guard" x="391" y="289">lowerPriority()&amp;&amp;
 active[sat_id] ==
 RECEIVE_INDEX</label>
 			<nail x="433" y="238"/>
@@ -474,7 +472,7 @@ RQ = sat_id</label>
 		<transition>
 			<source ref="id19"/>
 			<target ref="id5"/>
-			<label kind="guard" x="80" y="-176">active[com] != RECEIVE_INDEX</label>
+			<label kind="guard" x="76" y="-170">active[com] != RECEIVE_INDEX</label>
 			<nail x="224" y="-160"/>
 			<nail x="144" y="-160"/>
 		</transition>
@@ -577,9 +575,9 @@ active[com] != TRANSMIT_INDEX</label>
 		<transition>
 			<source ref="id22"/>
 			<target ref="id11"/>
-			<label kind="guard" x="144" y="-240">hasSpace() &amp;&amp; in_orbit[sat_id]</label>
-			<label kind="synchronisation" x="112" y="-224">transmit_data[sat_id]?</label>
-			<label kind="assignment" x="88" y="-208">task = RECEIVE_INDEX,
+			<label kind="guard" x="204" y="-238">hasSpace()</label>
+			<label kind="synchronisation" x="161" y="-221">transmit_data[sat_id]?</label>
+			<label kind="assignment" x="76" y="-204">task = RECEIVE_INDEX,
 active[sat_id] = RECEIVE_INDEX</label>
 			<nail x="0" y="-208"/>
 		</transition>
@@ -655,7 +653,6 @@ active[sat_id] = front()</label>
 		<transition>
 			<source ref="id18"/>
 			<target ref="id20"/>
-			<label kind="guard" x="51" y="289">lowerPriority()</label>
 			<label kind="assignment" x="51" y="306">enqueue(task),
 task = active[sat_id]</label>
 			<nail x="144" y="306"/>
@@ -906,7 +903,9 @@ void delayed(int t) {
 		</location>
 		<location id="id30" x="-2218" y="-2796">
 			<name x="-2210" y="-2820">Waiting</name>
-			<label kind="invariant" x="-1980" y="-2805">wait' == 1  &amp;&amp;
+			<label kind="invariant" x="-1980" y="-2805">run_time[task] &lt;= 
+getDeadline() &amp;&amp;
+wait' == 1  &amp;&amp;
 work' == 0 &amp;&amp; 
 idle' == 0 &amp;&amp;
 slew' == 0</label>
@@ -1237,7 +1236,7 @@ void suggest_task(){
 }
 </declaration>
 		<location id="id36" x="-216" y="-576">
-			<committed/>
+			<urgent/>
 		</location>
 		<location id="id37" x="-816" y="-576">
 			<name x="-864" y="-584">Start</name>
@@ -1250,7 +1249,7 @@ sats[sat_id].offset</label>
 		</location>
 		<location id="id39" x="-216" y="-464">
 			<name x="-256" y="-456">Checking</name>
-			<committed/>
+			<urgent/>
 		</location>
 		<location id="id40" x="-528" y="-464">
 			<name x="-544" y="-448">Waiting</name>
@@ -1335,7 +1334,7 @@ int window_to_check = 0, task_to_check = 0;
 int station = 0;
 bool station_to_check = false;
 bool can_run = false;
-int index[S][STATIONS] = {{0,0},{0,0},{0,0},{0,0},{0,0},{0,0},{0,0},{0,0},{0,0},{0,0}};
+int index[S][STATIONS] = {{0,0},{0,0},{0,0}};
 
 void overStation(){
     if (OVER_STATION[index[RQ][window_to_check]][window_to_check][2])
@@ -1527,66 +1526,13 @@ allTaskChecked()</label>
 	<system>p0 = Processor(0);
 p1 = Processor(1);
 p2 = Processor(2);
-p3 = Processor(3);
-p4 = Processor(4);
-p5 = Processor(5);
-p6 = Processor(6);
-p7 = Processor(7);
-p8 = Processor(8);
-p9 = Processor(9);
-
 s0 = Satellite(0);
 s1 = Satellite(1);
 s2 = Satellite(2);
-s3 = Satellite(3);
-s4 = Satellite(4);
-s5 = Satellite(5);
-s6 = Satellite(6);
-s7 = Satellite(7);
-s8 = Satellite(8);
-s9 = Satellite(9);
-
 sc0 = Scheduler(0);
 sc1 = Scheduler(1);
 sc2 = Scheduler(2);
-sc3 = Scheduler(3);
-sc4 = Scheduler(4);
-sc5 = Scheduler(5);
-sc6 = Scheduler(6);
-sc7 = Scheduler(7);
-sc8 = Scheduler(8);
-sc9 = Scheduler(9);
-
-system CheckRunnable &lt; sc0
- &lt; sc1
-&lt; sc2
-&lt; sc3
-&lt; sc4
-&lt; sc5
-&lt; sc6
-&lt; sc7
-&lt; sc8
-&lt; sc9
- &lt; s0
-&lt; s1
-&lt; s2
-&lt; s3
-&lt; s4
-&lt; s5
-&lt; s6
-&lt; s7
-&lt; s8
-&lt; s9
- &lt; p0
-&lt; p1
-&lt; p2
-&lt; p3
-&lt; p4
-&lt; p5
-&lt; p6
-&lt; p7
-&lt; p8
-&lt; p9;</system>
+system CheckRunnable &lt; sc0 &lt; sc1 &lt; sc2 &lt; s0 &lt; s1 &lt; s2 &lt; p0 &lt; p1 &lt; p2;</system>
 	<queries>
 		<query>
 			<formula>E&lt;&gt; p0.Free &amp;&amp; p1.Free &amp;&amp;  delayed[2][3] == 1
@@ -1667,13 +1613,13 @@ system CheckRunnable &lt; sc0
 			</comment>
 		</query>
 		<query>
-			<formula>E&lt;&gt; t_time &gt;= 720
+			<formula>E&lt;&gt; t_time == 720
 			</formula>
 			<comment>
 			</comment>
 		</query>
 		<query>
-			<formula>E&lt;&gt; t_time &gt;= 83
+			<formula>E&lt;&gt; t_time &gt;= 167
 			</formula>
 			<comment>
 			</comment>
@@ -1685,7 +1631,7 @@ system CheckRunnable &lt; sc0
 			</comment>
 		</query>
 		<query>
-			<formula>E&lt;&gt; runs[0][2] &gt; runs[1][3] &amp;&amp; p1.Free &amp;&amp; p2.Free &amp;&amp; t_time &lt;= 1440
+			<formula>E&lt;&gt; runs[1][2] &gt; runs[2][3] &amp;&amp; p1.Free &amp;&amp; p2.Free &amp;&amp; t_time &lt;= 1440
 			</formula>
 			<comment>
 			</comment>
