@@ -67,7 +67,8 @@ const int OVER_STATION[STATION_INDEX][STATIONS][STATION_ATTRI] = {
 
 clock t_time; // total amount of time passed
 urgent broadcast chan release[S], request[S], preemt[S], add_task[S], check, not_rdy_to_rec[S], go , slew_sat[S], transmit_data[S];
-broadcast chan next[S];
+broadcast chan next[S], find_new;
+chan priority find_new, slew_sat &lt; go;
 
 /** Task Description */
 typedef struct {
@@ -366,7 +367,7 @@ bool internalCom() {
 		<transition>
 			<source ref="id0"/>
 			<target ref="id13"/>
-			<label kind="guard" x="-8" y="493">!lowerPriority() &amp;&amp; false</label>
+			<label kind="guard" x="-8" y="493">false</label>
 			<label kind="synchronisation" x="0" y="518">check!</label>
 			<nail x="433" y="518"/>
 			<nail x="-34" y="518"/>
@@ -629,7 +630,7 @@ active[sat_id] = front()</label>
 		<transition>
 			<source ref="id17"/>
 			<target ref="id13"/>
-			<label kind="guard" x="42" y="433">!lowerPriority() &amp;&amp; false</label>
+			<label kind="guard" x="42" y="433">false</label>
 			<label kind="synchronisation" x="51" y="459">check!</label>
 		</transition>
 		<transition>
@@ -641,7 +642,6 @@ active[sat_id] = front()</label>
 		<transition>
 			<source ref="id17"/>
 			<target ref="id19"/>
-			<label kind="guard" x="51" y="289">lowerPriority()</label>
 			<label kind="assignment" x="51" y="306">enqueue(task),
 task = active[sat_id]</label>
 			<nail x="144" y="306"/>
@@ -744,9 +744,8 @@ void statistics(int value){
     }
 }
 
-void update_storage(int mult) {
-   int memory = (jobs[task].execution_time *
-       jobs[task].data_rate * mult)/2;
+void update_storage(int t) {
+   int memory = (jobs[t].execution_time * jobs[t].data_rate);
    if (sats[sat_id].memory + memory &gt; MAX_MEMORY) { // add above
            memory = MAX_MEMORY - sats[sat_id].memory;
            sats[sat_id].memory = MAX_MEMORY;
@@ -1027,7 +1026,7 @@ getWaitingD() &gt;= run_time[task]
 		<transition>
 			<source ref="id31"/>
 			<target ref="id26"/>
-			<label kind="synchronisation" x="-2252" y="-2532">preemt[sat_id]?</label>
+			<label kind="synchronisation" x="-2252" y="-2533">preemt[sat_id]?</label>
 		</transition>
 		<transition>
 			<source ref="id27"/>
@@ -1108,8 +1107,7 @@ w_queue[0]</label>
 getDeadline() &amp;&amp; 
 exe_time + time_used[task]  &lt; 
 getExeTime()</label>
-			<label kind="assignment" x="-2771" y="-2694">update_storage(1),
-delayed(task)</label>
+			<label kind="assignment" x="-2771" y="-2694">delayed(task)</label>
 			<nail x="-2660" y="-2643"/>
 		</transition>
 		<transition>
@@ -1132,7 +1130,7 @@ orientation(sat_id)</label>
 			<target ref="id30"/>
 			<label kind="guard" x="-2618" y="-2703">exe_time + time_used[task] 
 == getExeTime()</label>
-			<label kind="assignment" x="-2618" y="-2669">update_storage(2),
+			<label kind="assignment" x="-2618" y="-2669">update_storage(task),
 reportDone()</label>
 			<nail x="-2577" y="-2713"/>
 		</transition>
@@ -1305,6 +1303,7 @@ suggest_task()</label>
 			<source ref="id39"/>
 			<target ref="id38"/>
 			<label kind="guard" x="-496" y="-488">loc_time &gt;= TASK_SUGGEST_INTERVAL</label>
+			<label kind="synchronisation" x="-510" y="-481">find_new!</label>
 			<label kind="assignment" x="-496" y="-464">RQ = sat_id</label>
 		</transition>
 		<transition>
@@ -1606,7 +1605,7 @@ system CheckRunnable &lt; sc0 &lt; sc1 &lt; sc2 &lt; s0 &lt; s1 &lt; s2 &lt; p0 
 			</comment>
 		</query>
 		<query>
-			<formula>E&lt;&gt; t_time &gt;= 141
+			<formula>E&lt;&gt; t_time &gt;= 83
 			</formula>
 			<comment>
 			</comment>

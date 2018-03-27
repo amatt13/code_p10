@@ -1,25 +1,163 @@
+classic_v1_HighPrioNonInternal.xml
+1: 394.168096
+data_earth: 830
+data_storage: 1032
+data_internal: 1292
+satellite one:
+idle clock: 260
+wait clock: 571
+work clock: 407
+slew clock: 197
+satellite two:
+idle clock: 213
+wait clock: 51
+work clock: 672
+slew clock: 497
+satellite three:
+idle clock: 539
+wait clock: 0
+work clock: 801
+slew clock: 99
+delays[0][0]=0
+delays[0][1]=10
+delays[0][2]=25
+delays[0][3]=0
+delays[1][0]=0
+delays[1][1]=8
+delays[1][2]=0
+delays[1][3]=0
+delays[2][0]=10
+delays[2][1]=0
+delays[2][2]=0
+delays[2][3]=0
+runs[0][0]=0
+runs[0][1]=11
+runs[0][2]=24
+runs[0][3]=0
+runs[1][0]=0
+runs[1][1]=9
+runs[1][2]=57
+runs[1][3]=24
+runs[2][0]=21
+runs[2][1]=0
+runs[2][2]=0
+runs[2][3]=57
+
+
 classic_v1.xml
-1: 1.580461
-data_earth: 0
-data_storage: 0
-data_internal: 0
+1: 373.933132
+data_earth: 830
+data_storage: 1032
+data_internal: 1292
 satellite one:
-idle clock: 6
-wait clock: 0
-work clock: 0
-slew clock: 3
+idle clock: 260
+wait clock: 571
+work clock: 407
+slew clock: 197
 satellite two:
-idle clock: 6
-wait clock: 0
-work clock: 3
-slew clock: 0
+idle clock: 213
+wait clock: 51
+work clock: 672
+slew clock: 497
 satellite three:
-idle clock: 9
+idle clock: 539
 wait clock: 0
-work clock: 0
-slew clock: 0
+work clock: 801
+slew clock: 99
 delays[0][0]=0
-delays[0][1]=0
+delays[0][1]=10
+delays[0][2]=25
+delays[0][3]=0
+delays[1][0]=0
+delays[1][1]=8
+delays[1][2]=0
+delays[1][3]=0
+delays[2][0]=10
+delays[2][1]=0
+delays[2][2]=0
+delays[2][3]=0
+runs[0][0]=0
+runs[0][1]=11
+runs[0][2]=24
+runs[0][3]=0
+runs[1][0]=0
+runs[1][1]=9
+runs[1][2]=57
+runs[1][3]=24
+runs[2][0]=21
+runs[2][1]=0
+runs[2][2]=0
+runs[2][3]=57
+
+
+classic_v1_double_deadline.xml
+1: 403.791466
+data_earth: 840
+data_storage: 1058
+data_internal: 1363
+satellite one:
+idle clock: 336
+wait clock: 435
+work clock: 406
+slew clock: 261
+satellite two:
+idle clock: 310
+wait clock: 51
+work clock: 675
+slew clock: 402
+satellite three:
+idle clock: 547
+wait clock: 0
+work clock: 792
+slew clock: 99
+delays[0][0]=0
+delays[0][1]=12
+delays[0][2]=4
+delays[0][3]=0
+delays[1][0]=0
+delays[1][1]=9
+delays[1][2]=0
+delays[1][3]=0
+delays[2][0]=9
+delays[2][1]=0
+delays[2][2]=0
+delays[2][3]=0
+runs[0][0]=0
+runs[0][1]=13
+runs[0][2]=27
+runs[0][3]=0
+runs[1][0]=0
+runs[1][1]=10
+runs[1][2]=62
+runs[1][3]=27
+runs[2][0]=21
+runs[2][1]=0
+runs[2][2]=0
+runs[2][3]=62
+
+
+classic_v1_sat1_noGather.xml
+1: 259.963972
+data_earth: 480
+data_storage: 515
+data_internal: 1005
+satellite one:
+idle clock: 678
+wait clock: 96
+work clock: 453
+slew clock: 210
+satellite two:
+idle clock: 841
+wait clock: 30
+work clock: 368
+slew clock: 198
+satellite three:
+idle clock: 893
+wait clock: 0
+work clock: 490
+slew clock: 54
+delays[0][0]=0
+delays[0][1]=15
 delays[0][2]=0
 delays[0][3]=0
 delays[1][0]=0
@@ -31,48 +169,190 @@ delays[2][1]=0
 delays[2][2]=0
 delays[2][3]=0
 runs[0][0]=0
-runs[0][1]=0
-runs[0][2]=0
+runs[0][1]=17
+runs[0][2]=33
 runs[0][3]=0
 runs[1][0]=0
 runs[1][1]=0
-runs[1][2]=0
-runs[1][3]=0
-runs[2][0]=0
+runs[1][2]=34
+runs[1][3]=33
+runs[2][0]=16
 runs[2][1]=0
 runs[2][2]=0
-runs[2][3]=0
+runs[2][3]=34
 
 
-classic_v_copy.xml
-1: 0.989952
-data_earth: 0
-data_storage: 0
-data_internal: 0
+classic_v1_no_preemption.xml
+1: 0.078996
+
+
+classic_v1_furtherHighLow.xml
+1: 419.060103
+data_earth: 780
+data_storage: 908
+data_internal: 1228
 satellite one:
-idle clock: 6
-wait clock: 0
-work clock: 0
-slew clock: 3
+idle clock: 365
+wait clock: 368
+work clock: 437
+slew clock: 267
 satellite two:
-idle clock: 6
-wait clock: 0
-work clock: 3
-slew clock: 0
+idle clock: 302
+wait clock: 51
+work clock: 639
+slew clock: 445
 satellite three:
-idle clock: 9
+idle clock: 564
 wait clock: 0
-work clock: 0
-slew clock: 0
+work clock: 774
+slew clock: 99
 delays[0][0]=0
-delays[0][1]=0
-delays[0][2]=0
+delays[0][1]=16
+delays[0][2]=16
 delays[0][3]=0
 delays[1][0]=0
-delays[1][1]=0
+delays[1][1]=13
+delays[1][2]=0
+delays[1][3]=0
+delays[2][0]=7
+delays[2][1]=0
+delays[2][2]=0
+delays[2][3]=0
+runs[0][0]=0
+runs[0][1]=17
+runs[0][2]=28
+runs[0][3]=0
+runs[1][0]=0
+runs[1][1]=13
+runs[1][2]=52
+runs[1][3]=28
+runs[2][0]=24
+runs[2][1]=0
+runs[2][2]=0
+runs[2][3]=52
+
+
+classic_v1_noSlew.xml
+1: 581.646981
+data_earth: 1180
+data_storage: 1306
+data_internal: 1709
+satellite one:
+idle clock: 401
+wait clock: 293
+work clock: 745
+slew clock: 0
+satellite two:
+idle clock: 244
+wait clock: 0
+work clock: 1195
+slew clock: 0
+satellite three:
+idle clock: 503
+wait clock: 0
+work clock: 936
+slew clock: 0
+delays[0][0]=0
+delays[0][1]=8
+delays[0][2]=2
+delays[0][3]=0
+delays[1][0]=0
+delays[1][1]=8
 delays[1][2]=0
 delays[1][3]=0
 delays[2][0]=0
+delays[2][1]=0
+delays[2][2]=0
+delays[2][3]=0
+runs[0][0]=0
+runs[0][1]=8
+runs[0][2]=32
+runs[0][3]=0
+runs[1][0]=0
+runs[1][1]=10
+runs[1][2]=81
+runs[1][3]=32
+runs[2][0]=31
+runs[2][1]=0
+runs[2][2]=0
+runs[2][3]=81
+
+
+classic_v1_doubleStorage.xml
+1: 398.666223
+data_earth: 940
+data_storage: 1324
+data_internal: 1392
+satellite one:
+idle clock: 217
+wait clock: 765
+work clock: 335
+slew clock: 114
+satellite two:
+idle clock: 121
+wait clock: 48
+work clock: 737
+slew clock: 526
+satellite three:
+idle clock: 511
+wait clock: 0
+work clock: 831
+slew clock: 93
+delays[0][0]=0
+delays[0][1]=6
+delays[0][2]=28
+delays[0][3]=0
+delays[1][0]=0
+delays[1][1]=9
+delays[1][2]=0
+delays[1][3]=0
+delays[2][0]=6
+delays[2][1]=0
+delays[2][2]=0
+delays[2][3]=0
+runs[0][0]=0
+runs[0][1]=7
+runs[0][2]=23
+runs[0][3]=0
+runs[1][0]=0
+runs[1][1]=10
+runs[1][2]=67
+runs[1][3]=23
+runs[2][0]=23
+runs[2][1]=0
+runs[2][2]=0
+runs[2][3]=67
+
+
+classic_v1_noWindow.xml
+1: 202.805959
+data_earth: 780
+data_storage: 860
+data_internal: 810
+satellite one:
+idle clock: 443
+wait clock: 872
+work clock: 117
+slew clock: 6
+satellite two:
+idle clock: 6
+wait clock: 84
+work clock: 666
+slew clock: 682
+satellite three:
+idle clock: 524
+wait clock: 0
+work clock: 752
+slew clock: 162
+delays[0][0]=0
+delays[0][1]=0
+delays[0][2]=27
+delays[0][3]=0
+delays[1][0]=0
+delays[1][1]=14
+delays[1][2]=0
+delays[1][3]=0
+delays[2][0]=13
 delays[2][1]=0
 delays[2][2]=0
 delays[2][3]=0
@@ -81,12 +361,62 @@ runs[0][1]=0
 runs[0][2]=0
 runs[0][3]=0
 runs[1][0]=0
-runs[1][1]=0
-runs[1][2]=0
+runs[1][1]=14
+runs[1][2]=54
 runs[1][3]=0
-runs[2][0]=0
+runs[2][0]=13
 runs[2][1]=0
 runs[2][2]=0
-runs[2][3]=0
+runs[2][3]=54
+
+
+classic_v1_HighPrioInternal.xml
+1: 382.708829
+data_earth: 1030
+data_storage: 1130
+data_internal: 1356
+satellite one:
+idle clock: 201
+wait clock: 885
+work clock: 263
+slew clock: 90
+satellite two:
+idle clock: 151
+wait clock: 51
+work clock: 719
+slew clock: 517
+satellite three:
+idle clock: 434
+wait clock: 0
+work clock: 909
+slew clock: 96
+delays[0][0]=0
+delays[0][1]=2
+delays[0][2]=30
+delays[0][3]=0
+delays[1][0]=0
+delays[1][1]=8
+delays[1][2]=0
+delays[1][3]=0
+delays[2][0]=3
+delays[2][1]=0
+delays[2][2]=0
+delays[2][3]=0
+runs[0][0]=0
+runs[0][1]=3
+runs[0][2]=16
+runs[0][3]=0
+runs[1][0]=0
+runs[1][1]=9
+runs[1][2]=73
+runs[1][3]=16
+runs[2][0]=26
+runs[2][1]=0
+runs[2][2]=0
+runs[2][3]=73
+
+
+classic_v1_closerHighLow.xml
+1: 0.60476
 
 
