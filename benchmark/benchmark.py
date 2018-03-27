@@ -12,18 +12,23 @@ linux = 'linux'
 def linux_machine(OS_name: str):
     return OS_name == linux
 
-def get_clocks(satID, clock):
-    bla = re.findall("(\ p" + satID + "." + clock +"[>=]+[0-9]+)", line)
-    if bla:
-        return bla[0].split('>')[1].replace("=", "")
-    else:
-        return '0'
+
+def get_clocks():
+    results = []
+    clocks = re.findall("( p[0-9]+.idle[<=]+[0-9]+| p[0-9]+.wait[<=]+[0-9]+| p[0-9]+.work[<=]+[0-9]+| p[0-9]+.slew[<=]+[0-9]+)", line)
+    for c in clocks:
+        splits = c.split("<=")
+        results.append((splits[0].replace(" ", ""), splits[1]))
+    return results
+
 
 def get_delays(first):
     return re.findall("(delays\["+str(first)+"\]\[[0-9]+\]=[0-9]+)", line)
 
+
 def get_runs(first):
     return re.findall("(runs\["+str(first)+"\]\[[0-9]+\]=[0-9]+)", line)
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Benchmark tool for UPPAAL models')
@@ -64,6 +69,7 @@ if __name__ == '__main__':
                             if write:
                                 output = trace_file
                             p1 = None
+                            print("Current model:{0}".format(model))
                             start = datetime.datetime.now()
                             if linux_machine(OS):
                                 subprocess.Popen([my_location + "./verifyta", my_location + model, my_location + "classic.q",
@@ -75,29 +81,16 @@ if __name__ == '__main__':
                             total_seconds = time.total_seconds()
                             times.append(total_seconds)
                             results.write(str(i) + ": " + str(times[-1]) + "\n")
+                            print("Done:{0}".format(model))
                     with open('benchmark_trace', 'r') as trace:
                         for line in reversed(list(trace)):
                             t_time = re.findall("(t_time[>=]+[0-9]+)", line)
                             if t_time:
                                 results.write("data_earth: " + re.findall("(data_earth\=[0-9]+)", line)[0].split('=')[1])
                                 results.write("\ndata_storage: " + re.findall("(data_gathered\=[0-9]+)", line)[0].split('=')[1])
-                                results.write('\ndata_internal: ' + re.findall("(data_internal\=[0-9]+)", line)[0].split('=')[1])
-                                results.write('\nsatellite one:\n')
-
-                                results.write('idle clock: ' + get_clocks('0', 'idle') + "\n")
-                                results.write('wait clock: ' + get_clocks('0', 'wait') + "\n")
-                                results.write('work clock: ' + get_clocks('0', 'work') + "\n")
-                                results.write('slew clock: ' + get_clocks('0', 'slew') + "\n")
-                                results.write('satellite two:\n')
-                                results.write('idle clock: ' + get_clocks('1', 'idle') + "\n")
-                                results.write('wait clock: ' + get_clocks('1', 'wait') + "\n")
-                                results.write('work clock: ' + get_clocks('1', 'work') + "\n")
-                                results.write('slew clock: ' + get_clocks('1', 'slew') + "\n")
-                                results.write('satellite three:\n')
-                                results.write('idle clock: ' + get_clocks('2', 'idle') + "\n")
-                                results.write('wait clock: ' + get_clocks('2', 'wait') + "\n")
-                                results.write('work clock: ' + get_clocks('2', 'work') + "\n")
-                                results.write('slew clock: ' + get_clocks('2', 'slew') + "\n")
+                                results.write('\ndata_internal: ' + re.findall("(data_internal\=[0-9]+)", line)[0].split('=')[1] + "\n")
+                                for clock in get_clocks():
+                                    results.write("{0}\t{1}\n".format(clock[0], clock[1]))
                                 for i in range(0, 3):
                                     items = get_delays(i)
                                     for item in items:
