@@ -282,7 +282,7 @@ bool internalCom() {
 		</location>
 		<location id="id1" x="-212" y="374">
 			<name x="-222" y="340">pre_in</name>
-			<urgent/>
+			<committed/>
 		</location>
 		<location id="id2" x="765" y="127">
 			<committed/>

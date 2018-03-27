@@ -282,7 +282,7 @@ bool internalCom() {
 		</location>
 		<location id="id1" x="-212" y="374">
 			<name x="-222" y="340">pre_in</name>
-			<urgent/>
+			<committed/>
 		</location>
 		<location id="id2" x="765" y="127">
 			<committed/>
@@ -655,7 +655,7 @@ task = active[sat_id]</label>
 		<transition>
 			<source ref="id19"/>
 			<target ref="id17"/>
-			<label kind="guard" x="170" y="289">validSuggestion(sat_id)</label>
+			<label kind="guard" x="170" y="289">validSuggestion(sat_id) &amp;&amp; false</label>
 			<label kind="synchronisation" x="195" y="306">add_task[sat_id]?</label>
 			<label kind="assignment" x="195" y="331">task = sats[sat_id].
 suggested_task,
@@ -892,7 +892,9 @@ void delayed(int t) {
 		</location>
 		<location id="id29" x="-2218" y="-2796">
 			<name x="-2210" y="-2820">Waiting</name>
-			<label kind="invariant" x="-1980" y="-2805">wait' == 1  &amp;&amp;
+			<label kind="invariant" x="-1980" y="-2805">run_time[task] &lt;= 
+getDeadline() &amp;&amp;
+wait' == 1  &amp;&amp;
 work' == 0 &amp;&amp; 
 idle' == 0 &amp;&amp;
 slew' == 0</label>
@@ -1223,7 +1225,7 @@ void suggest_task(){
 }
 </declaration>
 		<location id="id35" x="-216" y="-576">
-			<committed/>
+			<urgent/>
 		</location>
 		<location id="id36" x="-816" y="-576">
 			<name x="-864" y="-584">Start</name>
@@ -1236,7 +1238,7 @@ sats[sat_id].offset</label>
 		</location>
 		<location id="id38" x="-216" y="-464">
 			<name x="-256" y="-456">Checking</name>
-			<committed/>
+			<urgent/>
 		</location>
 		<location id="id39" x="-528" y="-464">
 			<name x="-544" y="-448">Waiting</name>
@@ -1605,7 +1607,7 @@ system CheckRunnable &lt; sc0 &lt; sc1 &lt; sc2 &lt; s0 &lt; s1 &lt; s2 &lt; p0 
 			</comment>
 		</query>
 		<query>
-			<formula>E&lt;&gt; t_time &gt;= 83
+			<formula>E&lt;&gt; t_time &gt;= 167
 			</formula>
 			<comment>
 			</comment>
