@@ -101,10 +101,10 @@ const int PRIOS[N] = {jobs[0].prio, jobs[1].prio, jobs[2].prio, jobs[3].prio};
 
 // some satellites performing different tasks and with different offset
 const SatDescription sat_gat = {0, 0, 80, {0,1,1,0}, -1};
-const SatDescription sat_work = {6, 0, 30, {0,1,1,1}, -1};
+const SatDescription sat_work = {6, 0, 20, {0,1,1,1}, -1};
 const SatDescription sat_trans = {12, 0, 20, {0,0,1,1}, -1};
 const SatDescription sat_sen = {18, 2, 0, {1,0,0,1}, -1};
-SatDescription sats[S] = {sat_gat, sat_trans, sat_sen, sat_gat, sat_work, sat_sen, sat_gat, sat_trans, sat_work, sat_sen};
+SatDescription sats[S] = {sat_gat, sat_work, sat_sen, sat_gat, sat_trans, sat_sen, sat_gat, sat_trans, sat_work, sat_sen};
 
 /** Remove StationDescription and replace with array over costrate */
 const int station_price_rate[STATIONS] = {13, 8};
@@ -287,7 +287,7 @@ bool internalCom() {
 		</location>
 		<location id="id2" x="-212" y="374">
 			<name x="-222" y="340">pre_in</name>
-			<urgent/>
+			<committed/>
 		</location>
 		<location id="id3" x="765" y="127">
 			<committed/>
