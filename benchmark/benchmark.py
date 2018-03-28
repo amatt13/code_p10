@@ -101,6 +101,8 @@ if __name__ == '__main__':
                                         results.write(item + "\n")
                                 break
                         results.write("\n\n")
+                        trace.seek(0)
+                        trace.truncate()
             except IndexError as e:
                     pass
     for times in time_measurements:
