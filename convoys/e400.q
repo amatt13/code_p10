@@ -3,4 +3,4 @@
 /*
 
 */
-E<> TotalTime >= 400
+E<> TotalTime >=400
