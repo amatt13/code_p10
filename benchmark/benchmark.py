@@ -35,6 +35,9 @@ def write(text, newline=True):
             text += "\n"
         results.write(text)
 
+def construct_genral(name, time, earth, gathered, transferred):
+    return "{0} & {1} & {2} & {3} & {4} \\\\ \\hline".format(name, earth, gathered, transferred, time)
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Benchmark tool for UPPAAL models')
     parser.add_argument('-o', type=str, required=False, help='OS name')
@@ -64,8 +67,10 @@ if __name__ == '__main__':
     for model in os.listdir(os.getcwd()):
         i = 0    
         try:
-            if model.split('.')[1] == 'xml':
+            splits = model.split('.')
+            if splits[1] == 'xml':
                 write(model)
+                short_name = splits[0]
                 times = []
                 with open(my_location + "benchmark_trace", 'w') as trace_file:
                     while i < args.i:
@@ -80,30 +85,46 @@ if __name__ == '__main__':
                             subprocess.Popen([my_location + "./verifyta", my_location + model, my_location + "classic.q",
                                               "-o1", t, y], stdout=output, stderr=output).wait()
                         else:
-                            subprocess.Popen(my_location_windows + "verifyta.exe -o1 " + t + " " + s + " " + q + " "  + y  + " " + my_location_windows + model + " " + my_location_windows + "classic.q", stdout=output, stderr=output).wait()
+                            subprocess.Popen(my_location_windows + "verifyta.exe -o1 " + t + " "  + y  + " " + my_location_windows + model + " " + my_location_windows + "classic.q", stdout=output, stderr=output).wait()
                         end = datetime.datetime.now()
                         time = end - start
                         total_seconds = time.total_seconds()
                         times.append(total_seconds)
-                        write(str(i) + ": " + str(times[-1]))
+                        write(str(i) + "\t" + str(times[-1]))
                         print("Done:{0}".format(model))
                 with open('benchmark_trace', 'r') as trace:
                     for line in reversed(list(trace)):
                         t_time = re.findall("(t_time[>=]+[0-9]+)", line)
                         if t_time:
-                            write("data_earth:\t" + re.findall("(data_earth\=[0-9]+)", line)[0].split('=')[1])
-                            write("data_storage:\t" + re.findall("(data_gathered\=[0-9]+)", line)[0].split('=')[1])
-                            write('data_internal:\t' + re.findall("(data_internal\=[0-9]+)", line)[0].split('=')[1])
+                            earth = re.findall("(data_earth\=[0-9]+)", line)[0].split('=')[1]
+                            storage = re.findall("(data_gathered\=[0-9]+)", line)[0].split('=')[1]
+                            internal = re.findall("(data_internal\=[0-9]+)", line)[0].split('=')[1]
+                            write("data_earth:\t" + earth)
+                            write("data_storage:\t" + storage)
+                            write('data_internal:\t' + internal)
+                            clocks_str = short_name
                             for clock in get_clocks():
                                 write("{0}\t{1}".format(clock[0], clock[1]))
+                                clocks_str += " & {0}".format(clock[1])
+                            clocks_str += " \\\\ \\hline"
+                            delays_str = short_name
                             for i in range(0, 3):
                                 items = get_delays(i)
                                 for item in items:
-                                    write(item)
+                                    write(item.replace("=", "\t")) # delays[0][1]=15 
+                                    delays_str += " & {0}".format(item.split("=")[1])
+                            delays_str += " \\\\ \\hline"
+                            runs_str = short_name
                             for i in range(0, 3):
                                 items = get_runs(i)
                                 for item in items:
-                                    write(item)
+                                    write(item.replace("=", "\t"))
+                                    runs_str += " & {0}".format(item.split("=")[1])
+                            runs_str += " \\\\ \\hline"
+                            print(construct_genral(name=short_name, time=str(total_seconds), earth=earth, gathered=storage, transferred=internal))
+                            print(clocks_str)
+                            print(delays_str)
+                            print(runs_str)
                             break
                     write("\n")
         except IndexError as e:

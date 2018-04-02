@@ -68,7 +68,7 @@ const int OVER_STATION[STATION_INDEX][STATIONS][STATION_ATTRI] = {
 clock t_time; // total amount of time passed
 urgent broadcast chan release[S], request[S], preemt[S], add_task[S], check, not_rdy_to_rec[S], go , slew_sat[S], transmit_data[S];
 broadcast chan next[S], find_new;
-chan priority find_new, default &lt; go, slew_sat;
+chan priority find_new, slew_sat &lt; go;
 
 /** Task Description */
 typedef struct {
@@ -376,7 +376,7 @@ bool internalCom() {
 		<transition>
 			<source ref="id1"/>
 			<target ref="id14"/>
-			<label kind="guard" x="-8" y="493">!lowerPriority()</label>
+			<label kind="guard" x="-8" y="493">false</label>
 			<label kind="synchronisation" x="0" y="518">check!</label>
 			<nail x="433" y="518"/>
 			<nail x="-34" y="518"/>
@@ -384,8 +384,7 @@ bool internalCom() {
 		<transition>
 			<source ref="id1"/>
 			<target ref="id20"/>
-			<label kind="guard" x="518" y="229">lowerPriority()&amp;&amp;
-active[sat_id] != RECEIVE_INDEX</label>
+			<label kind="guard" x="518" y="229">active[sat_id] != RECEIVE_INDEX</label>
 			<label kind="synchronisation" x="518" y="272">not_rdy_to_rec[sat_id]!</label>
 			<nail x="510" y="459"/>
 			<nail x="510" y="221"/>
@@ -394,8 +393,7 @@ active[sat_id] != RECEIVE_INDEX</label>
 		<transition>
 			<source ref="id1"/>
 			<target ref="id20"/>
-			<label kind="guard" x="391" y="289">lowerPriority()&amp;&amp;
-active[sat_id] ==
+			<label kind="guard" x="391" y="289">active[sat_id] ==
 RECEIVE_INDEX</label>
 			<nail x="433" y="238"/>
 			<nail x="280" y="238"/>
@@ -641,7 +639,7 @@ active[sat_id] = front()</label>
 		<transition>
 			<source ref="id18"/>
 			<target ref="id14"/>
-			<label kind="guard" x="42" y="433">!lowerPriority()</label>
+			<label kind="guard" x="42" y="433">false</label>
 			<label kind="synchronisation" x="51" y="459">check!</label>
 		</transition>
 		<transition>
@@ -666,7 +664,7 @@ task = active[sat_id]</label>
 		<transition>
 			<source ref="id20"/>
 			<target ref="id18"/>
-			<label kind="guard" x="170" y="289">validSuggestion(sat_id)</label>
+			<label kind="guard" x="170" y="289">validSuggestion(sat_id) &amp;&amp; false</label>
 			<label kind="synchronisation" x="195" y="306">add_task[sat_id]?</label>
 			<label kind="assignment" x="195" y="331">task = sats[sat_id].
 suggested_task,
@@ -895,6 +893,7 @@ void delayed(int t) {
 			<committed/>
 		</location>
 		<location id="id28" x="-2218" y="-2864">
+			<name x="-2228" y="-2898">GG</name>
 			<committed/>
 		</location>
 		<location id="id29" x="-2473" y="-2796">
@@ -1608,6 +1607,12 @@ system CheckRunnable &lt; sc0 &lt; sc1 &lt; sc2 &lt; s0 &lt; s1 &lt; s2 &lt; p0 
 		</query>
 		<query>
 			<formula>E&lt;&gt; t_time &gt;=1440
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>E&lt;&gt; p0.GG
 			</formula>
 			<comment>
 			</comment>
