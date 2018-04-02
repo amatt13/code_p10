@@ -80,7 +80,8 @@ if __name__ == '__main__':
                             subprocess.Popen([my_location + "./verifyta", my_location + model, my_location + "classic.q",
                                               "-o1", t, y], stdout=output, stderr=output).wait()
                         else:
-                            subprocess.Popen(my_location_windows + "verifyta.exe -o1 " + t + " " + s + " " + q + " "  + y  + " " + my_location_windows + model + " " + my_location_windows + "classic.q", stdout=output, stderr=output).wait()
+                            print("start Windows")
+                            subprocess.Popen(my_location_windows + "verifyta.exe -o1 " + t + " "  + y  + " " + my_location_windows + model + " " + my_location_windows + "classic.q", stdout=output, stderr=output).wait()
                         end = datetime.datetime.now()
                         time = end - start
                         total_seconds = time.total_seconds()

@@ -472,3 +472,149 @@ runs[2][2]=0
 runs[2][3]=61
 
 
+
+
+2018-03-28 11:17:33.090642
+classic_v1_10_SATS.xml
+1: 13132.306878
+Trace FileSize: 25,130761 GB
+
+data_earth=2025 
+data_internal=3645 
+data_gathered=2425
+delays[0][0]=0 delays[0][1]=8 delays[0][2]=28 delays[0][3]=0 
+delays[1][0]=0 delays[1][1]=16 delays[1][2]=0 delays[1][3]=0 
+delays[2][0]=11 delays[2][1]=0 delays[2][2]=0 delays[2][3]=0 
+delays[3][0]=0 delays[3][1]=15 delays[3][2]=0 delays[3][3]=0 
+delays[4][0]=0 delays[4][1]=0 delays[4][2]=0 delays[4][3]=0 
+delays[5][0]=11 delays[5][1]=0 delays[5][2]=0 delays[5][3]=0 
+delays[6][0]=0 delays[6][1]=10 delays[6][2]=41 delays[6][3]=0 
+delays[7][0]=0 delays[7][1]=0 delays[7][2]=24 delays[7][3]=0 
+delays[8][0]=0 delays[8][1]=16 delays[8][2]=0 delays[8][3]=0 
+delays[9][0]=10 delays[9][1]=0 delays[9][2]=0 delays[9][3]=0
+
+runs[0][0]=0 runs[0][1]=9 runs[0][2]=20 runs[0][3]=0 
+runs[1][0]=0 runs[1][1]=17 runs[1][2]=56 runs[1][3]=20 
+runs[2][0]=19 runs[2][1]=0 runs[2][2]=0 runs[2][3]=56 
+runs[3][0]=0 runs[3][1]=17 runs[3][2]=33 runs[3][3]=0 
+runs[4][0]=0 runs[4][1]=0 runs[4][2]=34 runs[4][3]=33 
+runs[5][0]=12 runs[5][1]=0 runs[5][2]=0 runs[5][3]=34 
+runs[6][0]=0 runs[6][1]=11 runs[6][2]=21 runs[6][3]=0 
+runs[7][0]=0 runs[7][1]=0 runs[7][2]=21 runs[7][3]=21 
+runs[8][0]=0 runs[8][1]=17 runs[8][2]=58 runs[8][3]=21 
+runs[9][0]=20 runs[9][1]=0 runs[9][2]=0 runs[9][3]=58
+
+p0.idle<=247
+p0.wait<=696
+p0.work<=366
+p0.slew<=131
+p1.idle<=77
+p1.wait<=51
+p1.work<=785
+p1.slew<=527
+p2.idle<=541
+p2.wait<=0
+p2.work<=800
+p2.slew<=99
+p3.idle<=582
+p3.wait<=102
+p3.work<=441
+p3.slew<=315
+p4.idle<=838
+p4.wait<=42
+p4.work<=356
+p4.slew<=204
+p5.idle<=793
+p5.wait<=0
+p5.work<=569
+p5.slew<=78
+p6.idle<=69
+p7.slew<=236
+p8.idle<=113
+p8.wait<=51
+p8.work<=780
+p8.slew<=496
+p9.idle<=544
+p9.wait<=0
+p9.work<=797
+p9.slew<=99
+
+
+2018-03-28 15:27:49.778119
+classic_v1_BASE.xml
+1: 432.033059
+Trace FileSize: 816,570 MB
+data_earth:	880
+data_storage:	1015
+data_internal:	1245
+p0.idle	313
+p0.wait	587
+p0.work	378
+p0.slew	163
+p1.idle	92
+p1.wait	51
+p1.work	808
+p1.slew	490
+p2.idle	503
+p2.wait	0
+p2.work	839
+p2.slew	99
+delays[0][0]=0
+delays[0][1]=9
+delays[0][2]=24
+delays[0][3]=0
+delays[1][0]=0
+delays[1][1]=16
+delays[1][2]=0
+delays[1][3]=0
+delays[2][0]=9
+delays[2][1]=0
+delays[2][2]=0
+delays[2][3]=0
+runs[0][0]=0
+runs[0][1]=10
+runs[0][2]=22
+runs[0][3]=0
+runs[1][0]=0
+runs[1][1]=17
+runs[1][2]=61
+runs[1][3]=22
+runs[2][0]=22
+runs[2][1]=0
+runs[2][2]=0
+runs[2][3]=61
+
+
+2018-03-28 15:43:06.630923
+classic_v1_BASE_2_SAT.xml
+1: 160.218947
+Trace FileSize: 301,782 MB
+data_earth:	710
+data_storage:	755
+data_internal:	735
+p0.idle	678
+p0.wait	51
+p0.work	501
+p0.slew	210
+p1.idle	722
+p1.wait	0
+p1.work	619
+p1.slew	99
+delays[0][0]=0
+delays[0][1]=15
+delays[0][2]=0
+delays[0][3]=0
+delays[1][0]=13
+delays[1][1]=0
+delays[1][2]=0
+delays[1][3]=0
+runs[0][0]=0
+runs[0][1]=17
+runs[0][2]=49
+runs[0][3]=0
+runs[1][0]=18
+runs[1][1]=0
+runs[1][2]=0
+runs[1][3]=49
+
+
