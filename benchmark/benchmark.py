@@ -90,7 +90,7 @@ if __name__ == '__main__':
                         time = end - start
                         total_seconds = time.total_seconds()
                         times.append(total_seconds)
-                        write(str(i) + ": " + str(times[-1]))
+                        write(str(i) + "\t" + str(times[-1]))
                         print("Done:{0}".format(model))
                 with open('benchmark_trace', 'r') as trace:
                     for line in reversed(list(trace)):
@@ -111,14 +111,14 @@ if __name__ == '__main__':
                             for i in range(0, 3):
                                 items = get_delays(i)
                                 for item in items:
-                                    write(item) # delays[0][1]=15 
+                                    write(item.replace("=", "\t")) # delays[0][1]=15 
                                     delays_str += " & {0}".format(item.split("=")[1])
                             delays_str += " \\\\ \\hline"
                             runs_str = short_name
                             for i in range(0, 3):
                                 items = get_runs(i)
                                 for item in items:
-                                    write(item)
+                                    write(item.replace("=", "\t"))
                                     runs_str += " & {0}".format(item.split("=")[1])
                             runs_str += " \\\\ \\hline"
                             print(construct_genral(name=short_name, time=str(total_seconds), earth=earth, gathered=storage, transferred=internal))
