@@ -123,6 +123,7 @@ int data_earth = 0; // Amount of data units sent to Earth (for benchmarking)
 int data_internal = 0; // Amount of data sent internaly between satellites (for benchmarking)
 int data_gathered = 0; // Amount of data currently stored in the system (for benchmarking)
 bool in_orbit[S] = {false,false,false};
+int slews = 0;
 
 
 bool empty(int q[N]){
@@ -1302,7 +1303,7 @@ in_orbit[sat_id] = true</label>
 			<label kind="guard" x="-848" y="-536">slew_time &gt;= 3 &amp;&amp;
 !orientation(sat_id)</label>
 			<label kind="assignment" x="-848" y="-496">turn_satellite(),
-slew_time = 0</label>
+slew_time = 0, slews++</label>
 			<nail x="-856" y="-464"/>
 			<nail x="-856" y="-496"/>
 			<nail x="-736" y="-496"/>
