@@ -7,6 +7,7 @@ const int NO_TASK = -1;
 const int GATHER_DATA = 0;
 const int SEND_TO_STATION = 1;
 const int SEND_TO_CONVOY = 2;
+const int RECIEVE_FROM_CONVOY = 3;
 const int OPEN_WINDOW = 1;
 const int NO_WINDOW_DEPENDENCY = -1;
 const bool FORCE_SEND_TO_STATION = true;
@@ -69,8 +70,8 @@ const int CONVOYS = 3;
 typedef int[0, CONVOYS - 1] id_t;
 const int CONVOY_ZEROS[CONVOYS] = {0,0,0};
 const int MAX_PROCESSORS = 10;
-const int TASKS = 3;
-const int TASKS_ZEROS[TASKS] = {0,0,0};
+const int TASKS = 4;
+const int TASKS_ZEROS[TASKS] = {0,0,0,0};
 typedef struct {
 	int processors; // Number of task the convoy is allowed to perform in parallel
 	int send_to_station[STATIONS]; // Number of stations the convoy is allowed to send to in parallel
@@ -86,11 +87,11 @@ typedef struct {
 	int data_rate;
 } TaskDescription;
 // #Convoy1
-const ConvoyDescription convoys[CONVOYS] = {{9, {3,3,3}, {0,3,3}, 9, 750, {{1,0,0},{0,1,1},{-1,-1,-1}}}, 
-					    {9, {3,0,3}, {3,0,3}, 9, 1000, {{1,0,0},{1,1,1},{-1,-1,-1}}},
-					    {9, {0,3,0}, {3,3,0}, 9, 1500, {{1,0,0},{0,1,0},{-1,-1,-1}}}};
+const ConvoyDescription convoys[CONVOYS] = {{9, {3,3,3}, {0,3,3}, 9, 750, {{1,0,0},{0,1,1},{-1,-1,-1},{-1,-1,-1}}}, 
+					    {9, {3,0,3}, {3,0,3}, 9, 1000, {{1,0,0},{1,1,1},{-1,-1,-1},{-1,-1,-1}}},
+					    {9, {0,3,0}, {3,3,0}, 9, 1500, {{1,0,0},{0,1,0},{-1,-1,-1},{-1,-1,-1}}}};
 // #0 Gather data  // #1 Send to station // #2 Send to convoy
-const TaskDescription tasks[TASKS] = {{0,15, 2},{1,15, 8},{2,15,4}};
+const TaskDescription tasks[TASKS] = {{0,15, 2},{1,15, 8},{2,15,4}, {3,15,4}};
 // Observe storage on each of the convoys
 int storages[CONVOYS] = CONVOY_ZEROS;
 
@@ -108,6 +109,7 @@ int proc_in_use[CONVOYS] = CONVOY_ZEROS;
 int gather_in_use[CONVOYS] = CONVOY_ZEROS;
 int send_to_station[CONVOYS][STATIONS] = {STATION_ZEROS, STATION_ZEROS, STATION_ZEROS};
 int send_to_convoy[CONVOYS][CONVOYS] = {CONVOY_ZEROS, CONVOY_ZEROS, CONVOY_ZEROS} ;
+int recieve_from_convoys[CONVOYS][CONVOYS] = {CONVOY_ZEROS, CONVOY_ZEROS, CONVOY_ZEROS};
 const int schedule_length = 1050;
 
 //CHANNELS
@@ -131,7 +133,7 @@ int obs_sender_convoy_cost[CONVOYS] = CONVOY_ZEROS;
 int calculated_cost = 0;
 
 //OBSERVABLE VARIABLES
-int total_runs[CONVOYS][TASKS] = {TASKS_ZEROS, TASKS_ZEROS, TASKS_ZEROS}; 
+int total_runs[CONVOYS][4] = {{0,0,0,0}, {0,0,0,0}, {0,0,0,0}}; 
 int total_convoy_recived[CONVOYS] = CONVOY_ZEROS;
 int total_convoy_send[CONVOYS] = CONVOY_ZEROS;
 
@@ -154,7 +156,6 @@ void sort_lists(){
 		}
 	}
 }
-
 
 
 </declaration><template><name>Scheduler</name><declaration>clock time;
@@ -310,8 +311,8 @@ int_clock += lowest,
 update_storage(),
 update_processors(),
 update_windows(),
-sort_lists()</label></transition><transition><source ref="id4"/><target ref="id0"/><label kind="guard" x="-372" y="-46">current_task == TASKS</label><label kind="assignment" x="-384" y="-8">calculated_cost = 0</label></transition><transition><source ref="id4"/><target ref="id3"/><label kind="guard" x="-456" y="-96">current_task != TASKS</label><label kind="synchronisation" x="-456" y="-112">suggest_task!</label><nail x="-272" y="-72"/></transition></template><template><name>Convoy</name><parameter>const id_t id</parameter><declaration>//Used in accept_suggestion(), reject_suggestion(), and lastly used in add_tasks()
-int decisions[TASKS] = {1, 0, 0};
+sort_lists()</label></transition><transition><source ref="id4"/><target ref="id0"/><label kind="guard" x="-372" y="-46">current_task == TASKS-1</label><label kind="assignment" x="-384" y="-8">calculated_cost = 0</label></transition><transition><source ref="id4"/><target ref="id3"/><label kind="guard" x="-456" y="-96">current_task != TASKS-1</label><label kind="synchronisation" x="-456" y="-112">suggest_task!</label><nail x="-272" y="-72"/></transition></template><template><name>Convoy</name><parameter>const id_t id</parameter><declaration>//Used in accept_suggestion(), reject_suggestion(), and lastly used in add_tasks()
+int decisions[TASKS] = {1, 0, 0, 0};
 
 //Indicate that the convoy will execute the task
 void accept_suggestion(){
@@ -388,64 +389,90 @@ bool task_within_station(int task_id){
 }
 
 //Used by add_tasks(), this adds the tasks to the convoys processor list, based on the given parameter.
-void insert_task(TaskDescription item){
+int insert_task(TaskDescription item, int local_id){
 	int p, station_index, convoy_index;
-	for(p = 0; p &lt; convoys[id].processors; p++){
-		if (convoy_tasks[id][p].task_type == NO_TASK  &amp;&amp; task_within_station(item.task_type)){
+	if (local_id == -1){
+		local_id = id;
+	}
+	for(p = 0; p &lt; convoys[local_id].processors; p++){
+		if (convoy_tasks[local_id][p].task_type == NO_TASK  &amp;&amp; task_within_station(item.task_type)){
 			if (item.task_type == GATHER_DATA){
-				proc_in_use[id]++;
-				convoy_tasks[id][p].task_type = item.task_type;
-				convoy_tasks[id][p].execution_time = item.execution_time;
-				convoy_tasks[id][p].to = -1;
-				gather_in_use[id]++;
-				total_runs[id][item.task_type]++;
-				return;
+				proc_in_use[local_id]++;
+				convoy_tasks[local_id][p].task_type = item.task_type;
+				convoy_tasks[local_id][p].execution_time = item.execution_time;
+				convoy_tasks[local_id][p].to = -1;
+				gather_in_use[local_id]++;
+				total_runs[local_id][item.task_type]++;
+				return -1;
 			}
 			else if (item.task_type == SEND_TO_STATION){
 				station_index = cheapest_available_station();
 				if (station_index == 9999){
-					return;
+					return 9999;
 				}
 				else{
-					proc_in_use[id]++;
-					convoy_tasks[id][p].task_type = item.task_type;
-					convoy_tasks[id][p].execution_time = item.execution_time;
-					convoy_tasks[id][p].to = station_index;
-					send_to_station[id][convoy_tasks[id][p].to]++;
-					total_runs[id][item.task_type]++;
-					return;
+					proc_in_use[local_id]++;
+					convoy_tasks[local_id][p].task_type = item.task_type;
+					convoy_tasks[local_id][p].execution_time = item.execution_time;
+					convoy_tasks[local_id][p].to = station_index;
+					send_to_station[local_id][convoy_tasks[local_id][p].to]++;
+					total_runs[local_id][item.task_type]++;
+					return -1;
 				}
 			}
 			else if (item.task_type == SEND_TO_CONVOY){
 				convoy_index = lowest_available_convoy();
 				if (convoy_index == 9999){
-					return;
+					return 9999;
 				}
 				else{
-					proc_in_use[id]++;
-					convoy_tasks[id][p].task_type = item.task_type;
-					convoy_tasks[id][p].execution_time = item.execution_time;
-					convoy_tasks[id][p].to = convoy_index;
-					send_to_convoy[id][convoy_tasks[id][p].to]++;
-					total_runs[id][item.task_type]++;
-					return;
+					proc_in_use[local_id]++;
+					convoy_tasks[local_id][p].task_type = item.task_type;
+					convoy_tasks[local_id][p].execution_time = item.execution_time;
+					convoy_tasks[local_id][p].to = convoy_index;
+					send_to_convoy[local_id][convoy_tasks[local_id][p].to]++;
+					total_runs[local_id][item.task_type]++;
+					return convoy_index;
 				}
+			}
+			else if (item.task_type == RECIEVE_FROM_CONVOY){
+				proc_in_use[local_id]++;
+				convoy_tasks[local_id][p].task_type = item.task_type;
+				convoy_tasks[local_id][p].execution_time = item.execution_time;
+				convoy_tasks[local_id][p].to = id;
+				recieve_from_convoys[local_id][convoy_tasks[local_id][p].to]++;
+				total_runs[local_id][item.task_type]++;
+				return -1;
 			}		
 		}
 	}
-	
+	return 1337;
 }
 int running_tasks[TASKS] = TASKS_ZEROS;
-
 //Called after cost has been calculated in the template, because insert_task uses the cost to determine the number of proccesers that needs to perform each task.
 void add_tasks(){
-	int t, amount;
-	for (t = 0; t &lt; TASKS; t++){
+	int t, amount, return_value;
+	int c = 0;
+	for (t = 0; t &lt; TASKS-1; t++){
 		if (decisions[t]){
 			running_tasks[t] = 0;
 			amount = amount_of_tasks_to_execute(t);
 			while(amount){
-				insert_task(tasks[t]);
+				return_value = insert_task(tasks[t], -1);
+				if (tasks[t].task_type == SEND_TO_CONVOY){
+					if (return_value == 9999){//No available convoy
+						
+					}
+					else if (return_value != 1337){//No available processor
+						return_value = insert_task(tasks[3], return_value);
+						if (return_value == 1337){
+							illegal_move = true;
+						}
+						else{
+							running_tasks[RECIEVE_FROM_CONVOY]++;
+						}
+					}
+				}
 				running_tasks[t]++;
 				amount--;
 			}

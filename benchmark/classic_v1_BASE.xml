@@ -1532,7 +1532,28 @@ s2 = Satellite(2);
 sc0 = Scheduler(0);
 sc1 = Scheduler(1);
 sc2 = Scheduler(2);
-system CheckRunnable &lt; sc0 &lt; sc1 &lt; sc2 &lt; s0 &lt; s1 &lt; s2 &lt; p0 &lt; p1 &lt; p2;</system>
+system CheckRunnable &lt; sc0 &lt; sc1 &lt; sc2 &lt; s0 &lt; s1 &lt; s2 &lt; p0 &lt; p1 &lt; p2;
+
+gantt{
+    Occupied0:
+        p0.Occupied -&gt; active[0];
+    Slewing0:
+        p0.Slewing -&gt; 32;
+    Waiting0:
+        p0.Waiting -&gt; 26;
+    Occupied1:
+        p1.Occupied -&gt; active[1];
+    Slewing1:
+        p1.Slewing -&gt; 32;
+    Waiting1:
+        p1.Waiting -&gt; 26;
+    Occupied2:
+        p2.Occupied -&gt; active[2];
+    Slewing2:
+        p2.Slewing -&gt; 32;
+    Waiting2:
+        p2.Waiting -&gt; 26;
+}</system>
 	<queries>
 		<query>
 			<formula>E&lt;&gt; p0.Free &amp;&amp; p1.Free &amp;&amp;  delayed[2][3] == 1
