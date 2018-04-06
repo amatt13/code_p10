@@ -10,7 +10,7 @@ const int SEND_TO_CONVOY = 2;
 const int RECIEVE_FROM_CONVOY = 3;
 const int OPEN_WINDOW = 1;
 const int NO_WINDOW_DEPENDENCY = -1;
-const bool FORCE_SEND_TO_STATION = true;
+const bool IDLE_ALLOWED = false;
 int int_clock = 0;
 
 //STATIONS
@@ -168,21 +168,14 @@ int window_count = 0;
 
 //Look at the stations to see how much time needs to be advanced before a window change appears.
 int nearest_window(){
-	int s1, s2;
-	bool found = false;
+	int s, c;
 	tm = MAX_VALUE;
-	if (true){ // Check if any of the convoys has any tasked queued
-		for (s1 = 0; s1 &lt; STATIONS; s1++){
-			found = false;
-			for (s2 = s_indexes[s1]; s2 &lt; STATION_INDEX; s2++){
-				if (tm &gt; OVER_STATION[s2][s1][1]+1 &amp;&amp; !found &amp;&amp; OVER_STATION[s2][s1][2] == 1){
-					tm = OVER_STATION[s2][s1][1]+1;
-					found = true;
-				}
-			}
+	for (s = 0; s &lt; STATIONS; s++){
+		if (tm &gt; OVER_STATION[s_indexes[s]][s][1]){
+			tm = OVER_STATION[s_indexes[s]][s][1];
 		}
-		return int_clock+1;// NEED FIXING, produces errors when it return tm-fake_clock
 	}
+	return tm-int_clock;
 }
 
 //Sets the lowest variable equal to the lowest amount of time before any of the tasks finishes.
@@ -197,7 +190,7 @@ void closest_task_to_finish(){
 	if (lowest == MAX_VALUE){
 		idle = true;
 		window_count++;
-		lowest = nearest_window()- int_clock;
+		lowest = nearest_window();
 	}
 }
 
@@ -267,10 +260,21 @@ void update_storage(){
 
 
 //Enforces that scheduler is less likely to idle to reduce state-space
-void check_idle(){
-	if (idle){
+bool check_idle(){
+	if (!IDLE_ALLOWED &amp;&amp; idle){
+		illegal_move = true;
+		return false;
+	}
+	else if (!IDLE_ALLOWED &amp;&amp; !idle){
+		return true;
+	}
+	else if (IDLE_ALLOWED &amp;&amp; idle){
 		calculated_cost += 1000;
 		idle = false;
+		return true;
+	}
+	else if (IDLE_ALLOWED &amp;&amp; !idle){
+		return true;
 	}
 }
 
@@ -311,6 +315,7 @@ int_clock += lowest,
 update_storage(),
 update_processors(),
 update_windows(),
+check_idle(),
 sort_lists()</label></transition><transition><source ref="id4"/><target ref="id0"/><label kind="guard" x="-372" y="-46">current_task == TASKS-1</label><label kind="assignment" x="-384" y="-8">calculated_cost = 0</label></transition><transition><source ref="id4"/><target ref="id3"/><label kind="guard" x="-456" y="-96">current_task != TASKS-1</label><label kind="synchronisation" x="-456" y="-112">suggest_task!</label><nail x="-272" y="-72"/></transition></template><template><name>Convoy</name><parameter>const id_t id</parameter><declaration>//Used in accept_suggestion(), reject_suggestion(), and lastly used in add_tasks()
 int decisions[TASKS] = {1, 0, 0, 0};
 
