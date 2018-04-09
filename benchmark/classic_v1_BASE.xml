@@ -65,7 +65,7 @@ const int OVER_STATION[STATION_INDEX][STATIONS][STATION_ATTRI] = {
 {{0, 9999, 0}, {1417, 1439, 1}},
 {{0, 9999, 0}, {1440, 1440, 0}}};
 
-clock t_time, band_cost; // total amount of time passed, accumulated bandwith cost
+clock t_time; // total amount of time passed
 urgent broadcast chan release[S], request[S], preemt[S], add_task[S], check, not_rdy_to_rec[S], go , slew_sat[S], transmit_data[S];
 broadcast chan next[S], find_new;
 chan priority find_new, default &lt; go, slew_sat;
@@ -112,7 +112,7 @@ const int station_price_rate[STATIONS] = {13, 8};
 /** Variables */
 id_s RQ;
 bool runnable[N] = {0,0,0,0};    // can this task be performed
-bool win_active[STATIONS] = {0,0};      // it the satellite currently over a station
+//bool win_active[STATIONS] = {0,0};      // it the satellite currently over a station
 int runs[S][N] = S_ZEROES;       // how many times have each task been run on each satellite (for benchmarking)
 int priorities[S][N] = {PRIOS, PRIOS, PRIOS};
 int active[S] = ACTIVE_INIT;
@@ -123,6 +123,9 @@ int data_earth = 0; // Amount of data units sent to Earth (for benchmarking)
 int data_internal = 0; // Amount of data sent internaly between satellites (for benchmarking)
 int data_gathered = 0; // Amount of data currently stored in the system (for benchmarking)
 bool in_orbit[S] = {false,false,false};
+int slews = 0;
+int band_cost = 0; // accumulated bandwith cost
+int w1 = 0, w2 = 0;
 
 
 bool empty(int q[N]){
@@ -726,11 +729,10 @@ void boostPriority(){
 }
 
 void calc_cost() {
-// TODO: Håndter overlappende vinduer
     int i = 0;
     price = 9999;
     for (i = 0; i &lt; STATIONS; i++){
-        if(jobs[task].depend_station[i] == 1 &amp;&amp; win_active[i]) {
+        if(jobs[task].depend_station[i] == 1 &amp;&amp; runnable[task]) {
             if (price &gt;= station_price_rate[i] * jobs[task].execution_time){
                 price = station_price_rate[i] * jobs[task].execution_time; //choose cheapest
             }
@@ -768,6 +770,15 @@ void update_storage(int t) {
        sats[sat_id].memory += memory;
    }
    statistics(memory); // adds nothing if 0
+}
+
+void update_band_cost(int t) {
+   if (t == 0 || t == 1)  // task is "send_data"
+       band_cost += price;
+       if (price == station_price_rate[0] * jobs[task].execution_time)
+           w1 += 1;
+       else if (price == station_price_rate[1] * jobs[task].execution_time)
+           w2 += 1;
 }
 
 void reportDone() {
@@ -907,8 +918,7 @@ getDeadline() &amp;&amp;
 wait' == 1  &amp;&amp;
 work' == 0 &amp;&amp; 
 idle' == 0 &amp;&amp;
-slew' == 0 &amp;&amp;
-band_cost' == 0</label>
+slew' == 0</label>
 		</location>
 		<location id="id31" x="-2660" y="-2796">
 			<name x="-2700" y="-2820">End</name>
@@ -921,11 +931,10 @@ getDeadline() &amp;&amp;
 wait' == 0  &amp;&amp;
 work' == 0 &amp;&amp; 
 idle' == 0 &amp;&amp;
-slew' == 1 &amp;&amp;
-band_cost' == 0</label>
+slew' == 1</label>
 		</location>
 		<location id="id33" x="-2473" y="-2617">
-			<name x="-2549" y="-2643">Occupied</name>
+			<name x="-2550" y="-2618">Occupied</name>
 			<label kind="invariant" x="-2524" y="-2371">run_time[task]  &lt;= 
 getDeadline() &amp;&amp;
 exe_time + time_used[task]  &lt;= 
@@ -933,8 +942,7 @@ getExeTime() &amp;&amp;
 wait' == 0  &amp;&amp;
 work' == 1 &amp;&amp; 
 idle' == 0 &amp;&amp;
-slew' == 0 &amp;&amp;
-band_cost' == price</label>
+slew' == 0</label>
 		</location>
 		<location id="id34" x="-2473" y="-2473">
 			<name x="-2524" y="-2490">Block</name>
@@ -945,8 +953,7 @@ band_cost' == price</label>
 			<label kind="invariant" x="-3281" y="-2465">wait' == 0  &amp;&amp;
 work' == 0 &amp;&amp; 
 idle' == 1 &amp;&amp;
-slew' == 0 &amp;&amp;
-band_cost' == 0</label>
+slew' == 0</label>
 		</location>
 		<init ref="id35"/>
 		<transition>
@@ -1144,9 +1151,10 @@ orientation(sat_id)</label>
 		<transition>
 			<source ref="id33"/>
 			<target ref="id31"/>
-			<label kind="guard" x="-2618" y="-2703">exe_time + time_used[task] 
+			<label kind="guard" x="-2618" y="-2711">exe_time + time_used[task] 
 == getExeTime()</label>
-			<label kind="assignment" x="-2618" y="-2669">update_storage(task),
+			<label kind="assignment" x="-2618" y="-2677">update_storage(task),
+update_band_cost(task),
 reportDone()</label>
 			<nail x="-2577" y="-2713"/>
 		</transition>
@@ -1305,7 +1313,7 @@ in_orbit[sat_id] = true</label>
 			<label kind="guard" x="-848" y="-536">slew_time &gt;= 3 &amp;&amp;
 !orientation(sat_id)</label>
 			<label kind="assignment" x="-848" y="-496">turn_satellite(),
-slew_time = 0</label>
+slew_time = 0, slews++</label>
 			<nail x="-856" y="-464"/>
 			<nail x="-856" y="-496"/>
 			<nail x="-736" y="-496"/>
@@ -1341,9 +1349,7 @@ int index[S][STATIONS] = {{0,0},{0,0},{0,0}};
 
 void overStation(){
     if (OVER_STATION[index[RQ][window_to_check]][window_to_check][2]) {
-        can_run = true;
-    } else {
-        can_run = false;
+        runnable[task_to_check] = true;
     }
 }
 
@@ -1366,9 +1372,9 @@ void next() {
 
 
 void resetRunnable() {
-	int i;
+	int i, s;
 	for (i = 0; i &lt; N; i++) {
-		runnable[i] = 0;
+		runnable[i] = false;
 	}
 }
 
@@ -1420,10 +1426,7 @@ bool depends() {
 		<location id="id42" x="-306" y="-357">
 			<name x="-316" y="-387">Wait</name>
 		</location>
-		<location id="id43" x="-119" y="-212">
-			<committed/>
-		</location>
-		<location id="id44" x="-306" y="-212">
+		<location id="id43" x="-306" y="-212">
 			<committed/>
 		</location>
 		<init ref="id42"/>
@@ -1435,26 +1438,15 @@ windowEnd() &lt; t_time - sats[RQ].offset +
 jobs[task_to_check].execution_time 
 &amp;&amp; windowStart() &lt;= t_time - sats[RQ].offset
 &amp;&amp; station_to_check</label>
-			<label kind="assignment" x="136" y="-314">station_to_check = false,
-can_run = false</label>
+			<label kind="assignment" x="136" y="-314">station_to_check = false</label>
 			<nail x="68" y="-383"/>
 			<nail x="127" y="-383"/>
 		</transition>
 		<transition>
 			<source ref="id41"/>
-			<target ref="id44"/>
-			<label kind="guard" x="-195" y="-102">!station_to_check &amp;&amp; !can_run</label>
-			<label kind="assignment" x="-221" y="-76">win_active[window_to_check] = can_run,
-next()</label>
-			<nail x="25" y="-76"/>
-			<nail x="-229" y="-76"/>
-		</transition>
-		<transition>
-			<source ref="id41"/>
-			<target ref="id44"/>
-			<label kind="guard" x="-195" y="-178">can_run &amp;&amp; !station_to_check</label>
-			<label kind="assignment" x="-221" y="-153">runnable[task_to_check] = true, next(),
-win_active[window_to_check] = can_run</label>
+			<target ref="id43"/>
+			<label kind="guard" x="-195" y="-170">!station_to_check</label>
+			<label kind="assignment" x="-195" y="-153">next()</label>
 			<nail x="25" y="-153"/>
 			<nail x="-238" y="-153"/>
 		</transition>
@@ -1481,14 +1473,7 @@ overStation()</label>
 		</transition>
 		<transition>
 			<source ref="id43"/>
-			<target ref="id41"/>
-			<label kind="guard" x="-56" y="-240">depends()</label>
-			<label kind="assignment" x="-102" y="-216">station_to_check = true,
-can_run = false</label>
-		</transition>
-		<transition>
-			<source ref="id44"/>
-			<target ref="id44"/>
+			<target ref="id43"/>
 			<label kind="guard" x="-382" y="-161">independent()</label>
 			<label kind="assignment" x="-399" y="-144">skipWindowCheck(),
 allTaskChecked()</label>
@@ -1497,7 +1482,7 @@ allTaskChecked()</label>
 		</transition>
 		<transition>
 			<source ref="id42"/>
-			<target ref="id44"/>
+			<target ref="id43"/>
 			<label kind="synchronisation" x="-391" y="-306">check?</label>
 			<label kind="assignment" x="-433" y="-289">resetRunnable()</label>
 			<nail x="-399" y="-357"/>
@@ -1505,19 +1490,21 @@ allTaskChecked()</label>
 		</transition>
 		<transition>
 			<source ref="id43"/>
-			<target ref="id44"/>
-			<label kind="guard" x="-272" y="-272">!depends()</label>
-			<label kind="assignment" x="-195" y="-272">next()</label>
-			<nail x="-212" y="-255"/>
-		</transition>
-		<transition>
-			<source ref="id44"/>
 			<target ref="id43"/>
-			<label kind="guard" x="-263" y="-229">!all_checked &amp;&amp;
-!independent()</label>
+			<label kind="guard" x="-289" y="-272">!depends() &amp;&amp; !independent()</label>
+			<label kind="assignment" x="-289" y="-255">next()</label>
+			<nail x="-212" y="-255"/>
+			<nail x="-204" y="-229"/>
 		</transition>
 		<transition>
-			<source ref="id44"/>
+			<source ref="id43"/>
+			<target ref="id41"/>
+			<label kind="guard" x="-178" y="-246">!all_checked &amp;&amp; !independent() &amp;&amp;
+depends()</label>
+			<label kind="assignment" x="-288" y="-212">station_to_check = true</label>
+		</transition>
+		<transition>
+			<source ref="id43"/>
 			<target ref="id42"/>
 			<label kind="guard" x="-297" y="-331">all_checked</label>
 			<label kind="synchronisation" x="-297" y="-314">check!</label>
@@ -1533,7 +1520,28 @@ s2 = Satellite(2);
 sc0 = Scheduler(0);
 sc1 = Scheduler(1);
 sc2 = Scheduler(2);
-system CheckRunnable &lt; sc0 &lt; sc1 &lt; sc2 &lt; s0 &lt; s1 &lt; s2 &lt; p0 &lt; p1 &lt; p2;</system>
+system CheckRunnable &lt; sc0 &lt; sc1 &lt; sc2 &lt; s0 &lt; s1 &lt; s2 &lt; p0 &lt; p1 &lt; p2;
+
+gantt{
+    Occupied0:
+        p0.Occupied -&gt; active[0];
+    Slewing0:
+        p0.Slewing -&gt; 32;
+    Waiting0:
+        p0.Waiting -&gt; 26;
+    Occupied1:
+        p1.Occupied -&gt; active[1];
+    Slewing1:
+        p1.Slewing -&gt; 32;
+    Waiting1:
+        p1.Waiting -&gt; 26;
+    Occupied2:
+        p2.Occupied -&gt; active[2];
+    Slewing2:
+        p2.Slewing -&gt; 32;
+    Waiting2:
+        p2.Waiting -&gt; 26;
+}</system>
 	<queries>
 		<query>
 			<formula>E&lt;&gt; p0.Free &amp;&amp; p1.Free &amp;&amp;  delayed[2][3] == 1
@@ -1603,6 +1611,12 @@ system CheckRunnable &lt; sc0 &lt; sc1 &lt; sc2 &lt; s0 &lt; s1 &lt; s2 &lt; p0 
 		</query>
 		<query>
 			<formula>E&lt;&gt; Scheduler(1).pre_in
+			</formula>
+			<comment>
+			</comment>
+		</query>
+		<query>
+			<formula>E&lt;&gt; t_time &lt;= 1440 &amp;&amp; w1 + w2 &lt; runs[0][1] + runs[1][1] + runs[2][0]
 			</formula>
 			<comment>
 			</comment>
