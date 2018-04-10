@@ -8,6 +8,53 @@ import re
 my_location = os.path.dirname(os.path.realpath(__file__)) + "/"
 linux = 'linux'
 
+class Exp:
+    def __init__(self, price: int, time: int, data: list, clocks: list, delays: list, runs: list):
+        self.price = price
+        self.time = time
+        self.data = data
+        self.clocks = clocks
+        self.delays = delays
+        self.runs = runs
+
+    def comp_price(self, price):
+        return (price/int(self.price)) * 100
+
+    def comp_time(self, time):
+        return (time/self.time) * 100
+
+    def comp_data(self, data: list):
+        result = []
+        for i, d in enumerate(data):
+            try:
+                result.append(int(d)/int(self.data[i]) * 100)
+            except ZeroDivisionError:
+                result.append(0)
+        return result
+
+    def comp_clocks(self, clock, index: int):
+        result = []
+        try:
+            result.append(int(clock)/int(self.clocks[index].split("\t")[1]) * 100)
+        except ZeroDivisionError:
+            result.append(0)
+        return result
+
+    def comp_delays(self, delay, index: int):
+        result = []
+        try:
+            result.append(int(delay)/int(self.delays[index].split("=")[1]) * 100)
+        except ZeroDivisionError:
+            result.append(0)
+        return result
+
+    def comp_runs(self, run, index: int):
+        result = []
+        try:
+            result.append(int(run)/int(self.runs[index].split("=")[1]) * 100)
+        except ZeroDivisionError:
+            result.append(0)
+        return result
 
 def linux_machine(OS_name: str):
     return OS_name == linux
@@ -64,71 +111,150 @@ if __name__ == '__main__':
     my_location_windows = my_location.replace("/", "\\")
     
     write(str(datetime.datetime.now()))
+    # base
+    base_time = 0
+    base_price = 0
+    base_clocks = []
+    base_delays = []
+    base_runs = []
+    base_data = []
+    with open(my_location + "/base/base.xml") as base:
+        write("base.xml")
+        short_name = "base"
+        times = []
+        with open(my_location + "benchmark_trace", 'w') as trace_file:
+            output = None
+            if w:
+                output = trace_file
+            p1 = None
+            print("Current model:base.xml")
+            start = datetime.datetime.now()
+            if linux_machine(OS):
+                subprocess.Popen([my_location + "./verifyta", my_location + "/base/base.xml", my_location + "classic.q",
+                                  "-o1", t, y], stdout=output, stderr=output).wait()
+            else:
+                subprocess.Popen(my_location_windows + "verifyta.exe -o1 " + t + " "  + y  + " " + my_location_windows + model + " " + my_location_windows + "classic.q", stdout=output, stderr=output).wait()
+            end = datetime.datetime.now()
+            time = end - start
+            base_time = time.total_seconds()
+            times.append(base_time)
+            write("1:\t" + str(times[-1]))
+            print("Done:base.xml")
+        with open('benchmark_trace', 'r') as trace:
+            for line in reversed(list(trace)):
+                t_time = re.findall("(t_time[>=]+[0-9]+)", line)
+                if t_time:
+                    base_price = re.findall("(band_cost\=[0-9]+)", line)[0].split('=')[1]
+                    write("price:\t{0}".format(base_price))
+                    earth = re.findall("(data_earth\=[0-9]+)", line)[0].split('=')[1]
+                    storage = re.findall("(data_gathered\=[0-9]+)", line)[0].split('=')[1]
+                    internal = re.findall("(data_internal\=[0-9]+)", line)[0].split('=')[1]
+                    base_data.append(earth)
+                    base_data.append(storage)
+                    base_data.append(internal)
+                    write("data_earth:\t" + earth)
+                    write("data_storage:\t" + storage)
+                    write('data_internal:\t' + internal)
+                    clocks_str = short_name
+                    for clock in get_clocks():
+                        clock_rep = "{0}\t{1}".format(clock[0], clock[1])
+                        write(clock_rep)
+                        base_clocks.append(clock_rep)
+                        clocks_str += " & {0}".format(clock[1])
+                    clocks_str += " \\\\ \\hline"
+                    delays_str = short_name
+                    for i in range(0, 3):
+                        items = get_delays(i)
+                        for item in items:
+                            delay = item.replace("=", "\t")
+                            write(delay) # delays[0][1]=15 
+                            base_delays.append(delay)
+                            delays_str += " & {0}".format(item.split("=")[1])
+                    delays_str += " \\\\ \\hline"
+                    runs_str = short_name
+                    for i in range(0, 3):
+                        items = get_runs(i)
+                        for item in items:
+                            run = item.replace("=", "\t")
+                            write(run)
+                            base_runs.append(run)
+                            runs_str += " & {0}".format(item.split("=")[1])
+                    runs_str += " \\\\ \\hline"
+                    print(construct_genral(name=short_name, time=str(base_time), earth=earth, gathered=storage, transferred=internal))
+                    print(clocks_str)
+                    print(delays_str)
+                    print(runs_str)
+                    break
+            write("\n")
+
+    # models
+    base_exp = Exp(price=int(base_price), time=base_time, data=base_data, clocks=base_clocks, delays=base_delays, runs=base_runs)
     for model in os.listdir(os.getcwd()):
         i = 0    
-        try:
-            splits = model.split('.')
-            if splits[1] == 'xml':
-                write(model)
-                short_name = splits[0]
-                times = []
-                with open(my_location + "benchmark_trace", 'w') as trace_file:
-                    while i < args.i:
-                        i += 1
-                        output = None
-                        if w:
-                            output = trace_file
-                        p1 = None
-                        print("Current model:{0}".format(model))
-                        start = datetime.datetime.now()
-                        if linux_machine(OS):
-                            subprocess.Popen([my_location + "./verifyta", my_location + model, my_location + "classic.q",
-                                              "-o1", t, y], stdout=output, stderr=output).wait()
-                        else:
-                            subprocess.Popen(my_location_windows + "verifyta.exe -o1 " + t + " "  + y  + " " + my_location_windows + model + " " + my_location_windows + "classic.q", stdout=output, stderr=output).wait()
-                        end = datetime.datetime.now()
-                        time = end - start
-                        total_seconds = time.total_seconds()
-                        times.append(total_seconds)
-                        write(str(i) + "\t" + str(times[-1]))
-                        print("Done:{0}".format(model))
-                with open('benchmark_trace', 'r') as trace:
-                    for line in reversed(list(trace)):
-                        t_time = re.findall("(t_time[>=]+[0-9]+)", line)
-                        if t_time:
-                            earth = re.findall("(data_earth\=[0-9]+)", line)[0].split('=')[1]
-                            storage = re.findall("(data_gathered\=[0-9]+)", line)[0].split('=')[1]
-                            internal = re.findall("(data_internal\=[0-9]+)", line)[0].split('=')[1]
-                            write("data_earth:\t" + earth)
-                            write("data_storage:\t" + storage)
-                            write('data_internal:\t' + internal)
-                            clocks_str = short_name
-                            for clock in get_clocks():
-                                write("{0}\t{1}".format(clock[0], clock[1]))
-                                clocks_str += " & {0}".format(clock[1])
-                            clocks_str += " \\\\ \\hline"
-                            delays_str = short_name
-                            for i in range(0, 3):
-                                items = get_delays(i)
-                                for item in items:
-                                    write(item.replace("=", "\t")) # delays[0][1]=15 
-                                    delays_str += " & {0}".format(item.split("=")[1])
-                            delays_str += " \\\\ \\hline"
-                            runs_str = short_name
-                            for i in range(0, 3):
-                                items = get_runs(i)
-                                for item in items:
-                                    write(item.replace("=", "\t"))
-                                    runs_str += " & {0}".format(item.split("=")[1])
-                            runs_str += " \\\\ \\hline"
-                            print(construct_genral(name=short_name, time=str(total_seconds), earth=earth, gathered=storage, transferred=internal))
-                            print(clocks_str)
-                            print(delays_str)
-                            print(runs_str)
-                            break
-                    write("\n")
-        except IndexError as e:
-                pass
+        splits = model.split('.')
+        if len(splits) == 2 and splits[1] == 'xml':
+            write(model)
+            short_name = splits[0]
+            times = []
+            with open(my_location + "benchmark_trace", 'w') as trace_file:
+                while i < args.i:
+                    i += 1
+                    output = None
+                    if w:
+                        output = trace_file
+                    p1 = None
+                    print("Current model:{0}".format(model))
+                    start = datetime.datetime.now()
+                    if linux_machine(OS):
+                        subprocess.Popen([my_location + "./verifyta", my_location + model, my_location + "classic.q",
+                                          "-o1", t, y], stdout=output, stderr=output).wait()
+                    else:
+                        subprocess.Popen(my_location_windows + "verifyta.exe -o1 " + t + " "  + y  + " " + my_location_windows + model + " " + my_location_windows + "classic.q", stdout=output, stderr=output).wait()
+                    end = datetime.datetime.now()
+                    time = end - start
+                    total_seconds = time.total_seconds()
+                    times.append(total_seconds)
+                    write("{0}:\t{1}\t{2}".format(i, total_seconds, base_exp.comp_time(total_seconds)))
+                    print("Done:{0}".format(model))
+            with open('benchmark_trace', 'r') as trace:
+                for line in reversed(list(trace)):
+                    t_time = re.findall("(t_time[>=]+[0-9]+)", line)
+                    if t_time:
+                        print(line)
+                        price = re.findall("(band_cost\=[0-9]+)", line)[0].split('=')[1]
+                        write("price:\t{0}\t{1}".format(price, base_exp.comp_price(price)))
+                        earth = re.findall("(data_earth\=[0-9]+)", line)[0].split('=')[1]
+                        storage = re.findall("(data_gathered\=[0-9]+)", line)[0].split('=')[1]
+                        internal = re.findall("(data_internal\=[0-9]+)", line)[0].split('=')[1]
+                        d_r = base_exp.comp_data([earth, storage, internal])
+                        write("data_earth:\t" + earth + "\t" + str(d_r[0]))
+                        write("data_storage:\t" + storage + "\t" + str(d_r[1]))
+                        write('data_internal:\t' + internal + "\t" + str(d_r[2]))
+                        clocks_str = short_name
+                        for i, clock in enumerate(get_clocks()):
+                            write("{0}\t{1}\t{2}".format(clock[0], clock[1], base_exp.comp_clocks(clock[1], i)))
+                            clocks_str += " & {0}".format(clock[1])
+                        clocks_str += " \\\\ \\hline"
+                        delays_str = short_name
+                        for i in range(0, 3):
+                            items = get_delays(i)
+                            for item in items:
+                                write(item.replace("=", "\t") + "\t" + base_exp.comp_delays(items.split("\t")[1], i)) # delays[0][1]=15 
+                                delays_str += " & {0}".format(item.split("=")[1])
+                        delays_str += " \\\\ \\hline"
+                        runs_str = short_name
+                        for i in range(0, 3):
+                            items = get_runs(i)
+                            for item in items:
+                                write(item.replace("=", "\t") + "\t" + base_exp.comp_runs(items.split("\t")[1], i))
+                                runs_str += " & {0}".format(item.split("=")[1])
+                        runs_str += " \\\\ \\hline"
+                        print(construct_genral(name=short_name, time=str(total_seconds), earth=earth, gathered=storage, transferred=internal))
+                        print(clocks_str)
+                        print(delays_str)
+                        print(runs_str)
+                        break
+                write("\n")
     for times in time_measurements:
         print("Average time: " + str(sum(times) / len(times)))
 
