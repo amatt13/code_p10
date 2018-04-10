@@ -143,8 +143,9 @@ if __name__ == '__main__':
         with open('benchmark_trace', 'r') as trace:
             for line in reversed(list(trace)):
                 t_time = re.findall("(t_time[>=]+[0-9]+)", line)
-                base_price = re.findall("(band_cost\=[0-9]+)", line)[0].split('=')[1]
+                base_price = re.findall("(band_cost\=[0-9]+)", line)
                 if t_time and base_price:
+                    base_price = base_price[0].split('=')[1]
                     write(base_price)
                     earth = re.findall("(data_earth\=[0-9]+)", line)[0].split('=')[1]
                     storage = re.findall("(data_gathered\=[0-9]+)", line)[0].split('=')[1]
@@ -210,13 +211,14 @@ if __name__ == '__main__':
                     time = end - start
                     total_seconds = time.total_seconds()
                     times.append(total_seconds)
-                    write("{0}:\t{1}\t{2}".format(i, total_seconds, base_exp.comp_time(total_seconds)))
+                    write("{0}\t{1}".format(total_seconds, base_exp.comp_time(total_seconds)))
                     print("Done:{0}".format(model))
             with open('benchmark_trace', 'r') as trace:
                 for line in reversed(list(trace)):
                     t_time = re.findall("(t_time[>=]+[0-9]+)", line)
-                    price = re.findall("(band_cost\=[0-9]+)", line)[0].split('=')[1]
+                    price = re.findall("(band_cost\=[0-9]+)", line)
                     if t_time and price:
+                        price = price[0].split('=')[1]
                         write("{0}\t{1}".format(price, base_exp.comp_price(price)))
                         earth = re.findall("(data_earth\=[0-9]+)", line)[0].split('=')[1]
                         storage = re.findall("(data_gathered\=[0-9]+)", line)[0].split('=')[1]
@@ -232,17 +234,15 @@ if __name__ == '__main__':
                         clocks_str += " \\\\ \\hline"
                         delays_str = short_name
                         for index, d in enumerate(get_delays()):
-                            print(d)
-                            d = d.replace("=", "\t")
-                            write(base_exp.comp_delays(d.split("\t")[1], index)) # delays[0][1]=15 
-                            delays_str += " & {0}".format(d.split("\t")[1])
+                            d = d.replace("=", "\t").split("\t")[1]
+                            write("{0}\t{1}".format(d, base_exp.comp_delays(d, index))) # delays[0][1]=15 
+                            delays_str += " & {0}".format(d)
                         delays_str += " \\\\ \\hline"
                         runs_str = short_name
                         for index, r in enumerate(get_runs()):
-                            print(r)
-                            r = r.replace("=", "\t")
-                            write(base_exp.comp_runs(r.split("\t")[1], index))
-                            runs_str += " & {0}".format(r.split("\t")[1])
+                            r = r.replace("=", "\t").split("\t")[1]
+                            write("{0}\t{1}".format(r, base_exp.comp_runs(r, index)))
+                            runs_str += " & {0}".format(r)
                         runs_str += " \\\\ \\hline"
                         print(construct_genral(name=short_name, time=str(total_seconds), earth=earth, gathered=storage, transferred=internal))
                         print(clocks_str)
