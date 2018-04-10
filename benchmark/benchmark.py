@@ -18,7 +18,7 @@ class Exp:
         self.runs = runs
 
     def comp_price(self, price):
-        return (price/int(self.price)) * 100
+        return (int(price)/self.price) * 100
 
     def comp_time(self, time):
         return (time/self.time) * 100
@@ -35,26 +35,25 @@ class Exp:
     def comp_clocks(self, clock, index: int):
         result = []
         try:
-            result.append(int(clock)/int(self.clocks[index].split("\t")[1]) * 100)
+            return int(clock)/int(self.clocks[index].split("\t")[1]) * 100
         except ZeroDivisionError:
-            result.append(0)
-        return result
+            return 0
 
     def comp_delays(self, delay, index: int):
-        result = []
+        if int(delay) == 0 and int(self.delays[index].split("\t")[1]) == 0:
+            return 100
         try:
-            result.append(int(delay)/int(self.delays[index].split("=")[1]) * 100)
+            return int(delay)/int(self.delays[index].split("\t")[1]) * 100
         except ZeroDivisionError:
-            result.append(0)
-        return result
+            return "inf"
 
     def comp_runs(self, run, index: int):
-        result = []
+        if int(run) == 0 and int(self.runs[index].split("\t")[1]) == 0:
+            return 100
         try:
-            result.append(int(run)/int(self.runs[index].split("=")[1]) * 100)
+            return int(run)/int(self.runs[index].split("\t")[1]) * 100
         except ZeroDivisionError:
-            result.append(0)
-        return result
+            return "inf"
 
 def linux_machine(OS_name: str):
     return OS_name == linux
@@ -69,14 +68,15 @@ def get_clocks():
     return results
 
 
-def get_delays(first):
-    return re.findall("(delays\["+str(first)+"\]\[[0-9]+\]=[0-9]+)", line)
+def get_delays():
+    return re.findall("(delays\[[0-9]+\]\[[0-9]+\]=[0-9]+)", line)
 
 
-def get_runs(first):
-    return re.findall("(runs\["+str(first)+"\]\[[0-9]+\]=[0-9]+)", line)
+def get_runs():
+    return re.findall("(runs\[[0-9]+\]\[[0-9]+\]=[0-9]+)", line)
 
 def write(text, newline=True):
+    text = str(text)
     with open('results', 'a') as results:
         if newline:
             text += "\n"
@@ -138,47 +138,43 @@ if __name__ == '__main__':
             time = end - start
             base_time = time.total_seconds()
             times.append(base_time)
-            write("1:\t" + str(times[-1]))
+            write(str(times[-1]))
             print("Done:base.xml")
         with open('benchmark_trace', 'r') as trace:
             for line in reversed(list(trace)):
                 t_time = re.findall("(t_time[>=]+[0-9]+)", line)
-                if t_time:
-                    base_price = re.findall("(band_cost\=[0-9]+)", line)[0].split('=')[1]
-                    write("price:\t{0}".format(base_price))
+                base_price = re.findall("(band_cost\=[0-9]+)", line)[0].split('=')[1]
+                if t_time and base_price:
+                    write(base_price)
                     earth = re.findall("(data_earth\=[0-9]+)", line)[0].split('=')[1]
                     storage = re.findall("(data_gathered\=[0-9]+)", line)[0].split('=')[1]
                     internal = re.findall("(data_internal\=[0-9]+)", line)[0].split('=')[1]
                     base_data.append(earth)
                     base_data.append(storage)
                     base_data.append(internal)
-                    write("data_earth:\t" + earth)
-                    write("data_storage:\t" + storage)
-                    write('data_internal:\t' + internal)
+                    write(earth)
+                    write(storage)
+                    write(internal)
                     clocks_str = short_name
                     for clock in get_clocks():
                         clock_rep = "{0}\t{1}".format(clock[0], clock[1])
-                        write(clock_rep)
+                        write(clock_rep.split("\t")[1])
                         base_clocks.append(clock_rep)
                         clocks_str += " & {0}".format(clock[1])
                     clocks_str += " \\\\ \\hline"
                     delays_str = short_name
-                    for i in range(0, 3):
-                        items = get_delays(i)
-                        for item in items:
-                            delay = item.replace("=", "\t")
-                            write(delay) # delays[0][1]=15 
-                            base_delays.append(delay)
-                            delays_str += " & {0}".format(item.split("=")[1])
+                    for d in get_delays():
+                        d = d.replace("=", "\t")
+                        write(d.split("\t")[1]) # delays[0][1]=15 
+                        base_delays.append(d)
+                        delays_str += " & {0}".format(d.split("\t")[1])
                     delays_str += " \\\\ \\hline"
                     runs_str = short_name
-                    for i in range(0, 3):
-                        items = get_runs(i)
-                        for item in items:
-                            run = item.replace("=", "\t")
-                            write(run)
-                            base_runs.append(run)
-                            runs_str += " & {0}".format(item.split("=")[1])
+                    for r in get_runs():
+                        r = r.replace("=", "\t")
+                        write(r.split("\t")[1])
+                        base_runs.append(r)
+                        runs_str += " & {0}".format(r.split("\t")[1])
                     runs_str += " \\\\ \\hline"
                     print(construct_genral(name=short_name, time=str(base_time), earth=earth, gathered=storage, transferred=internal))
                     print(clocks_str)
@@ -219,35 +215,34 @@ if __name__ == '__main__':
             with open('benchmark_trace', 'r') as trace:
                 for line in reversed(list(trace)):
                     t_time = re.findall("(t_time[>=]+[0-9]+)", line)
-                    if t_time:
-                        print(line)
-                        price = re.findall("(band_cost\=[0-9]+)", line)[0].split('=')[1]
-                        write("price:\t{0}\t{1}".format(price, base_exp.comp_price(price)))
+                    price = re.findall("(band_cost\=[0-9]+)", line)[0].split('=')[1]
+                    if t_time and price:
+                        write("{0}\t{1}".format(price, base_exp.comp_price(price)))
                         earth = re.findall("(data_earth\=[0-9]+)", line)[0].split('=')[1]
                         storage = re.findall("(data_gathered\=[0-9]+)", line)[0].split('=')[1]
                         internal = re.findall("(data_internal\=[0-9]+)", line)[0].split('=')[1]
                         d_r = base_exp.comp_data([earth, storage, internal])
-                        write("data_earth:\t" + earth + "\t" + str(d_r[0]))
-                        write("data_storage:\t" + storage + "\t" + str(d_r[1]))
-                        write('data_internal:\t' + internal + "\t" + str(d_r[2]))
+                        write(earth + "\t" + str(d_r[0]))
+                        write(storage + "\t" + str(d_r[1]))
+                        write(internal + "\t" + str(d_r[2]))
                         clocks_str = short_name
                         for i, clock in enumerate(get_clocks()):
-                            write("{0}\t{1}\t{2}".format(clock[0], clock[1], base_exp.comp_clocks(clock[1], i)))
+                            write("{0}\t{1}".format(clock[1], base_exp.comp_clocks(clock[1], i)))
                             clocks_str += " & {0}".format(clock[1])
                         clocks_str += " \\\\ \\hline"
                         delays_str = short_name
-                        for i in range(0, 3):
-                            items = get_delays(i)
-                            for item in items:
-                                write(item.replace("=", "\t") + "\t" + base_exp.comp_delays(items.split("\t")[1], i)) # delays[0][1]=15 
-                                delays_str += " & {0}".format(item.split("=")[1])
+                        for index, d in enumerate(get_delays()):
+                            print(d)
+                            d = d.replace("=", "\t")
+                            write(base_exp.comp_delays(d.split("\t")[1], index)) # delays[0][1]=15 
+                            delays_str += " & {0}".format(d.split("\t")[1])
                         delays_str += " \\\\ \\hline"
                         runs_str = short_name
-                        for i in range(0, 3):
-                            items = get_runs(i)
-                            for item in items:
-                                write(item.replace("=", "\t") + "\t" + base_exp.comp_runs(items.split("\t")[1], i))
-                                runs_str += " & {0}".format(item.split("=")[1])
+                        for index, r in enumerate(get_runs()):
+                            print(r)
+                            r = r.replace("=", "\t")
+                            write(base_exp.comp_runs(r.split("\t")[1], index))
+                            runs_str += " & {0}".format(r.split("\t")[1])
                         runs_str += " \\\\ \\hline"
                         print(construct_genral(name=short_name, time=str(total_seconds), earth=earth, gathered=storage, transferred=internal))
                         print(clocks_str)
