@@ -1789,3 +1789,91 @@ runs[2][2]	0
 runs[2][3]	0
 
 
+2018-04-10 09:43:32.726855
+allDoAll.xml
+1	265.997648
+data_earth:	1450
+data_storage:	1530
+data_internal:	0
+p0.idle	803
+p0.wait	0
+p0.work	580
+p0.slew	57
+p1.idle	798
+p1.wait	0
+p1.work	591
+p1.slew	51
+p2.idle	761
+p2.wait	14
+p2.work	605
+p2.slew	60
+delays[0][0]	1
+delays[0][1]	14
+delays[0][2]	0
+delays[0][3]	0
+delays[1][0]	0
+delays[1][1]	16
+delays[1][2]	0
+delays[1][3]	0
+delays[2][0]	2
+delays[2][1]	12
+delays[2][2]	1
+delays[2][3]	0
+runs[0][0]	16
+runs[0][1]	16
+runs[0][2]	0
+runs[0][3]	0
+runs[1][0]	16
+runs[1][1]	17
+runs[1][2]	0
+runs[1][3]	0
+runs[2][0]	15
+runs[2][1]	18
+runs[2][2]	0
+runs[2][3]	0
+
+
+classic_v1_BASE.xml
+1	296.20994
+data_earth:	710
+data_storage:	930
+data_internal:	1275
+p0.idle	511
+p0.wait	299
+p0.work	403
+p0.slew	227
+p1.idle	303
+p1.wait	51
+p1.work	673
+p1.slew	413
+p2.idle	600
+p2.wait	0
+p2.work	741
+p2.slew	99
+delays[0][0]	0
+delays[0][1]	15
+delays[0][2]	12
+delays[0][3]	0
+delays[1][0]	0
+delays[1][1]	13
+delays[1][2]	0
+delays[1][3]	0
+delays[2][0]	12
+delays[2][1]	0
+delays[2][2]	0
+delays[2][3]	0
+runs[0][0]	0
+runs[0][1]	16
+runs[0][2]	32
+runs[0][3]	0
+runs[1][0]	0
+runs[1][1]	15
+runs[1][2]	53
+runs[1][3]	32
+runs[2][0]	18
+runs[2][1]	0
+runs[2][2]	0
+runs[2][3]	53
+
+
+closerHighLow.xml
