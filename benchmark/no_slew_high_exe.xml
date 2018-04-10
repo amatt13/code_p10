@@ -756,7 +756,7 @@ void statistics(int value){
 }
 
 void update_storage(int t) {
-   int memory = (jobs[t].execution_time * jobs[t].data_rate);
+   int memory = (jobs[t].execution_time * jobs[t].data_rate) - (jobs[t].data_rate * 3);
    if (sats[sat_id].memory + memory &gt; MAX_MEMORY) { // add above
            memory = MAX_MEMORY - sats[sat_id].memory;
            sats[sat_id].memory = MAX_MEMORY;
