@@ -6,8 +6,8 @@ const int S = 3; // Amount of satellites
 const int SCHEDULE_LENGHT = 360; // Length of schedule
 const int ORBIT_TIME = 60; // duration of one orbit
 const int MAX_MEMORY = 100; // satellites maximum storage capacity
-const int LOW_MEMORY = MAX_MEMORY * 30/100; // threshold for when  little memory is used
-const int HIGH_MEMORY = MAX_MEMORY * 75/100; // threshold for when a lot memory is used
+const int LOW_MEMORY = MAX_MEMORY * 15/100; // threshold for when  little memory is used
+const int HIGH_MEMORY = MAX_MEMORY * 90/100; // threshold for when a lot memory is used
 const int RECEIVE_INDEX = 3; // the index for the receive task
 const int TRANSMIT_INDEX = 2; // the index for the internal send task
 const int TASK_SUGGEST_INTERVAL = 3; // how often should a task be suggested
@@ -91,17 +91,17 @@ typedef struct {
 // Some tasks, with different propperties
 				      /* 0 = forward, 1 = earth, 2 = backwards*/
                                       /*  w     E  D   P  rate Co   Orien*/
-const TaskDescription send_data       = {{0,1}, 23,26, 9, -2, 0};
-const TaskDescription gather_new_data = {{1,0}, 18,21,  6,  2, 0};
-const TaskDescription transfer        = {{0,0}, 8,17,  5, -3, 0};
-const TaskDescription receive         = {{0,0}, 8,11,  4,  3, 0};
+const TaskDescription send_data       = {{0,1}, 20,26, 9, -2, 1};
+const TaskDescription gather_new_data = {{1,0}, 15,21,  6,  2, 0};
+const TaskDescription transfer        = {{0,0}, 5,17,  5, -3, 2};
+const TaskDescription receive         = {{0,0}, 5,11,  4,  3, 0};
 const TaskDescription jobs[N]         = {send_data, gather_new_data, transfer, receive}; //update RECEIVE_INDEX if receive moves
 const int PRIOS[N] = {jobs[0].prio, jobs[1].prio, jobs[2].prio, jobs[3].prio};
 
 // some satellites performing different tasks and with different offset
 const SatDescription sat_gat = {3, 0, 80, {0,1,1,0}, -1};
 const SatDescription sat_trans = {3, 0, 20, {0,1,1,1}, -1};
-const SatDescription sat_sen = {9, 0, 0, {1,0,0,1}, -1};
+const SatDescription sat_sen = {9, 2, 0, {1,0,0,1}, -1};
 SatDescription sats[S] = {sat_gat, sat_trans, sat_sen};
 
 /** Remove StationDescription and replace with array over costrate */
