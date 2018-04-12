@@ -133,7 +133,7 @@ if __name__ == '__main__':
                 subprocess.Popen([my_location + "./verifyta", my_location + "/base/base.xml", my_location + "classic.q",
                                   "-o1", t, y], stdout=output, stderr=output).wait()
             else:
-                subprocess.Popen(my_location_windows + "verifyta.exe -o1 " + t + " "  + y  + " " + my_location_windows + model + " " + my_location_windows + "classic.q", stdout=output, stderr=output).wait()
+                subprocess.Popen(my_location_windows + "verifyta.exe -o1 " + t + " "  + y  + " " + my_location_windows + "/base/base.xml" + " " + my_location_windows + "classic.q", stdout=output, stderr=output).wait()
             end = datetime.datetime.now()
             time = end - start
             base_time = time.total_seconds()
