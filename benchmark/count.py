@@ -5,8 +5,4 @@ if __name__ == '__main__':
     n = sys.argv[2]
     print("Replacing X and counting {0} times".format(n))
     result = ""
-    i = 0 
-    while i < int(n):
-        result += string.replace("X", str(i)) + "\n"
-        i += 1
-    print(result)
+    print("\n".join(string.replace("X", str(x)) for x in range(0, int(n))))

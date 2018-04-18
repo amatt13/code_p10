@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.1//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_2.dtd'>
+<nta>
+	<declaration>// Place global declarations here.
+clock x, c, p, t;
+int value = 0;</declaration>
+	<template>
+		<name x="5" y="5">Template</name>
+		<declaration>// Place local declarations here.
+
+</declaration>
+		<location id="id0" x="-229" y="-170">
+			<urgent/>
+		</location>
+		<location id="id1" x="-59" y="-255">
+			<name x="-93" y="-263">A</name>
+			<label kind="invariant" x="-119" y="-289">c'==3 &amp;&amp; x &lt;= 100</label>
+		</location>
+		<location id="id2" x="-59" y="-85">
+			<name x="-93" y="-93">U</name>
+			<label kind="invariant" x="-127" y="-68">c'==10 &amp;&amp; x &lt;= 50</label>
+		</location>
+		<location id="id3" x="127" y="-178">
+			<urgent/>
+		</location>
+		<location id="id4" x="272" y="-272">
+			<name x="238" y="-280">B</name>
+			<label kind="invariant" x="212" y="-306">c'==1 &amp;&amp; x &lt;= 100</label>
+		</location>
+		<location id="id5" x="289" y="-68">
+			<name x="263" y="-76">V</name>
+			<label kind="invariant" x="229" y="-51">c'==8 &amp;&amp; x &lt;= 50</label>
+		</location>
+		<location id="id6" x="450" y="-195">
+			<name x="440" y="-229">End</name>
+		</location>
+		<init ref="id0"/>
+		<transition controllable="false">
+			<source ref="id4"/>
+			<target ref="id6"/>
+		</transition>
+		<transition controllable="false">
+			<source ref="id5"/>
+			<target ref="id6"/>
+		</transition>
+		<transition>
+			<source ref="id3"/>
+			<target ref="id5"/>
+		</transition>
+		<transition>
+			<source ref="id3"/>
+			<target ref="id4"/>
+		</transition>
+		<transition controllable="false">
+			<source ref="id2"/>
+			<target ref="id3"/>
+			<label kind="assignment" x="51" y="-170">x=0</label>
+		</transition>
+		<transition controllable="false">
+			<source ref="id1"/>
+			<target ref="id3"/>
+			<label kind="assignment" x="51" y="-187">x=0</label>
+		</transition>
+		<transition>
+			<source ref="id0"/>
+			<target ref="id1"/>
+		</transition>
+		<transition>
+			<source ref="id0"/>
+			<target ref="id2"/>
+		</transition>
+	</template>
+	<template>
+		<name>M2</name>
+		<location id="id7" x="-8" y="25">
+			<urgent/>
+		</location>
+		<location id="id8" x="144" y="-85">
+			<label kind="invariant" x="134" y="-68">x &lt;= 10 &amp;&amp; 
+p'==10</label>
+		</location>
+		<location id="id9" x="-144" y="-85">
+			<label kind="invariant" x="-221" y="-68">x &lt;= 10 &amp;&amp; 
+p'==1</label>
+		</location>
+		<location id="id10" x="-8" y="119">
+			<name x="8" y="85">Done</name>
+		</location>
+		<init ref="id7"/>
+		<transition>
+			<source ref="id7"/>
+			<target ref="id10"/>
+			<label kind="guard" x="0" y="59">t &gt;= 100</label>
+		</transition>
+		<transition controllable="false">
+			<source ref="id9"/>
+			<target ref="id7"/>
+			<label kind="guard" x="-68" y="-110">x == 10</label>
+			<label kind="assignment" x="-51" y="-76">x = 0</label>
+			<nail x="-8" y="-85"/>
+		</transition>
+		<transition>
+			<source ref="id7"/>
+			<target ref="id9"/>
+			<label kind="guard" x="-153" y="-25">value &gt;= 5 &amp;&amp;
+t &lt; 100</label>
+		</transition>
+		<transition controllable="false">
+			<source ref="id8"/>
+			<target ref="id7"/>
+			<label kind="guard" x="0" y="-110">x == 10</label>
+			<label kind="assignment" x="0" y="-76">x = 0, 
+value += 1</label>
+			<nail x="-8" y="-85"/>
+		</transition>
+		<transition>
+			<source ref="id7"/>
+			<target ref="id8"/>
+			<label kind="guard" x="59" y="-17">t &lt; 100</label>
+		</transition>
+	</template>
+	<system>// Place template instantiations here.
+Process = Template();
+Model = M2();
+// List one or more processes to be composed into a system.
+system Model;</system>
+	<queries>
+		<query>
+			<formula>strategy high = maxE (value) [&lt;=101] : &lt;&gt; Process.End</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>strategy low = minE (value) [&lt;=101] : &lt;&gt; Process.End</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>simulate 1000 [&lt;=100] {value} under high</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>simulate 1000 [&lt;=100] {value} under low</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>Pr [&lt;=100] (&lt;&gt; value &lt;= 32 &amp;&amp; t_time == 100) under low</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>Pr [&lt;=100] (&lt;&gt; value &gt; 32 &amp;&amp; t_time == 100) under low</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>Pr [&lt;=100] (&lt;&gt; value &lt;= 32 &amp;&amp; t_time == 100) under high</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>Pr [&lt;=100] (&lt;&gt; value &gt; 32 &amp;&amp; t_time == 100) under high</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula></formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula></formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>strategy Opt = minE(c) [&lt;=200]: &lt;&gt; Process.End</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>simulate 10 [&lt;=200] {c} under Opt</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>simulate 10 [&lt;=200] {c}</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>simulate 1 [&lt;=200] {Process.A,Process.U*2,Process.B*3,Process.V*4, c/100} under Opt</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>simulate 1 [&lt;=200] {A,U,B,V}</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>E[&lt;=200; 1000] (max: c) under Opt</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula></formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>strategy Cheap = minE(p) [&lt;=100]: &lt;&gt; Model.Done</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>simulate 1 [&lt;=100] {p, value*10} under Cheap</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>simulate 1 [&lt;=100] {p, value*10}</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula></formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula></formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula></formula>
+			<comment></comment>
+		</query>
+	</queries>
+</nta>

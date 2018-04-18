@@ -187,7 +187,8 @@ if __name__ == '__main__':
     # models
     base_exp = Exp(price=int(base_price), time=base_time, data=base_data, clocks=base_clocks, delays=base_delays, runs=base_runs)
     for model in os.listdir(os.getcwd()):
-        i = 0    
+        i = 0
+        count = 0
         splits = model.split('.')
         if len(splits) == 2 and splits[1] == 'xml':
             write(model)
@@ -200,7 +201,8 @@ if __name__ == '__main__':
                     if w:
                         output = trace_file
                     p1 = None
-                    print("Current model:{0}".format(model))
+                    count += 1
+                    print("{0} - Current model:{1}".format(count, model))
                     start = datetime.datetime.now()
                     if linux_machine(OS):
                         subprocess.Popen([my_location + "./verifyta", my_location + model, my_location + "classic.q",
