@@ -45,7 +45,7 @@ class Exp:
         try:
             return int(delay)/int(self.delays[index].split("\t")[1]) * 100
         except ZeroDivisionError:
-            return "inf"
+            return "\textbf{" + str(delay) + "}"
 
     def comp_runs(self, run, index: int):
         if int(run) == 0 and int(self.runs[index].split("\t")[1]) == 0:
@@ -53,7 +53,7 @@ class Exp:
         try:
             return int(run)/int(self.runs[index].split("\t")[1]) * 100
         except ZeroDivisionError:
-            return "inf"
+            return "\textbf{" + str(run) + "}"
 
 def linux_machine(OS_name: str):
     return OS_name == linux

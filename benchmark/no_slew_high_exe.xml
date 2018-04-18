@@ -733,7 +733,7 @@ void calc_cost() {
     for (i = 0; i &lt; STATIONS; i++){
         if(jobs[task].depend_station[i] &amp;&amp; runnable[task] &amp;&amp; win_active[i]) {
             if (price &gt; station_price_rate[i] * jobs[task].execution_time){
-                price = station_price_rate[i] * jobs[task].execution_time; //choose cheapest
+                price = (station_price_rate[i] * jobs[task].execution_time) - (station_price_rate[i] * 3); //choose cheapest
             }
         }
     }
