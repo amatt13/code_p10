@@ -92,11 +92,11 @@ typedef struct {
 	int data_rate;
 } TaskDescription;
 // #Convoy1
-const ConvoyDescription convoys[CONVOYS] = {{9, {1,1,3}, {0,3,3}, 9, 750, {{1,1,1},{1,1,1},{-1,-1,-1},{-1,-1,-1}}}, 
+const ConvoyDescription convoys[CONVOYS] = {{9, {3,3,3}, {0,3,3}, 9, 750, {{1,0,0},{0,1,1},{-1,-1,-1},{-1,-1,-1}}}, 
 					    {9, {3,0,3}, {3,0,3}, 9, 1000, {{1,0,0},{1,1,1},{-1,-1,-1},{-1,-1,-1}}},
-					    {9, {1,1,3}, {3,3,0}, 9, 1500, {{1,0,0},{0,1,0},{-1,-1,-1},{-1,-1,-1}}}};
+					    {9, {0,3,3}, {3,3,0}, 9, 1500, {{1,0,0},{0,1,0},{-1,-1,-1},{-1,-1,-1}}}};
 // #0 Gather data  // #1 Send to station // #2 Send to convoy
-const TaskDescription tasks[TASKS] = {{0,18, 2},{1,23, 2},{2,8,3}, {3,8,3}};
+const TaskDescription tasks[TASKS] = {{0,15, 2},{1,15, 8},{2,15,4}, {3,15,4}};
 // Observe storage on each of the convoys
 int storages[CONVOYS] = CONVOY_ZEROS;
 
@@ -290,7 +290,7 @@ bool check_idle(){
 
 //Check if the scheduler has made a move that result in either storage under- or over-flowing, and more.
 bool check_constrains(){
-    return true;
+//    return true;
 	if (illegal_move){
 		return false;
 	}
@@ -316,7 +316,7 @@ void update_windows(){
 	}
 }
 </declaration>
-		<location id="id0" x="-480" y="-16">
+		<location id="id0" x="-476" y="-17">
 			<committed/>
 		</location>
 		<location id="id1" x="-256" y="184">
@@ -324,26 +324,29 @@ void update_windows(){
 			<label kind="invariant" x="-306" y="195">time &lt;= lowest &amp;&amp;
 TotalTime &lt; SCHEDULE_LENGTH &amp;&amp;
 lowest != 0 &amp;&amp;
-check_constrains() &amp;&amp;
 cost' == calculated_cost</label>
 		</location>
 		<location id="id2" x="-256" y="-16">
 			<urgent/>
 		</location>
+		<location id="id3" x="-357" y="-110">
+			<name x="-367" y="-144">B</name>
+		</location>
 		<init ref="id2"/>
 		<transition controllable="false">
 			<source ref="id0"/>
-			<target ref="id2"/>
-			<label kind="guard" x="-399" y="51">lowest == 0</label>
-			<nail x="-348" y="76"/>
+			<target ref="id3"/>
+			<label kind="guard" x="-467" y="-102">!check_constrains()</label>
+			<nail x="-476" y="-110"/>
 		</transition>
 		<transition controllable="false">
 			<source ref="id0"/>
 			<target ref="id1"/>
+			<label kind="guard" x="-467" y="110">check_constrains()</label>
 			<label kind="assignment" x="-467" y="127">time = 0,
 sort_lists(),
 closest_task_to_finish()</label>
-			<nail x="-480" y="184"/>
+			<nail x="-476" y="187"/>
 		</transition>
 		<transition controllable="false">
 			<source ref="id1"/>
@@ -367,7 +370,7 @@ sort_lists()</label>
 		<transition controllable="false">
 			<source ref="id2"/>
 			<target ref="id2"/>
-			<label kind="guard" x="-221" y="-93">current_task != TASKS-1</label>
+			<label kind="guard" x="-246" y="-93">current_task != TASKS-1</label>
 			<label kind="synchronisation" x="-246" y="-76">suggest_task!</label>
 			<label kind="assignment" x="-246" y="-59">current_task++</label>
 			<nail x="-280" y="-76"/>
@@ -698,20 +701,20 @@ void calc_cost(){
 
 
 </declaration>
-		<location id="id3" x="-392" y="-40">
+		<location id="id4" x="-392" y="-40">
 		</location>
-		<location id="id4" x="-535" y="-42">
+		<location id="id5" x="-535" y="-42">
 			<committed/>
 		</location>
-		<init ref="id3"/>
+		<init ref="id4"/>
 		<transition controllable="false">
-			<source ref="id3"/>
-			<target ref="id4"/>
+			<source ref="id4"/>
+			<target ref="id5"/>
 			<label kind="synchronisation" x="-518" y="-59">suggest_task?</label>
 		</transition>
 		<transition controllable="false">
-			<source ref="id3"/>
-			<target ref="id3"/>
+			<source ref="id4"/>
+			<target ref="id4"/>
 			<label kind="synchronisation" x="-368" y="-72">assign_tasks?</label>
 			<label kind="assignment" x="-360" y="-32">calc_cost(),
 add_tasks()</label>
@@ -719,15 +722,15 @@ add_tasks()</label>
 			<nail x="-288" y="-32"/>
 		</transition>
 		<transition>
-			<source ref="id4"/>
-			<target ref="id3"/>
+			<source ref="id5"/>
+			<target ref="id4"/>
 			<label kind="assignment" x="-510" y="34">accept_suggestion()</label>
 			<nail x="-493" y="17"/>
 			<nail x="-391" y="17"/>
 		</transition>
 		<transition>
-			<source ref="id4"/>
-			<target ref="id3"/>
+			<source ref="id5"/>
+			<target ref="id4"/>
 			<label kind="assignment" x="-510" y="-127">reject_suggestion()</label>
 			<nail x="-493" y="-102"/>
 			<nail x="-391" y="-102"/>
@@ -757,15 +760,27 @@ system Scheduler, Convoy;</system>
 			<comment></comment>
 		</query>
 		<query>
+			<formula>strategy dontDie = minE (cost) [&lt;=1440] : &lt;&gt; !Scheduler.B &amp;&amp; TotalTime ==  600</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>strategy hej = minE (cost) [&lt;=1440] : &lt;&gt; Scheduler.A &amp;&amp; TotalTime ==  600 under stor</formula>
+			<comment></comment>
+		</query>
+		<query>
 			<formula>strategy hej = minE (cost) [&lt;=1440] : &lt;&gt; Scheduler.A under sat2</formula>
 			<comment></comment>
 		</query>
 		<query>
-			<formula>simulate 100 [&lt;=1440] {cost, stations[0].data_recieved, stations[1].data_recieved, stations[2].data_recieved}</formula>
+			<formula>simulate 100 [&lt;=165] {cost, stations[0].data_recieved, stations[1].data_recieved, stations[2].data_recieved}</formula>
 			<comment></comment>
 		</query>
 		<query>
-			<formula>simulate 100 [&lt;=1440] {cost, stations[0].data_recieved, stations[1].data_recieved, stations[2].data_recieved} under sat2</formula>
+			<formula>simulate 100 [&lt;=165] {cost, storages[0], storages[1], storages[2]} under hej</formula>
+			<comment></comment>
+		</query>
+		<query>
+			<formula>simulate 100 [&lt;=165] {cost, stations[0].data_recieved, stations[1].data_recieved, stations[2].data_recieved} under dontDie</formula>
 			<comment></comment>
 		</query>
 	</queries>
