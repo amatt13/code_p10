@@ -45,7 +45,7 @@ class Exp:
         try:
             return int(delay)/int(self.delays[index].split("\t")[1]) * 100
         except ZeroDivisionError:
-            return "inf"
+            return "\textbf{" + str(delay) + "}"
 
     def comp_runs(self, run, index: int):
         if int(run) == 0 and int(self.runs[index].split("\t")[1]) == 0:
@@ -53,7 +53,7 @@ class Exp:
         try:
             return int(run)/int(self.runs[index].split("\t")[1]) * 100
         except ZeroDivisionError:
-            return "inf"
+            return "\textbf{" + str(run) + "}"
 
 def linux_machine(OS_name: str):
     return OS_name == linux
@@ -133,7 +133,7 @@ if __name__ == '__main__':
                 subprocess.Popen([my_location + "./verifyta", my_location + "/base/base.xml", my_location + "classic.q",
                                   "-o1", t, y], stdout=output, stderr=output).wait()
             else:
-                subprocess.Popen(my_location_windows + "verifyta.exe -o1 " + t + " "  + y  + " " + my_location_windows + model + " " + my_location_windows + "classic.q", stdout=output, stderr=output).wait()
+                subprocess.Popen(my_location_windows + "verifyta.exe -o1 " + t + " "  + y  + " " + my_location_windows + "/base/base.xml" + " " + my_location_windows + "classic.q", stdout=output, stderr=output).wait()
             end = datetime.datetime.now()
             time = end - start
             base_time = time.total_seconds()
@@ -187,7 +187,8 @@ if __name__ == '__main__':
     # models
     base_exp = Exp(price=int(base_price), time=base_time, data=base_data, clocks=base_clocks, delays=base_delays, runs=base_runs)
     for model in os.listdir(os.getcwd()):
-        i = 0    
+        i = 0
+        count = 0
         splits = model.split('.')
         if len(splits) == 2 and splits[1] == 'xml':
             write(model)
@@ -200,7 +201,8 @@ if __name__ == '__main__':
                     if w:
                         output = trace_file
                     p1 = None
-                    print("Current model:{0}".format(model))
+                    count += 1
+                    print("{0} - Current model:{1}".format(count, model))
                     start = datetime.datetime.now()
                     if linux_machine(OS):
                         subprocess.Popen([my_location + "./verifyta", my_location + model, my_location + "classic.q",

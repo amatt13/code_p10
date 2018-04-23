@@ -380,7 +380,7 @@ bool internalCom() {
 		<transition>
 			<source ref="id1"/>
 			<target ref="id14"/>
-			<label kind="guard" x="-8" y="493">!lowerPriority()</label>
+			<label kind="guard" x="-8" y="493">!lowerPriority() &amp;&amp; false</label>
 			<label kind="synchronisation" x="0" y="518">check!</label>
 			<nail x="433" y="518"/>
 			<nail x="-34" y="518"/>
@@ -388,8 +388,6 @@ bool internalCom() {
 		<transition>
 			<source ref="id1"/>
 			<target ref="id20"/>
-			<label kind="guard" x="518" y="229">lowerPriority()&amp;&amp;
-active[sat_id] != RECEIVE_INDEX</label>
 			<label kind="synchronisation" x="518" y="272">not_rdy_to_rec[sat_id]!</label>
 			<nail x="510" y="459"/>
 			<nail x="510" y="221"/>
@@ -400,7 +398,7 @@ active[sat_id] != RECEIVE_INDEX</label>
 			<target ref="id20"/>
 			<label kind="guard" x="391" y="289">lowerPriority()&amp;&amp;
 active[sat_id] ==
-RECEIVE_INDEX</label>
+RECEIVE_INDEX  &amp;&amp; false</label>
 			<nail x="433" y="238"/>
 			<nail x="280" y="238"/>
 		</transition>
@@ -645,7 +643,7 @@ active[sat_id] = front()</label>
 		<transition>
 			<source ref="id18"/>
 			<target ref="id14"/>
-			<label kind="guard" x="42" y="433">!lowerPriority()</label>
+			<label kind="guard" x="42" y="433">!lowerPriority() &amp;&amp; false</label>
 			<label kind="synchronisation" x="51" y="459">check!</label>
 		</transition>
 		<transition>
