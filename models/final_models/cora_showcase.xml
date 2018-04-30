@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?><!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.1//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_1.dtd'><nta><declaration>// Place global declarations here.
+clock t;</declaration><template><name>Min_cost</name><declaration>// Place local declarations here.
+</declaration><location id="id0" x="112" y="40"><label kind="invariant" x="128" y="24">cost '== 2 &amp;&amp;
+t &lt; 10</label></location><location id="id1" x="208" y="-40"><label kind="invariant" x="224" y="-56">cost '== 5</label></location><location id="id2" x="112" y="-120"><label kind="invariant" x="128" y="-136">cost '== 1 &amp;&amp;
+t &lt; 10</label></location><location id="id3" x="16" y="-40"><label kind="invariant" x="-104" y="-56">cost '== 1 &amp;&amp;
+t &lt; 5</label></location><init ref="id3"/><transition><source ref="id0"/><target ref="id1"/><label kind="guard" x="160" y="0">t &gt; 7</label></transition><transition><source ref="id3"/><target ref="id0"/><label kind="guard" x="24" y="0">t &gt; 3</label></transition><transition><source ref="id2"/><target ref="id1"/><label kind="guard" x="168" y="-96">t &gt; 10</label></transition><transition><source ref="id3"/><target ref="id2"/><label kind="guard" x="24" y="-96">t &gt; 3</label></transition></template><system>// Place template instantiations here.
+Process = Template();
+
+// List one or more processes to be composed into a system.
+system Process;</system></nta>

@@ -53,7 +53,7 @@ const int OVER_STATION[STATION_INDEX][STATIONS][STATION_ATTRI] = {
 {{1306, 1376, 1}, {1325, 1355, 1}, {1265, 1329, 0}},
 {{1377, 1393, 0}, {1356, 1413, 0}, {1330, 1352, 1}},
 {{1394, 1440, 1}, {1414, 1440, 1}, {1353, 1417, 0}},
-{{0, 9999, 0}, {0, 9999, 0}, {1418, 9999, 1}}};
+{{0, 9999, 0}, {0, 9999, 0}, {1418, 1440, 1}}};
 
 typedef struct {
 	int cost;
@@ -104,7 +104,7 @@ typedef struct {
 ExecutionDescription convoy_tasks[CONVOYS][MAX_PROCESSORS] = {{{-1,9999,-1},{-1,9999,-1},{-1,9999,-1},{-1,9999,-1},{-1,9999,-1},{-1,9999,-1},{-1,9999,-1},{-1,9999,-1},{-1,9999,-1},{-1,-1,-1}},
 							      {{-1,9999,-1},{-1,9999,-1},{-1,9999,-1},{-1,9999,-1},{-1,9999,-1},{-1,9999,-1},{-1,9999,-1},{-1,9999,-1},{-1,9999,-1},{-1,-1,-1}},
 							      {{-1,9999,-1},{-1,9999,-1},{-1,9999,-1},{-1,9999,-1},{-1,9999,-1},{-1,9999,-1},{-1,9999,-1},{-1,9999,-1},{-1,9999,-1},{-1,-1,-1}}};
-int current_task = 1;
+int current_task = 0;
 int proc_in_use[CONVOYS] = CONVOY_ZEROS;
 int gather_in_use[CONVOYS] = CONVOY_ZEROS;
 int send_to_station[CONVOYS][STATIONS] = {STATION_ZEROS, STATION_ZEROS, STATION_ZEROS};
@@ -311,14 +311,14 @@ lowest != 0 &amp;&amp;
 check_constrains() &amp;&amp;
 cost '== calculated_cost</label></location><location id="id3" x="-480" y="-72"><committed/></location><location id="id4" x="-256" y="-16"><committed/></location><init ref="id4"/><transition><source ref="id0"/><target ref="id1"/><label kind="synchronisation" x="-464" y="-40">assign_tasks!</label></transition><transition><source ref="id1"/><target ref="id2"/><label kind="assignment" x="-472" y="128">time = 0,
 sort_lists(),
-closest_task_to_finish()</label><nail x="-480" y="184"/></transition><transition><source ref="id3"/><target ref="id4"/><label kind="synchronisation" x="-456" y="-160">move!</label><label kind="assignment" x="-456" y="-136">current_task++</label><nail x="-480" y="-136"/><nail x="-256" y="-136"/></transition><transition><source ref="id2"/><target ref="id4"/><label kind="guard" x="-392" y="32">time == lowest</label><label kind="assignment" x="-392" y="48">current_task = 1,
+closest_task_to_finish()</label><nail x="-480" y="184"/></transition><transition><source ref="id3"/><target ref="id4"/><label kind="synchronisation" x="-456" y="-160">move!</label><label kind="assignment" x="-456" y="-136">current_task++</label><nail x="-480" y="-136"/><nail x="-256" y="-136"/></transition><transition><source ref="id2"/><target ref="id4"/><label kind="guard" x="-392" y="32">time == lowest</label><label kind="assignment" x="-392" y="48">current_task = 0,
 int_clock += lowest,
 update_storage(),
 update_processors(),
 update_windows(),
 check_idle(),
 sort_lists()</label></transition><transition><source ref="id4"/><target ref="id0"/><label kind="guard" x="-372" y="-46">current_task == TASKS-1</label><label kind="assignment" x="-384" y="-8">calculated_cost = 0</label></transition><transition><source ref="id4"/><target ref="id3"/><label kind="guard" x="-456" y="-96">current_task != TASKS-1</label><label kind="synchronisation" x="-456" y="-112">suggest_task!</label><nail x="-272" y="-72"/></transition></template><template><name>Convoy</name><parameter>const id_t id</parameter><declaration>//Used in accept_suggestion(), reject_suggestion(), and lastly used in add_tasks()
-int decisions[TASKS] = {1, 0, 0, 0};
+int decisions[TASKS] = {0, 0, 0, 0};
 
 //Indicate that the convoy will execute the task
 void accept_suggestion(){
@@ -638,7 +638,5 @@ void calc_cost(){
 
 
 </declaration><location id="id5" x="-160" y="64"><committed/></location><location id="id6" x="-160" y="-96"><committed/></location><location id="id7" x="-392" y="-40"></location><init ref="id7"/><transition><source ref="id7"/><target ref="id7"/><label kind="synchronisation" x="-368" y="-72">assign_tasks?</label><label kind="assignment" x="-360" y="-32">calc_cost(),
-add_tasks()</label><nail x="-288" y="-48"/><nail x="-288" y="-32"/></transition><transition><source ref="id6"/><target ref="id7"/><label kind="synchronisation" x="-360" y="-184">move?</label><nail x="-160" y="-160"/><nail x="-392" y="-160"/></transition><transition><source ref="id5"/><target ref="id7"/><label kind="synchronisation" x="-360" y="88">move?</label><nail x="-160" y="112"/><nail x="-392" y="112"/></transition><transition><source ref="id7"/><target ref="id5"/><label kind="guard" x="-360" y="24">check_station_windows() &amp;&amp;
-allow_sending_to_convoy()</label><label kind="synchronisation" x="-360" y="8">suggest_task?</label><label kind="assignment" x="-360" y="64">accept_suggestion()</label><nail x="-368" y="64"/></transition><transition><source ref="id7"/><target ref="id6"/><label kind="guard" x="-360" y="-136">allow_gather_data() &amp;&amp;
-allow_send_data_to_station()</label><label kind="synchronisation" x="-360" y="-152">suggest_task?</label><label kind="assignment" x="-360" y="-96">reject_suggestion()</label><nail x="-376" y="-96"/></transition></template><system>
+add_tasks()</label><nail x="-288" y="-48"/><nail x="-288" y="-32"/></transition><transition><source ref="id6"/><target ref="id7"/><label kind="synchronisation" x="-360" y="-184">move?</label><nail x="-160" y="-160"/><nail x="-392" y="-160"/></transition><transition><source ref="id5"/><target ref="id7"/><label kind="synchronisation" x="-360" y="88">move?</label><nail x="-160" y="112"/><nail x="-392" y="112"/></transition><transition><source ref="id7"/><target ref="id5"/><label kind="synchronisation" x="-360" y="8">suggest_task?</label><label kind="assignment" x="-360" y="64">accept_suggestion()</label><nail x="-368" y="64"/></transition><transition><source ref="id7"/><target ref="id6"/><label kind="synchronisation" x="-360" y="-152">suggest_task?</label><label kind="assignment" x="-360" y="-96">reject_suggestion()</label><nail x="-376" y="-96"/></transition></template><system>
 system Convoy, Scheduler;</system></nta>
