@@ -91,10 +91,10 @@ typedef struct {
 // Some tasks, with different propperties
 				      /* 0 = forward, 1 = earth, 2 = backwards*/
                                       /*  w     E  D   P  rate Co   Orien*/
-const TaskDescription send_data       = {{0,1}, 20,26, 9, -2, 0};
-const TaskDescription gather_new_data = {{1,0}, 15,21,  6,  2, 0};
-const TaskDescription transfer        = {{0,0}, 5,17,  5, -3, 0};
-const TaskDescription receive         = {{0,0}, 5,11,  4,  3, 0};
+const TaskDescription send_data       = {{0,1}, 23,30, 9, -2, 0};
+const TaskDescription gather_new_data = {{1,0}, 18,24,  6,  2, 0};
+const TaskDescription transfer        = {{0,0}, 8,21,  5, -3, 0};
+const TaskDescription receive         = {{0,0}, 8,15,  4,  3, 0};
 const TaskDescription jobs[N]         = {send_data, gather_new_data, transfer, receive}; //update RECEIVE_INDEX if receive moves
 const int PRIOS[N] = {jobs[0].prio, jobs[1].prio, jobs[2].prio, jobs[3].prio};
 
@@ -120,6 +120,8 @@ int active[S] = ACTIVE_INIT;
 int queue[S][N] = S_MINUSSES;
 int sender = -1;
 int delays[S][N] = S_ZEROES; //(for benchmarking)
+int abbort[S][N] = S_ZEROES;
+int cycle[S][N] = S_ZEROES;
 int data_earth = 0; // Amount of data units sent to Earth (for benchmarking)
 int data_internal = 0; // Amount of data sent internaly between satellites (for benchmarking)
 int data_gathered = 0; // Amount of data currently stored in the system (for benchmarking)
@@ -281,19 +283,20 @@ bool internalCom() {
 
 
 </declaration>
-		<location id="id0" x="561" y="127">
-		</location>
-		<location id="id1" x="110" y="-246">
+		<location id="id0" x="323" y="76">
 			<committed/>
 		</location>
-		<location id="id2" x="433" y="459">
+		<location id="id1" x="561" y="127">
 			<committed/>
 		</location>
-		<location id="id3" x="-212" y="374">
+		<location id="id2" x="110" y="-246">
+			<committed/>
+		</location>
+		<location id="id3" x="433" y="459">
+			<committed/>
+		</location>
+		<location id="id4" x="-212" y="374">
 			<name x="-222" y="340">pre_in</name>
-			<committed/>
-		</location>
-		<location id="id4" x="8" y="408">
 			<committed/>
 		</location>
 		<location id="id5" x="110" y="-136">
@@ -342,43 +345,64 @@ bool internalCom() {
 		</location>
 		<init ref="id8"/>
 		<transition>
+			<source ref="id16"/>
+			<target ref="id6"/>
+			<label kind="guard" x="586" y="127">task == TRANSMIT_INDEX &amp;&amp;
+active[com] == TRANSMIT_INDEX</label>
+			<label kind="synchronisation" x="247" y="123">go!</label>
+			<nail x="297" y="153"/>
+			<nail x="697" y="153"/>
+			<nail x="697" y="-263"/>
+		</transition>
+		<transition>
 			<source ref="id0"/>
+			<target ref="id6"/>
+			<label kind="synchronisation" x="323" y="8">not_rdy_to_rec[com]?</label>
+			<nail x="323" y="0"/>
+			<nail x="374" y="0"/>
+		</transition>
+		<transition>
+			<source ref="id0"/>
+			<target ref="id16"/>
+			<label kind="synchronisation" x="246" y="76">request[sat_id]!</label>
+		</transition>
+		<transition>
+			<source ref="id1"/>
 			<target ref="id6"/>
 			<label kind="synchronisation" x="442" y="-127">not_rdy_to_rec[com]?</label>
 			<nail x="561" y="-263"/>
 		</transition>
 		<transition>
-			<source ref="id0"/>
-			<target ref="id16"/>
+			<source ref="id1"/>
+			<target ref="id0"/>
 			<label kind="synchronisation" x="357" y="51">transmit_data[com]!</label>
 			<nail x="552" y="76"/>
-			<nail x="280" y="76"/>
 		</transition>
 		<transition>
 			<source ref="id16"/>
-			<target ref="id0"/>
-			<label kind="guard" x="357" y="85">task == TRANSMIT_INDEX
+			<target ref="id1"/>
+			<label kind="guard" x="340" y="93">task == TRANSMIT_INDEX
 &amp;&amp; !is_synced &amp;&amp;
 active[com] != TRANSMIT_INDEX</label>
-			<label kind="synchronisation" x="357" y="136">request[sat_id]!</label>
+			<label kind="synchronisation" x="314" y="110">go!</label>
 			<label kind="assignment" x="357" y="153">is_synced = true</label>
 			<nail x="459" y="127"/>
 		</transition>
 		<transition>
-			<source ref="id1"/>
+			<source ref="id2"/>
 			<target ref="id6"/>
 			<label kind="synchronisation" x="178" y="-263">not_rdy_to_rec[sat_id]!</label>
 			<nail x="357" y="-246"/>
 		</transition>
 		<transition>
 			<source ref="id18"/>
-			<target ref="id1"/>
+			<target ref="id2"/>
 			<label kind="guard" x="-51" y="-246">!hasSpace() || !in_orbit[sat_id]</label>
 			<label kind="synchronisation" x="-42" y="-229">transmit_data[sat_id]?</label>
 			<nail x="-17" y="-246"/>
 		</transition>
 		<transition>
-			<source ref="id3"/>
+			<source ref="id4"/>
 			<target ref="id17"/>
 			<label kind="guard" x="-280" y="238">current == RI</label>
 			<label kind="synchronisation" x="-280" y="255">release[sat_id-1]!</label>
@@ -388,7 +412,7 @@ active[com] != TRANSMIT_INDEX</label>
 			<nail x="-93" y="204"/>
 		</transition>
 		<transition>
-			<source ref="id2"/>
+			<source ref="id3"/>
 			<target ref="id10"/>
 			<label kind="guard" x="-8" y="493">!lowerPriority()</label>
 			<label kind="synchronisation" x="0" y="518">check!</label>
@@ -396,7 +420,7 @@ active[com] != TRANSMIT_INDEX</label>
 			<nail x="-34" y="518"/>
 		</transition>
 		<transition>
-			<source ref="id2"/>
+			<source ref="id3"/>
 			<target ref="id16"/>
 			<label kind="guard" x="518" y="229">lowerPriority()&amp;&amp;
 active[sat_id] != RECEIVE_INDEX</label>
@@ -406,7 +430,7 @@ active[sat_id] != RECEIVE_INDEX</label>
 			<nail x="306" y="221"/>
 		</transition>
 		<transition>
-			<source ref="id2"/>
+			<source ref="id3"/>
 			<target ref="id16"/>
 			<label kind="guard" x="391" y="289">lowerPriority()&amp;&amp;
 active[sat_id] ==
@@ -415,7 +439,7 @@ RECEIVE_INDEX</label>
 			<nail x="280" y="238"/>
 		</transition>
 		<transition>
-			<source ref="id3"/>
+			<source ref="id4"/>
 			<target ref="id17"/>
 			<label kind="guard" x="-229" y="187">current == TI</label>
 			<label kind="synchronisation" x="-229" y="204">release[com]!</label>
@@ -425,7 +449,7 @@ RECEIVE_INDEX</label>
 		</transition>
 		<transition>
 			<source ref="id9"/>
-			<target ref="id3"/>
+			<target ref="id4"/>
 			<label kind="guard" x="-195" y="323">runnable[task] &amp;&amp;
 internalCom()</label>
 			<label kind="synchronisation" x="-194" y="357">release[sat_id]!</label>
@@ -441,15 +465,8 @@ internalCom()</label>
 			<nail x="697" y="-263"/>
 		</transition>
 		<transition>
-			<source ref="id4"/>
-			<target ref="id12"/>
-			<label kind="assignment" x="-289" y="382">task = active[sat_id]</label>
-			<nail x="-297" y="408"/>
-			<nail x="-297" y="59"/>
-		</transition>
-		<transition>
 			<source ref="id16"/>
-			<target ref="id2"/>
+			<target ref="id3"/>
 			<label kind="synchronisation" x="314" y="374">transmit_data[sat_id]?</label>
 			<label kind="assignment" x="314" y="391">task = RECEIVE_INDEX,
 RQ = sat_id</label>
@@ -459,10 +476,14 @@ RQ = sat_id</label>
 		</transition>
 		<transition>
 			<source ref="id16"/>
-			<target ref="id4"/>
+			<target ref="id12"/>
 			<label kind="synchronisation" x="25" y="246">next[sat_id]?</label>
-			<nail x="153" y="238"/>
-			<nail x="8" y="238"/>
+			<label kind="assignment" x="25" y="263">task = active[sat_id]</label>
+			<nail x="144" y="246"/>
+			<nail x="8" y="246"/>
+			<nail x="8" y="408"/>
+			<nail x="-306" y="408"/>
+			<nail x="-306" y="59"/>
 		</transition>
 		<transition>
 			<source ref="id15"/>
@@ -790,7 +811,7 @@ void preemt_task() {
 
 void resume_task(){
     task = w_queue[0];
-    dequeue();
+//    dequeue();
 }
 
 bool rdyToRun() {
@@ -802,7 +823,15 @@ void delayed(int t) {
 }
 
 
+void abbortMe(int t) {
+    if (t != RECEIVE_INDEX){
+    abbort[sat_id][t] ++;}
+    else return;
+}
 
+void mycycle(){
+    cycle[sat_id][task] ++;
+}
 
 
 
@@ -966,9 +995,10 @@ getWaitingD() &gt;= run_time[task]
 		<transition>
 			<source ref="id28"/>
 			<target ref="id25"/>
-			<label kind="guard" x="-2550" y="-2771">task == RECEIVE_INDEX ||
+			<label kind="guard" x="-2550" y="-2779">task == RECEIVE_INDEX ||
 task == TRANSMIT_INDEX</label>
-			<label kind="synchronisation" x="-2533" y="-2737">release[sat_id]?</label>
+			<label kind="synchronisation" x="-2533" y="-2745">release[sat_id]?</label>
+			<label kind="assignment" x="-2516" y="-2728">abbortMe(task)</label>
 		</transition>
 		<transition>
 			<source ref="id26"/>
@@ -1005,7 +1035,8 @@ calc_cost()</label>
 			<label kind="assignment" x="-2822" y="-2864">resetPriority(),
 resetProgress(),
 active[sat_id] = 
-w_queue[0]</label>
+w_queue[0],
+mycycle()</label>
 		</transition>
 		<transition>
 			<source ref="id28"/>
@@ -1309,7 +1340,8 @@ overStation()</label>
 		<transition>
 			<source ref="id37"/>
 			<target ref="id37"/>
-			<label kind="guard" x="-382" y="-161">independent()</label>
+			<label kind="guard" x="-382" y="-161">independent() &amp;&amp;
+!all_checked</label>
 			<label kind="assignment" x="-399" y="-144">skipWindowCheck(),
 allTaskChecked()</label>
 			<nail x="-370" y="-196"/>
@@ -1326,7 +1358,8 @@ allTaskChecked()</label>
 		<transition>
 			<source ref="id37"/>
 			<target ref="id37"/>
-			<label kind="guard" x="-289" y="-272">!depends() &amp;&amp; !independent()</label>
+			<label kind="guard" x="-289" y="-272">!depends() &amp;&amp; !independent() &amp;&amp;
+!all_checked</label>
 			<label kind="assignment" x="-289" y="-255">next()</label>
 			<nail x="-212" y="-255"/>
 			<nail x="-204" y="-229"/>
@@ -1355,7 +1388,7 @@ s2 = Satellite(2);
 sc0 = Scheduler(0);
 sc1 = Scheduler(1);
 sc2 = Scheduler(2);
-system CheckRunnable &lt; sc0 &lt; sc1 &lt; sc2 &lt; s0 &lt; s1 &lt; s2 &lt; p0 &lt; p1 &lt; p2;
+system CheckRunnable &lt; sc0 &lt; sc1 &lt; sc2  &lt; p0 &lt; p1 &lt; p2 &lt; s0 &lt; s1 &lt; s2;
 
 gantt{
     Occupied0:
@@ -1374,120 +1407,4 @@ gantt{
     Waiting2:
         p2.Waiting -&gt; 26;
 }</system>
-	<queries>
-		<query>
-			<formula>E&lt;&gt; p0.Free &amp;&amp; p1.Free &amp;&amp;  delayed[2][3] == 1
-			</formula>
-			<comment>
-			</comment>
-		</query>
-		<query>
-			<formula>E&lt;&gt; p2.Free &amp;&amp; p1.Free &amp;&amp; runs[1][2] &gt; runs[2][3]
-			</formula>
-			<comment>Don't fucking delete me!
-			</comment>
-		</query>
-		<query>
-			<formula>E&lt;&gt; forall (i : id_s) Processor(i).Occupied
-			</formula>
-			<comment>
-			</comment>
-		</query>
-		<query>
-			<formula>E[&lt;=1; 1330](max: sats[2].memory)
-			</formula>
-			<comment>
-			</comment>
-		</query>
-		<query>
-			<formula>E&lt;&gt; forall (i : id_t) forall (j : id_t) runs[i][j]+1 &lt; runs[i][j] &amp;&amp; t_time &lt; 600
-			</formula>
-			<comment>== runs[j] &amp;&amp; i != j
-			</comment>
-		</query>
-		<query>
-			<formula>E&lt;&gt; CheckRunnable.index[0] == STATION_INDEX -1
-			</formula>
-			<comment>
-			</comment>
-		</query>
-		<query>
-			<formula>E&lt;&gt; delayed[0][2] == 1
-			</formula>
-			<comment>
-			</comment>
-		</query>
-		<query>
-			<formula>E&lt;&gt; delayed[1][2] &gt; delayed[2][3] +1 &amp;&amp; p2.Free &amp;&amp; p1.Free
-			</formula>
-			<comment>
-			</comment>
-		</query>
-		<query>
-			<formula>E&lt;&gt; Scheduler(0).KK &amp;&amp; active[0] == 1
-			</formula>
-			<comment>
-			</comment>
-		</query>
-		<query>
-			<formula>E&lt;&gt; Scheduler(0).AA &amp;&amp; t_time &gt;= 200
-			</formula>
-			<comment>
-			</comment>
-		</query>
-		<query>
-			<formula>E&lt;&gt; t_time &gt;=20
-			</formula>
-			<comment>
-			</comment>
-		</query>
-		<query>
-			<formula>E&lt;&gt; Scheduler(1).pre_in
-			</formula>
-			<comment>
-			</comment>
-		</query>
-		<query>
-			<formula>E&lt;&gt; t_time &lt;= 1440 &amp;&amp; w1 + w2 &lt; runs[0][1] + runs[1][1] + runs[2][0]
-			</formula>
-			<comment>
-			</comment>
-		</query>
-		<query>
-			<formula>E&lt;&gt; t_time &gt;=1440
-			</formula>
-			<comment>
-			</comment>
-		</query>
-		<query>
-			<formula>E&lt;&gt; t_time ==600
-			</formula>
-			<comment>
-			</comment>
-		</query>
-		<query>
-			<formula>E&lt;&gt; t_time &gt;= 167
-			</formula>
-			<comment>
-			</comment>
-		</query>
-		<query>
-			<formula>E&lt;&gt; t_time &gt;=640 &amp;&amp; Scheduler(0).AA
-			</formula>
-			<comment>
-			</comment>
-		</query>
-		<query>
-			<formula>E&lt;&gt; runs[2][0] &gt; w2
-			</formula>
-			<comment>
-			</comment>
-		</query>
-		<query>
-			<formula>E&lt;&gt; priorities[0][1] == 0
-			</formula>
-			<comment>
-			</comment>
-		</query>
-	</queries>
 </nta>

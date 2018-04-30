@@ -118,7 +118,7 @@ if __name__ == '__main__':
     base_delays = []
     base_runs = []
     base_data = []
-    with open(my_location + "/base/base.xml") as base:
+    with open(my_location + "/base/base_test.xml") as base:
         write("base.xml")
         short_name = "base"
         times = []
