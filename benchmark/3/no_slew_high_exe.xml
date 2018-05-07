@@ -221,7 +221,7 @@ void set_com(){
 }
 
 bool hasSpace(){
-	return sats[sat_id].memory + transfer.data_rate * transfer.execution_time &lt;= MAX_MEMORY;
+	return sats[sat_id].memory + 3 * transfer.execution_time &lt;= MAX_MEMORY;
 }
 
 int orientationProgress(){
