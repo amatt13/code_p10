@@ -123,7 +123,6 @@ const int schedule_length = 1050;
 
 //CHANNELS
 broadcast chan suggest_task, assign_send_tasks, assign_rest, move;
-urgent broadcast chan test;
 //CLOCKS
 clock TotalTime;
 
@@ -323,13 +322,13 @@ void update_windows(){
 		}
 	}
 }
-</declaration><location id="id0" x="-520" y="64"></location><location id="id1" x="-112" y="-16"><committed/></location><location id="id2" x="-368" y="-16"><committed/></location><location id="id3" x="-552" y="-16"><committed/></location><location id="id4" x="-256" y="184"><label kind="invariant" x="-464" y="192">time &lt;= lowest &amp;&amp;
+</declaration><location id="id0" x="-552" y="64"></location><location id="id1" x="-112" y="-16"><committed/></location><location id="id2" x="-368" y="-16"><committed/></location><location id="id3" x="-552" y="-16"><committed/></location><location id="id4" x="-256" y="184"><label kind="invariant" x="-464" y="192">time &lt;= lowest &amp;&amp;
 TotalTime &lt; schedule_length &amp;&amp;
 lowest != 0 &amp;&amp;
 check_constrains() &amp;&amp;
 cost '== calculated_cost</label></location><location id="id5" x="-480" y="-72"><committed/></location><location id="id6" x="-256" y="-16"><committed/></location><init ref="id1"/><transition><source ref="id3"/><target ref="id0"/><label kind="synchronisation" x="-596" y="9">assign_rest!</label></transition><transition><source ref="id1"/><target ref="id6"/><label kind="assignment" x="-216" y="-16">initialize(),
 current_task = 1</label></transition><transition><source ref="id2"/><target ref="id3"/><label kind="synchronisation" x="-512" y="-40">assign_send_tasks!</label></transition><transition><source ref="id0"/><target ref="id4"/><label kind="assignment" x="-472" y="128">time = 0,
-closest_task_to_finish()</label><nail x="-480" y="184"/></transition><transition><source ref="id5"/><target ref="id6"/><label kind="synchronisation" x="-456" y="-160">move!</label><label kind="assignment" x="-456" y="-136">current_task++</label><nail x="-480" y="-136"/><nail x="-256" y="-136"/></transition><transition><source ref="id4"/><target ref="id6"/><label kind="guard" x="-392" y="32">time == lowest</label><label kind="assignment" x="-392" y="48">current_task = 1,
+closest_task_to_finish()</label><nail x="-552" y="184"/></transition><transition><source ref="id5"/><target ref="id6"/><label kind="synchronisation" x="-456" y="-160">move!</label><label kind="assignment" x="-456" y="-136">current_task++</label><nail x="-480" y="-136"/><nail x="-256" y="-136"/></transition><transition><source ref="id4"/><target ref="id6"/><label kind="guard" x="-392" y="32">time == lowest</label><label kind="assignment" x="-392" y="48">current_task = 1,
 int_clock += lowest,
 update_storage(),
 update_processors(),
@@ -546,18 +545,158 @@ bool both_within_window(int c1, int c2, int p1, int p2){
 	int w;
 	int best = MAX_VALUE;
 	for (w = 0; w &lt; STATIONS; w++){
-		if (OVER_STATION[sat_array[c1][p1].station_indexes[w]][w][2] &amp;&amp; 
-		    OVER_STATION[sat_array[c2][p2].station_indexes[w]][w][2] &amp;&amp; 
-		    convoys[c1].tasks_depending_on_window[SEND_TO_CONVOY][w] &amp;&amp; 
-		    convoys[c2].tasks_depending_on_window[SEND_TO_CONVOY][w]){
-			return true;
+		if (convoys[c1].tasks_depending_on_window[SEND_TO_CONVOY][w] &amp;&amp; convoys[c2].tasks_depending_on_window[SEND_TO_CONVOY][w]){
+			if (OVER_STATION[sat_array[c1][p1].station_indexes[w]][w][2] &amp;&amp; OVER_STATION[sat_array[c2][p2].station_indexes[w]][w][2]){
+				return true;
+			}
 		} 
 	}
 	return false;
 }
-
 int scores[PROCESSORS][3];
 int running_tasks[TASKS] = TASKS_ZEROS;
+
+void assign_send_task(){
+	int p,s,t,c, assign_task, assign_score, assign_processor, lowest_cost, lowest_convoy, lowest_processor;
+	int assign_order[TASKS-1] = {SEND_TO_STATION,SEND_TO_CONVOY,GATHER_DATA};
+	int tries = proc_in_use[id];
+	//Assign scores
+	for (p = 0; p &lt; convoys[id].processors; p++){
+		//Calculate cost for each satellites to determine the best task out of the available tasks that the convoy has decided between
+		if (decisions[GATHER_DATA] &amp;&amp; check_window(p, GATHER_DATA) != MAX_VALUE){
+			scores[p][0] = calc_storage(sat_array[id][p].storage,STORAGE);
+		}
+		if (decisions[SEND_TO_STATION] &amp;&amp; check_window(p, SEND_TO_STATION) != MAX_VALUE){
+			scores[p][1] = calc_send_to_station(sat_array[id][p].storage,STORAGE);
+		}
+		if (decisions[SEND_TO_CONVOY] &amp;&amp; check_window(p, SEND_TO_CONVOY) != MAX_VALUE){
+			scores[p][2] = calc_send_to_convoy(sat_array[id][p].storage,STORAGE);
+		}
+	}
+	//Assign tasks based on scores
+	while(convoys[id].processors != tries){
+		assign_task = -1;
+		assign_score = 0;
+		assign_processor = -1;
+		for (t = 0; t &lt; TASKS-1; t++){
+			for (p = 0; p &lt; convoys[id].processors; p++){
+				if (sat_array[id][p].task_type == -1 &amp;&amp; assign_score &lt; scores[p][assign_order[t]]){
+					assign_score = scores[p][assign_order[t]];
+					assign_task = assign_order[t];
+					assign_processor = p;
+				}	
+			}
+		}
+		if (assign_task == 0){
+			sat_array[id][assign_processor].execution_time = tasks[assign_task].execution_time;
+			sat_array[id][assign_processor].task_type = assign_task;
+			proc_in_use[id]++;
+		}
+		if (assign_task == 1){// Send_to_station
+			sat_array[id][assign_processor].execution_time = tasks[assign_task].execution_time;
+			sat_array[id][assign_processor].task_type = assign_task;
+			sat_array[id][assign_processor].to = check_window(assign_processor, assign_task);
+			proc_in_use[id]++;
+		}
+		else{//Send_to_convoy
+			lowest_cost = MAX_VALUE;
+			lowest_convoy = -1;
+			lowest_processor = -1;
+			for (c = 0; c &lt; CONVOYS; c++){
+				if (id != c){
+					for (p = 0; p &lt; convoys[c].processors; p++){
+						if (both_within_window(id, c, assign_processor, p)){
+							if (lowest_cost &gt; calc_storage(sat_array[c][p].storage,STORAGE)){
+								lowest_cost = calc_storage(sat_array[c][p].storage,STORAGE);
+								lowest_convoy = c;
+								lowest_processor = p; 
+							}
+						}
+					}
+				}
+			}
+			if (lowest_cost != MAX_VALUE){
+				sat_array[id][assign_processor].execution_time = tasks[assign_task].execution_time;
+				sat_array[id][assign_processor].task_type = assign_task;
+				sat_array[id][assign_processor].to = check_window(assign_processor, assign_task);
+				proc_in_use[id]++;
+				proc_in_use[lowest_convoy]++;
+			}
+		}
+		tries++;
+	}
+}
+
+void assign_gather_task(){
+	int p,s,t,c, assign_task, assign_score, assign_processor, lowest_cost, lowest_convoy, lowest_processor;
+	int assign_order[TASKS-1] = {SEND_TO_STATION,SEND_TO_CONVOY,GATHER_DATA};
+	int tries = proc_in_use[id];
+	//Assign scores
+	for (p = 0; p &lt; convoys[id].processors; p++){
+		//Calculate cost for each satellites to determine the best task out of the available tasks that the convoy has decided between
+		if (decisions[GATHER_DATA] &amp;&amp; check_window(p, GATHER_DATA) != MAX_VALUE){
+			scores[p][0] = calc_storage(sat_array[id][p].storage,STORAGE);
+		}
+		if (decisions[SEND_TO_STATION] &amp;&amp; check_window(p, SEND_TO_STATION) != MAX_VALUE){
+			scores[p][1] = calc_send_to_station(sat_array[id][p].storage,STORAGE);
+		}
+		if (decisions[SEND_TO_CONVOY] &amp;&amp; check_window(p, SEND_TO_CONVOY) != MAX_VALUE){
+			scores[p][2] = calc_send_to_convoy(sat_array[id][p].storage,STORAGE);
+		}
+	}
+	//Assign tasks based on scores
+	while(convoys[id].processors != tries){
+		assign_task = -1;
+		assign_score = 0;
+		assign_processor = -1;
+		for (t = 0; t &lt; TASKS-1; t++){
+			for (p = 0; p &lt; convoys[id].processors; p++){
+				if (sat_array[id][p].task_type == -1 &amp;&amp; assign_score &lt; scores[p][assign_order[t]]){
+					assign_score = scores[p][assign_order[t]];
+					assign_task = assign_order[t];
+					assign_processor = p;
+				}	
+			}
+		}
+		if (assign_task == 0){
+			sat_array[id][assign_processor].execution_time = tasks[assign_task].execution_time;
+			sat_array[id][assign_processor].task_type = assign_task;
+			proc_in_use[id]++;
+		}
+		if (assign_task == 1){// Send_to_station
+			sat_array[id][assign_processor].execution_time = tasks[assign_task].execution_time;
+			sat_array[id][assign_processor].task_type = assign_task;
+			sat_array[id][assign_processor].to = check_window(assign_processor, assign_task);
+			proc_in_use[id]++;
+		}
+		else{//Send_to_convoy
+			lowest_cost = MAX_VALUE;
+			lowest_convoy = -1;
+			lowest_processor = -1;
+			for (c = 0; c &lt; CONVOYS; c++){
+				if (id != c){
+					for (p = 0; p &lt; convoys[c].processors; p++){
+						if (both_within_window(id, c, assign_processor, p)){
+							if (lowest_cost &gt; calc_storage(sat_array[c][p].storage,STORAGE)){
+								lowest_cost = calc_storage(sat_array[c][p].storage,STORAGE);
+								lowest_convoy = c;
+								lowest_processor = p; 
+							}
+						}
+					}
+				}
+			}
+			if (lowest_cost != MAX_VALUE){
+				sat_array[id][assign_processor].execution_time = tasks[assign_task].execution_time;
+				sat_array[id][assign_processor].task_type = assign_task;
+				sat_array[id][assign_processor].to = check_window(assign_processor, assign_task);
+				proc_in_use[id]++;
+				proc_in_use[lowest_convoy]++;
+			}
+		}	
+		tries++;
+	}
+}
 //Called after cost has been calculated in the template, because insert_task uses the cost to determine the number of proccesers that needs to perform each task.
 void add_tasks(){
 	int p,s,t,c, assign_task, assign_score, assign_processor, lowest_cost, lowest_convoy, lowest_processor;
@@ -772,6 +911,5 @@ void calc_cost(){
 
 
 
-</declaration><location id="id7" x="-160" y="64"><committed/></location><location id="id8" x="-160" y="-96"><committed/></location><location id="id9" x="-392" y="-40"></location><init ref="id9"/><transition><source ref="id9"/><target ref="id9"/><label kind="synchronisation" x="-488" y="-72">assign_rest?</label><nail x="-472" y="-48"/><nail x="-472" y="-32"/></transition><transition><source ref="id9"/><target ref="id9"/><label kind="synchronisation" x="-368" y="-72">assign_send_tasks?</label><label kind="assignment" x="-360" y="-32">calc_cost(),
-add_tasks()</label><nail x="-288" y="-48"/><nail x="-288" y="-32"/></transition><transition><source ref="id8"/><target ref="id9"/><label kind="synchronisation" x="-360" y="-184">move?</label><nail x="-160" y="-160"/><nail x="-392" y="-160"/></transition><transition><source ref="id7"/><target ref="id9"/><label kind="synchronisation" x="-360" y="88">move?</label><nail x="-160" y="112"/><nail x="-392" y="112"/></transition><transition><source ref="id9"/><target ref="id7"/><label kind="guard" x="-360" y="24">allow_sending_to_convoy()</label><label kind="synchronisation" x="-360" y="8">suggest_task?</label><label kind="assignment" x="-360" y="64">accept_suggestion()</label><nail x="-368" y="64"/></transition><transition><source ref="id9"/><target ref="id8"/><label kind="guard" x="-360" y="-136">allow_gather_data() &amp;&amp;
+</declaration><location id="id7" x="-160" y="64"><committed/></location><location id="id8" x="-160" y="-96"><committed/></location><location id="id9" x="-392" y="-40"></location><init ref="id9"/><transition><source ref="id9"/><target ref="id9"/><label kind="synchronisation" x="-536" y="-72">assign_rest?</label><label kind="assignment" x="-536" y="-32">assign_gather_task()</label><nail x="-536" y="-48"/><nail x="-536" y="-32"/></transition><transition><source ref="id9"/><target ref="id9"/><label kind="synchronisation" x="-368" y="-72">assign_send_tasks?</label><label kind="assignment" x="-368" y="-32">assign_send_task()</label><nail x="-288" y="-48"/><nail x="-288" y="-32"/></transition><transition><source ref="id8"/><target ref="id9"/><label kind="synchronisation" x="-360" y="-184">move?</label><nail x="-160" y="-160"/><nail x="-392" y="-160"/></transition><transition><source ref="id7"/><target ref="id9"/><label kind="synchronisation" x="-360" y="88">move?</label><nail x="-160" y="112"/><nail x="-392" y="112"/></transition><transition><source ref="id9"/><target ref="id7"/><label kind="guard" x="-360" y="24">allow_sending_to_convoy()</label><label kind="synchronisation" x="-360" y="8">suggest_task?</label><label kind="assignment" x="-360" y="64">accept_suggestion()</label><nail x="-368" y="64"/></transition><transition><source ref="id9"/><target ref="id8"/><label kind="guard" x="-360" y="-136">allow_gather_data() &amp;&amp;
 allow_send_data_to_station()</label><label kind="synchronisation" x="-360" y="-152">suggest_task?</label><label kind="assignment" x="-360" y="-96">reject_suggestion()</label><nail x="-376" y="-96"/></transition></template><system>system Convoy, Scheduler;</system></nta>
