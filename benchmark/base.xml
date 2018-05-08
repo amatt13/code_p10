@@ -15,6 +15,7 @@ const int TASK_SUGGEST_INTERVAL = 3; // how often should a task be suggested
 
 // used for common instansiations of arrays
 const int ZEROES[N] = {0,0,0,0};
+const int ZEROES_S[S] = {0,0,0};
 const int S_ZEROES[S][N] = {ZEROES, ZEROES, ZEROES};
 const int MINUSSES[N] = {-1,-1,-1,-1};
 const int S_MINUSSES[S][N] = {MINUSSES, MINUSSES, MINUSSES};
@@ -92,8 +93,8 @@ typedef struct {
                                       /*  w     E  D   P  rate Co   Orien*/
 const TaskDescription send_data       = {{0,1}, 20,26, 9, -2, 1};
 const TaskDescription gather_new_data = {{1,0}, 15,21,  6,  2, 0};
-const TaskDescription transfer        = {{0,0}, 5,17,  10, -3, 2};
-const TaskDescription receive         = {{0,0}, 5,11,  8,  3, 0};
+const TaskDescription transfer        = {{0,0}, 5,17,  5, -3, 2};
+const TaskDescription receive         = {{0,0}, 5,11,  4,  3, 0};
 const TaskDescription jobs[N]         = {send_data, gather_new_data, transfer, receive}; //update RECEIVE_INDEX if receive moves
 const int PRIOS[N] = {jobs[0].prio, jobs[1].prio, jobs[2].prio, jobs[3].prio};
 
@@ -109,6 +110,7 @@ const int station_price_rate[STATIONS] = {13, 8};
 
 /** Variables */
 id_s RQ;
+int sugest_iterations[S] = ZEROES_S;
 bool runnable[N] = {0,0,0,0};    // can this task be performed
 //bool win_active[STATIONS] = {0,0};      // it the satellite currently over a station
 int runs[S][N] = S_ZEROES;       // how many times have each task been run on each satellite (for benchmarking)
@@ -591,8 +593,8 @@ active[sat_id] = RECEIVE_INDEX</label>
 		<transition>
 			<source ref="id13"/>
 			<target ref="id20"/>
-			<label kind="guard" x="-8" y="176">!runnable[task]</label>
-			<label kind="assignment" x="-8" y="195">task = active[sat_id]</label>
+			<label kind="guard" x="-8" y="187">!runnable[task]</label>
+			<label kind="assignment" x="-8" y="204">task = active[sat_id]</label>
 			<nail x="-32" y="192"/>
 			<nail x="112" y="192"/>
 		</transition>
@@ -688,8 +690,9 @@ RQ = sat_id</label>
 runnable[queue[sat_id][0]] &amp;&amp;
 active[sat_id] != -1</label>
 			<label kind="synchronisation" x="-8" y="127">request[sat_id]!</label>
-			<label kind="assignment" x="-8" y="144">dequeue(), is_synced = false,
-task = active[sat_id]</label>
+			<label kind="assignment" x="-8" y="136">dequeue(), is_synced = false,
+task = active[sat_id],
+sugest_iterations[sat_id] = 0</label>
 		</transition>
 		<transition>
 			<source ref="id22"/>
@@ -789,6 +792,9 @@ void reportDone() {
 
 void updateProgress(int time) {
     time_used[task] += time;
+    if (time_used[task] &gt;= jobs[task].execution_time){
+        time_used[task]= 5/0; //must not happen!
+    }
 }
 
 void resetProgress() {
@@ -857,11 +863,13 @@ void dequeue(){
 
 void preemt_task() {
     boostPriority();
-    updateProgress(jobs[task].execution_time/2);
+    updateProgress(sugest_iterations[sat_id]*TASK_SUGGEST_INTERVAL);
     insert_task();
     task = active[sat_id];
     if (time_used[task] == 0) 
         run_time[task] = 0;
+
+
 }
 
 void resume_task(){
@@ -1262,8 +1270,8 @@ sats[sat_id].offset</label>
 			<urgent/>
 		</location>
 		<location id="id40" x="-528" y="-464">
-			<name x="-544" y="-448">Waiting</name>
-			<label kind="invariant" x="-544" y="-432">loc_time &lt;= TASK_SUGGEST_INTERVAL</label>
+			<name x="-535" y="-450">Waiting</name>
+			<label kind="invariant" x="-561" y="-425">loc_time &lt;= TASK_SUGGEST_INTERVAL</label>
 		</location>
 		<init ref="id37"/>
 		<transition>
@@ -1320,15 +1328,17 @@ slew_time = 0, slews++</label>
 		<transition>
 			<source ref="id39"/>
 			<target ref="id36"/>
-			<label kind="assignment" x="-312" y="-536">loc_time = 0,
+			<label kind="assignment" x="-306" y="-535">loc_time = 0,
 suggest_task()</label>
 		</transition>
 		<transition>
 			<source ref="id40"/>
 			<target ref="id39"/>
-			<label kind="guard" x="-496" y="-488">loc_time &gt;= TASK_SUGGEST_INTERVAL</label>
-			<label kind="synchronisation" x="-510" y="-481">find_new!</label>
-			<label kind="assignment" x="-496" y="-464">RQ = sat_id</label>
+			<label kind="guard" x="-459" y="-518">loc_time &gt;= 
+TASK_SUGGEST_INTERVAL</label>
+			<label kind="synchronisation" x="-459" y="-484">find_new!</label>
+			<label kind="assignment" x="-459" y="-467">RQ = sat_id,
+sugest_iterations[sat_id] ++</label>
 		</transition>
 		<transition>
 			<source ref="id40"/>
