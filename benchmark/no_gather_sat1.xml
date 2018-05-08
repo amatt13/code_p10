@@ -155,6 +155,7 @@ bool validSuggestion(int id) {
 	<template>
 		<name>Scheduler</name>
 		<parameter>const id_s sat_id</parameter>
+<<<<<<< HEAD
 		<declaration>int task = 0;
 int com = 0;
 int is_synced = false;
@@ -280,6 +281,133 @@ bool internalCom() {
 
 
 
+=======
+		<declaration>int task = 0;
+int com = 0;
+int is_synced = false;
+const int TI = TRANSMIT_INDEX;
+const int RI = RECEIVE_INDEX;
+int current;
+/** order the queue to highest priority in front */
+void orderQueue(){ //OI! Look here
+	int i, temp = -1, selected = -1, high = -1, to_check = -1;
+	 
+	if(queue[sat_id][0] == -1){ return; }
+	for (i = 0; i &lt; N; i++){
+		if (queue[sat_id][i] != -1) {
+			to_check = queue[sat_id][i];
+			if (runnable[to_check] == 1) {
+				if(priorities[sat_id][to_check] &gt; high){
+					selected = i;
+					high = priorities[sat_id][to_check];
+	}}}}
+	if (selected != -1) {
+		temp = queue[sat_id][selected];
+		queue[sat_id][selected] = queue[sat_id][0];
+		queue[sat_id][0] = temp;
+	}
+
+}
+/** Add task to back of queue */
+void enqueue(int _task){
+	int i = 0;
+	if (queue[sat_id][N-1] == -1){
+	for (i = 0; i &lt; N; i++){
+		if (queue[sat_id][i] == -1){
+			queue[sat_id][i] = _task; 
+			i = N;
+		} else if (queue[sat_id][i] == _task) {
+			return;
+		}}
+	}
+	orderQueue();
+	
+}
+/** Amount of queued tasks */
+int len(){ 
+	int i;
+	for (i = 0; i &lt; N; i++){
+		if(queue[sat_id][i] == -1) {
+			return i; 
+		}
+	}
+	return N;
+}
+/** Update the queue after running the first one */
+void dequeue(){
+	int i = 0, k = len();
+        while (i &lt; k) {
+        	queue[sat_id][i] = queue[sat_id][i + 1];
+                i++;
+        }
+        queue[sat_id][i] = -1;
+	orderQueue();
+}
+
+void set_com(){
+    if (sat_id == S-1) com = sat_id;
+    else com = sat_id + 1;
+}
+
+bool hasSpace(){
+	return sats[sat_id].memory + 3 * transfer.execution_time &lt;= MAX_MEMORY;
+}
+
+int orientationProgress(){
+	if (sats[sat_id].rotation == transfer.orientation &amp;&amp; sats[com].rotation == receive.orientation){
+		return 0;
+	}
+	else if (sats[sat_id].rotation == transfer.orientation &amp;&amp; sats[com].rotation != receive.orientation){
+		return 1;
+	}
+	else if (sats[sat_id].rotation != transfer.orientation &amp;&amp; sats[com].rotation == receive.orientation){
+		return 2;
+	}
+	else{   
+		return 3;
+	}
+}
+bool rdyToTrans(){
+	if (sats[com].rotation == receive.orientation &amp;&amp; sats[sat_id].rotation == transfer.orientation) return true;
+	else return false;
+}
+
+
+bool lowerPriority() {
+	return priorities[sat_id][task] &lt;= priorities[sat_id][active[sat_id]];
+}
+
+
+int front() {
+	return queue[sat_id][0];
+}
+
+bool internalCom() {
+	return (current == RECEIVE_INDEX || current == TRANSMIT_INDEX);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+>>>>>>> e1c4797570b39677f58b8a33828e1719ec3f7d06
 </declaration>
 		<location id="id0" x="110" y="-246">
 			<committed/>

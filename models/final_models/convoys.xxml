@@ -505,19 +505,17 @@ bool allow_gather_data(){
 }
 
 //Template guard - forces send data to Earth to be taken if storage is above 50%
-bool allow_send_data_to_station(){
+int allow_send_data_to_station(){
 	if (current_task == SEND_TO_STATION){
-		if (THRESHOLD_SEND_TO_STATION_UPPER &gt; storages[id]*100/convoys[id].storage &amp;&amp;
-		    THRESHOLD_SEND_TO_STATION_LOWER &lt; storages[id]*100/convoys[id].storage){
-			//if (FORCE_SEND_TO_STATION){
-			//	return true;
-			//}
-			//else{
-				return false;
-			//}
+		if (THRESHOLD_SEND_TO_STATION_UPPER &gt;= storages[id]*100/convoys[id].storage &amp;&amp; 
+		    THRESHOLD_SEND_TO_STATION_LOWER &lt;= storages[id]*100/convoys[id].storage){
+			return 1;
 		}
-		else{
-			return true;
+		else if (THRESHOLD_SEND_TO_STATION_UPPER &lt;= storages[id]*100/convoys[id].storage){
+			return 2;
+		}
+		else {
+			return 0;
 		}
 	}
 	else{
@@ -637,7 +635,8 @@ void calc_cost(){
 
 
 </declaration><location id="id5" x="-160" y="64"><committed/></location><location id="id6" x="-160" y="-96"><committed/></location><location id="id7" x="-392" y="-40"></location><init ref="id7"/><transition><source ref="id7"/><target ref="id7"/><label kind="synchronisation" x="-368" y="-72">assign_tasks?</label><label kind="assignment" x="-360" y="-32">calc_cost(),
-add_tasks()</label><nail x="-288" y="-48"/><nail x="-288" y="-32"/></transition><transition><source ref="id6"/><target ref="id7"/><label kind="synchronisation" x="-360" y="-184">move?</label><nail x="-160" y="-160"/><nail x="-392" y="-160"/></transition><transition><source ref="id5"/><target ref="id7"/><label kind="synchronisation" x="-360" y="88">move?</label><nail x="-160" y="112"/><nail x="-392" y="112"/></transition><transition><source ref="id7"/><target ref="id5"/><label kind="guard" x="-360" y="24">check_station_windows() &amp;&amp;
-allow_sending_to_convoy()</label><label kind="synchronisation" x="-360" y="8">suggest_task?</label><label kind="assignment" x="-360" y="64">accept_suggestion()</label><nail x="-368" y="64"/></transition><transition><source ref="id7"/><target ref="id6"/><label kind="guard" x="-360" y="-136">allow_gather_data() &amp;&amp;
-allow_send_data_to_station()</label><label kind="synchronisation" x="-360" y="-152">suggest_task?</label><label kind="assignment" x="-360" y="-96">reject_suggestion()</label><nail x="-376" y="-96"/></transition></template><system>
+add_tasks()</label><nail x="-288" y="-48"/><nail x="-288" y="-32"/></transition><transition><source ref="id6"/><target ref="id7"/><label kind="synchronisation" x="-360" y="-184">move?</label><nail x="-160" y="-160"/><nail x="-392" y="-160"/></transition><transition><source ref="id5"/><target ref="id7"/><label kind="synchronisation" x="-360" y="88">move?</label><nail x="-160" y="112"/><nail x="-392" y="112"/></transition><transition><source ref="id7"/><target ref="id5"/><label kind="guard" x="-128" y="48">check_station_windows() &amp;&amp;
+allow_sending_to_convoy() &amp;&amp;
+allow_send_data_to_station() &gt; 0</label><label kind="synchronisation" x="-360" y="8">suggest_task?</label><label kind="assignment" x="-360" y="64">accept_suggestion()</label><nail x="-368" y="64"/></transition><transition><source ref="id7"/><target ref="id6"/><label kind="guard" x="-144" y="-144">allow_gather_data() &amp;&amp;
+allow_send_data_to_station() &lt; 2</label><label kind="synchronisation" x="-360" y="-152">suggest_task?</label><label kind="assignment" x="-360" y="-96">reject_suggestion()</label><nail x="-376" y="-96"/></transition></template><system>
 system Convoy, Scheduler;</system></nta>
