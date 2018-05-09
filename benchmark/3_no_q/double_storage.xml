@@ -5,7 +5,7 @@
 const int S = 3; // Amount of satellites
 const int SCHEDULE_LENGHT = 360; // Length of schedule
 const int ORBIT_TIME = 60; // duration of one orbit
-const int MAX_MEMORY = 100; // satellites maximum storage capacity
+const int MAX_MEMORY = 200; // satellites maximum storage capacity
 const int LOW_MEMORY = MAX_MEMORY * 30/100; // threshold for when  little memory is used
 const int HIGH_MEMORY = MAX_MEMORY * 75/100; // threshold for when a lot memory is used
 const int RECEIVE_INDEX = 3; // the index for the receive task
@@ -223,7 +223,7 @@ void set_com(){
 }
 
 bool hasSpace(){
-	return sats[sat_id].memory + transfer.data_rate * transfer.execution_time &lt;= MAX_MEMORY;
+	return sats[sat_id].memory + receive.data_rate * receive.execution_time &lt;= MAX_MEMORY;
 }
 
 int orientationProgress(){
@@ -1554,6 +1554,5 @@ gantt{
         p2.Waiting -&gt; 26;
 }</system>
 	<queries>
-
 	</queries>
 </nta>

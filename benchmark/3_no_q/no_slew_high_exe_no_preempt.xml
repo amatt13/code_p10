@@ -5,7 +5,7 @@
 const int S = 3; // Amount of satellites
 const int SCHEDULE_LENGHT = 360; // Length of schedule
 const int ORBIT_TIME = 60; // duration of one orbit
-const int MAX_MEMORY = 200; // satellites maximum storage capacity
+const int MAX_MEMORY = 100; // satellites maximum storage capacity
 const int LOW_MEMORY = MAX_MEMORY * 30/100; // threshold for when  little memory is used
 const int HIGH_MEMORY = MAX_MEMORY * 75/100; // threshold for when a lot memory is used
 const int RECEIVE_INDEX = 3; // the index for the receive task
@@ -91,17 +91,17 @@ typedef struct {
 // Some tasks, with different propperties
 				      /* 0 = forward, 1 = earth, 2 = backwards*/
                                       /*  w     E  D   P  rate Co   Orien*/
-const TaskDescription send_data       = {{0,1}, 20,26, 9, -2, 1};
-const TaskDescription gather_new_data = {{1,0}, 15,21,  6,  2, 0};
-const TaskDescription transfer        = {{0,0}, 5,17,  5, -3, 2};
-const TaskDescription receive         = {{0,0}, 5,11,  4,  3, 0};
+const TaskDescription send_data       = {{0,1}, 23,29, 9, -2, 0};
+const TaskDescription gather_new_data = {{1,0}, 18,24,  6,  2, 0};
+const TaskDescription transfer        = {{0,0}, 8,20,  5, -3, 0};
+const TaskDescription receive         = {{0,0}, 8,14,  4,  3, 0};
 const TaskDescription jobs[N]         = {send_data, gather_new_data, transfer, receive}; //update RECEIVE_INDEX if receive moves
 const int PRIOS[N] = {jobs[0].prio, jobs[1].prio, jobs[2].prio, jobs[3].prio};
 
 // some satellites performing different tasks and with different offset
 const SatDescription sat_gat = {3, 0, 80, {0,1,1,0}, -1};
 const SatDescription sat_trans = {3, 0, 20, {0,1,1,1}, -1};
-const SatDescription sat_sen = {9, 2, 0, {1,0,0,1}, -1};
+const SatDescription sat_sen = {9, 0, 0, {1,0,0,1}, -1};
 SatDescription sats[S] = {sat_gat, sat_trans, sat_sen};
 
 /** Remove StationDescription and replace with array over costrate */
@@ -287,161 +287,101 @@ bool internalCom() {
 		<location id="id1" x="433" y="459">
 			<committed/>
 		</location>
-		<location id="id2" x="-212" y="374">
-			<name x="-222" y="340">pre_in</name>
+		<location id="id2" x="765" y="127">
 			<committed/>
 		</location>
-		<location id="id3" x="765" y="127">
+		<location id="id3" x="110" y="-136">
 			<committed/>
 		</location>
-		<location id="id4" x="8" y="408">
+		<location id="id4" x="376" y="-264">
 			<committed/>
 		</location>
-		<location id="id5" x="110" y="-136">
+		<location id="id5" x="432" y="48">
 			<committed/>
 		</location>
-		<location id="id6" x="376" y="-264">
-			<committed/>
-		</location>
-		<location id="id7" x="432" y="48">
-			<committed/>
-		</location>
-		<location id="id8" x="432" y="-40">
-			<committed/>
-		</location>
-		<location id="id9" x="576" y="-40">
-			<name x="566" y="-74">Waiting</name>
-		</location>
-		<location id="id10" x="576" y="128">
+		<location id="id6" x="576" y="128">
 			<name x="566" y="94">Slewing</name>
 		</location>
-		<location id="id11" x="336" y="-208">
+		<location id="id7" x="336" y="-208">
 			<committed/>
 		</location>
-		<location id="id12" x="-76" y="-221">
+		<location id="id8" x="-76" y="-221">
 			<committed/>
 		</location>
-		<location id="id13" x="-34" y="374">
+		<location id="id9" x="-229" y="127">
 			<committed/>
 		</location>
-		<location id="id14" x="-34" y="459">
+		<location id="id10" x="-229" y="59">
 			<committed/>
 		</location>
-		<location id="id15" x="-229" y="127">
+		<location id="id11" x="110" y="0">
 			<committed/>
 		</location>
-		<location id="id16" x="-229" y="59">
-			<committed/>
-		</location>
-		<location id="id17" x="110" y="0">
-			<committed/>
-		</location>
-		<location id="id18" x="229" y="459">
-			<name x="205" y="475">Preempt</name>
-			<committed/>
-		</location>
-		<location id="id19" x="229" y="-136">
+		<location id="id12" x="229" y="-136">
 			<name x="253" y="-152">Release</name>
 			<committed/>
 		</location>
-		<location id="id20" x="229" y="127">
+		<location id="id13" x="229" y="127">
 			<name x="247" y="104">Occupied</name>
 		</location>
-		<location id="id21" x="-76" y="127">
+		<location id="id14" x="-76" y="127">
 			<committed/>
 		</location>
-		<location id="id22" x="-76" y="-136">
+		<location id="id15" x="-76" y="-136">
 			<name x="-65" y="-130">Start</name>
 		</location>
-		<init ref="id12"/>
+		<init ref="id8"/>
+		<transition>
+			<source ref="id13"/>
+			<target ref="id13"/>
+			<label kind="synchronisation" x="203" y="174">add_task[sat_id]?</label>
+			<label kind="assignment" x="203" y="191">enqueue(sats[sat_id].suggested_task)</label>
+			<nail x="178" y="255"/>
+			<nail x="238" y="263"/>
+		</transition>
 		<transition>
 			<source ref="id0"/>
-			<target ref="id6"/>
+			<target ref="id4"/>
 			<label kind="synchronisation" x="178" y="-263">not_rdy_to_rec[sat_id]!</label>
 			<nail x="357" y="-246"/>
 		</transition>
 		<transition>
-			<source ref="id22"/>
+			<source ref="id15"/>
 			<target ref="id0"/>
 			<label kind="guard" x="-51" y="-246">!hasSpace() || !in_orbit[sat_id]</label>
 			<label kind="synchronisation" x="-42" y="-229">transmit_data[sat_id]?</label>
 			<nail x="-17" y="-246"/>
 		</transition>
 		<transition>
-			<source ref="id2"/>
-			<target ref="id21"/>
-			<label kind="guard" x="-280" y="238">current == RI</label>
-			<label kind="synchronisation" x="-280" y="255">release[sat_id-1]!</label>
-			<label kind="assignment" x="-280" y="272">active[sat_id] = front()</label>
-			<nail x="-263" y="374"/>
-			<nail x="-263" y="204"/>
-			<nail x="-93" y="204"/>
-		</transition>
-		<transition>
 			<source ref="id1"/>
-			<target ref="id14"/>
-			<label kind="guard" x="-8" y="493">!lowerPriority()</label>
-			<label kind="synchronisation" x="0" y="518">check!</label>
-			<nail x="433" y="518"/>
-			<nail x="-34" y="518"/>
-		</transition>
-		<transition>
-			<source ref="id1"/>
-			<target ref="id20"/>
-			<label kind="guard" x="518" y="229">lowerPriority()&amp;&amp;
-active[sat_id] != RECEIVE_INDEX</label>
+			<target ref="id13"/>
 			<label kind="synchronisation" x="518" y="272">not_rdy_to_rec[sat_id]!</label>
 			<nail x="510" y="459"/>
 			<nail x="510" y="221"/>
 			<nail x="306" y="221"/>
 		</transition>
 		<transition>
-			<source ref="id1"/>
-			<target ref="id20"/>
-			<label kind="guard" x="391" y="289">lowerPriority()&amp;&amp;
-active[sat_id] ==
-RECEIVE_INDEX</label>
-			<nail x="433" y="238"/>
-			<nail x="280" y="238"/>
-		</transition>
-		<transition>
 			<source ref="id2"/>
-			<target ref="id21"/>
-			<label kind="guard" x="-229" y="187">current == TI</label>
-			<label kind="synchronisation" x="-229" y="204">release[com]!</label>
-			<label kind="assignment" x="-229" y="221">active[sat_id] = front()</label>
-			<nail x="-212" y="204"/>
-			<nail x="-93" y="204"/>
-		</transition>
-		<transition>
-			<source ref="id13"/>
-			<target ref="id2"/>
-			<label kind="guard" x="-195" y="323">runnable[task] &amp;&amp;
-internalCom()</label>
-			<label kind="synchronisation" x="-194" y="357">release[sat_id]!</label>
-		</transition>
-		<transition>
-			<source ref="id3"/>
-			<target ref="id10"/>
+			<target ref="id6"/>
 			<label kind="guard" x="578" y="161">active[com] != TRANSMIT_INDEX</label>
 			<nail x="663" y="161"/>
 			<nail x="578" y="161"/>
 		</transition>
 		<transition>
-			<source ref="id10"/>
-			<target ref="id3"/>
+			<source ref="id6"/>
+			<target ref="id2"/>
 			<label kind="synchronisation" x="637" y="127">check?</label>
 		</transition>
 		<transition>
-			<source ref="id3"/>
-			<target ref="id6"/>
+			<source ref="id2"/>
+			<target ref="id4"/>
 			<label kind="guard" x="578" y="76">active[com] == TRANSMIT_INDEX</label>
 			<nail x="671" y="110"/>
 			<nail x="671" y="-263"/>
 		</transition>
 		<transition>
-			<source ref="id20"/>
-			<target ref="id6"/>
+			<source ref="id13"/>
+			<target ref="id4"/>
 			<label kind="guard" x="323" y="170">active[sat_id] == TRANSMIT_INDEX</label>
 			<label kind="synchronisation" x="399" y="187">not_rdy_to_rec[com]?</label>
 			<nail x="314" y="144"/>
@@ -450,14 +390,7 @@ internalCom()</label>
 			<nail x="697" y="-263"/>
 		</transition>
 		<transition>
-			<source ref="id4"/>
-			<target ref="id16"/>
-			<label kind="assignment" x="-289" y="382">task = active[sat_id]</label>
-			<nail x="-297" y="408"/>
-			<nail x="-297" y="59"/>
-		</transition>
-		<transition>
-			<source ref="id20"/>
+			<source ref="id13"/>
 			<target ref="id1"/>
 			<label kind="synchronisation" x="314" y="374">transmit_data[sat_id]?</label>
 			<label kind="assignment" x="314" y="391">task = RECEIVE_INDEX,
@@ -467,42 +400,29 @@ RQ = sat_id</label>
 			<nail x="331" y="459"/>
 		</transition>
 		<transition>
-			<source ref="id20"/>
-			<target ref="id4"/>
-			<label kind="synchronisation" x="25" y="246">next[sat_id]?</label>
-			<nail x="153" y="238"/>
-			<nail x="8" y="238"/>
-		</transition>
-		<transition>
-			<source ref="id19"/>
-			<target ref="id5"/>
+			<source ref="id12"/>
+			<target ref="id3"/>
 			<label kind="guard" x="76" y="-170">active[com] != RECEIVE_INDEX</label>
 			<nail x="224" y="-160"/>
 			<nail x="144" y="-160"/>
 		</transition>
 		<transition>
-			<source ref="id19"/>
-			<target ref="id5"/>
+			<source ref="id12"/>
+			<target ref="id3"/>
 			<label kind="guard" x="110" y="-136">active[com] == 
 RECEIVE_INDEX</label>
 			<label kind="synchronisation" x="144" y="-102">release[com]!</label>
 		</transition>
 		<transition>
-			<source ref="id6"/>
-			<target ref="id22"/>
+			<source ref="id4"/>
+			<target ref="id15"/>
 			<label kind="synchronisation" x="-40" y="-280">release[sat_id]!</label>
 			<label kind="assignment" x="-40" y="-264">active[sat_id] = -1</label>
 			<nail x="-48" y="-264"/>
 		</transition>
 		<transition>
-			<source ref="id9"/>
-			<target ref="id19"/>
-			<label kind="synchronisation" x="416" y="-128">release[sat_id]?</label>
-			<nail x="569" y="-127"/>
-		</transition>
-		<transition>
-			<source ref="id10"/>
-			<target ref="id19"/>
+			<source ref="id6"/>
+			<target ref="id12"/>
 			<label kind="synchronisation" x="416" y="-152">release[sat_id]?</label>
 			<nail x="584" y="120"/>
 			<nail x="680" y="120"/>
@@ -513,8 +433,8 @@ RECEIVE_INDEX</label>
 			<nail x="568" y="-136"/>
 		</transition>
 		<transition>
-			<source ref="id10"/>
-			<target ref="id6"/>
+			<source ref="id6"/>
+			<target ref="id4"/>
 			<label kind="guard" x="408" y="-288">task == TRANSMIT_INDEX</label>
 			<label kind="synchronisation" x="416" y="-264">not_rdy_to_rec[com]?</label>
 			<nail x="688" y="128"/>
@@ -522,40 +442,21 @@ RECEIVE_INDEX</label>
 			<nail x="688" y="-264"/>
 		</transition>
 		<transition>
-			<source ref="id7"/>
-			<target ref="id20"/>
+			<source ref="id5"/>
+			<target ref="id13"/>
 			<label kind="synchronisation" x="289" y="25">transmit_data[com]!</label>
 			<nail x="272" y="48"/>
 		</transition>
 		<transition>
-			<source ref="id8"/>
-			<target ref="id20"/>
-			<label kind="synchronisation" x="289" y="-8">request[com]!</label>
-			<nail x="272" y="8"/>
-		</transition>
-		<transition>
-			<source ref="id10"/>
-			<target ref="id7"/>
+			<source ref="id6"/>
+			<target ref="id5"/>
 			<label kind="guard" x="464" y="32">rdyToTrans()</label>
 			<label kind="synchronisation" x="448" y="48">request[sat_id]!</label>
 			<nail x="560" y="48"/>
 		</transition>
 		<transition>
-			<source ref="id9"/>
-			<target ref="id8"/>
-			<label kind="guard" x="456" y="-56">rdyToTrans()</label>
-			<label kind="synchronisation" x="448" y="-40">request[sat_id]!</label>
-		</transition>
-		<transition>
-			<source ref="id10"/>
-			<target ref="id9"/>
-			<label kind="guard" x="528" y="-16">orientation(sat_id) &amp;&amp; 
-!rdyToTrans()</label>
-			<label kind="synchronisation" x="527" y="17">transmit_data[com]!</label>
-		</transition>
-		<transition>
-			<source ref="id20"/>
-			<target ref="id10"/>
+			<source ref="id13"/>
+			<target ref="id6"/>
 			<label kind="guard" x="331" y="68">task == TRANSMIT_INDEX
 &amp;&amp; !is_synced &amp;&amp;
 active[com] != TRANSMIT_INDEX</label>
@@ -563,22 +464,15 @@ active[com] != TRANSMIT_INDEX</label>
 			<label kind="assignment" x="344" y="128">is_synced = true</label>
 		</transition>
 		<transition>
-			<source ref="id9"/>
-			<target ref="id6"/>
-			<label kind="synchronisation" x="416" y="-232">not_rdy_to_rec[com]?</label>
-			<nail x="576" y="-232"/>
-			<nail x="376" y="-232"/>
-		</transition>
-		<transition>
-			<source ref="id11"/>
-			<target ref="id20"/>
+			<source ref="id7"/>
+			<target ref="id13"/>
 			<label kind="synchronisation" x="288" y="-80">request[sat_id]!</label>
 			<nail x="336" y="-32"/>
 			<nail x="248" y="0"/>
 		</transition>
 		<transition>
-			<source ref="id22"/>
-			<target ref="id11"/>
+			<source ref="id15"/>
+			<target ref="id7"/>
 			<label kind="guard" x="204" y="-238">hasSpace()</label>
 			<label kind="synchronisation" x="161" y="-221">transmit_data[sat_id]?</label>
 			<label kind="assignment" x="76" y="-204">task = RECEIVE_INDEX,
@@ -586,56 +480,32 @@ active[sat_id] = RECEIVE_INDEX</label>
 			<nail x="0" y="-208"/>
 		</transition>
 		<transition>
-			<source ref="id12"/>
-			<target ref="id22"/>
+			<source ref="id8"/>
+			<target ref="id15"/>
 			<label kind="assignment" x="-152" y="-192">set_com()</label>
 		</transition>
 		<transition>
-			<source ref="id13"/>
-			<target ref="id20"/>
-			<label kind="guard" x="-8" y="187">!runnable[task]</label>
-			<label kind="assignment" x="-8" y="204">task = active[sat_id]</label>
-			<nail x="-32" y="192"/>
-			<nail x="112" y="192"/>
-		</transition>
-		<transition>
-			<source ref="id13"/>
-			<target ref="id21"/>
-			<label kind="guard" x="-136" y="238">runnable[task] &amp;&amp;
-!internalCom()</label>
-			<label kind="synchronisation" x="-144" y="272">preemt[sat_id]!</label>
-			<label kind="assignment" x="-144" y="289">active[sat_id] = front()</label>
-			<nail x="-76" y="374"/>
-		</transition>
-		<transition>
-			<source ref="id14"/>
-			<target ref="id13"/>
-			<label kind="synchronisation" x="-85" y="416">check?</label>
-			<label kind="assignment" x="-187" y="416">enqueue(task),
-current = active[sat_id]</label>
-		</transition>
-		<transition>
-			<source ref="id15"/>
-			<target ref="id21"/>
+			<source ref="id9"/>
+			<target ref="id14"/>
 			<label kind="synchronisation" x="-184" y="128">check?</label>
 			<label kind="assignment" x="-248" y="144">enqueue(task),
 active[sat_id] = front()</label>
 		</transition>
 		<transition>
-			<source ref="id16"/>
-			<target ref="id15"/>
+			<source ref="id10"/>
+			<target ref="id9"/>
 			<label kind="synchronisation" x="-224" y="80">check!</label>
 		</transition>
 		<transition>
-			<source ref="id21"/>
-			<target ref="id22"/>
+			<source ref="id14"/>
+			<target ref="id15"/>
 			<label kind="guard" x="-176" y="-48">queue[sat_id][0] == -1 ||
 !runnable[queue[sat_id][0]]</label>
 			<label kind="assignment" x="-176" y="-16">active[sat_id] = -1</label>
 		</transition>
 		<transition>
-			<source ref="id17"/>
-			<target ref="id21"/>
+			<source ref="id11"/>
+			<target ref="id14"/>
 			<label kind="synchronisation" x="-17" y="34">check?</label>
 			<label kind="assignment" x="-17" y="0">orderQueue(),
 active[sat_id] = front()</label>
@@ -643,49 +513,27 @@ active[sat_id] = front()</label>
 			<nail x="-25" y="85"/>
 		</transition>
 		<transition>
-			<source ref="id18"/>
-			<target ref="id14"/>
-			<label kind="guard" x="42" y="433">!lowerPriority()</label>
-			<label kind="synchronisation" x="51" y="459">check!</label>
-		</transition>
-		<transition>
-			<source ref="id5"/>
-			<target ref="id22"/>
+			<source ref="id3"/>
+			<target ref="id15"/>
 			<label kind="guard" x="-48" y="-152">empty(queue[sat_id])</label>
 			<label kind="assignment" x="-32" y="-136">active[sat_id] = -1</label>
 		</transition>
 		<transition>
-			<source ref="id18"/>
-			<target ref="id20"/>
-			<label kind="assignment" x="51" y="306">enqueue(task),
-task = active[sat_id]</label>
-			<nail x="144" y="306"/>
-		</transition>
-		<transition>
-			<source ref="id5"/>
-			<target ref="id17"/>
+			<source ref="id3"/>
+			<target ref="id11"/>
 			<label kind="guard" x="8" y="-85">!empty(queue[sat_id])</label>
 			<label kind="synchronisation" x="59" y="-68">check!</label>
 		</transition>
 		<transition>
-			<source ref="id20"/>
-			<target ref="id18"/>
-			<label kind="guard" x="170" y="289">validSuggestion(sat_id)</label>
-			<label kind="synchronisation" x="195" y="306">add_task[sat_id]?</label>
-			<label kind="assignment" x="195" y="331">task = sats[sat_id].
-suggested_task,
-RQ = sat_id</label>
-		</transition>
-		<transition>
-			<source ref="id20"/>
-			<target ref="id19"/>
+			<source ref="id13"/>
+			<target ref="id12"/>
 			<label kind="synchronisation" x="184" y="-32">release[sat_id]?</label>
 			<label kind="assignment" x="176" y="-64">orderQueue(),
 RQ = sat_id</label>
 		</transition>
 		<transition>
-			<source ref="id21"/>
-			<target ref="id20"/>
+			<source ref="id14"/>
+			<target ref="id13"/>
 			<label kind="guard" x="-8" y="68">queue[sat_id][0] != -1 &amp;&amp; 
 runnable[queue[sat_id][0]] &amp;&amp;
 active[sat_id] != -1</label>
@@ -695,8 +543,8 @@ task = active[sat_id],
 sugest_iterations[sat_id] = 0</label>
 		</transition>
 		<transition>
-			<source ref="id22"/>
-			<target ref="id16"/>
+			<source ref="id15"/>
+			<target ref="id10"/>
 			<label kind="synchronisation" x="-340" y="-110">add_task[sat_id]?</label>
 			<label kind="assignment" x="-340" y="-85">task = sats[sat_id].suggested_task</label>
 			<nail x="-229" y="-136"/>
@@ -735,8 +583,8 @@ void calc_cost() {
     price = 9999;
     for (i = 0; i &lt; STATIONS; i++){
         if(jobs[task].depend_station[i] &amp;&amp; runnable[task] &amp;&amp; win_active[i]) {
-            if (price &gt; station_price_rate[i] * jobs[task].execution_time){
-                price = station_price_rate[i] * jobs[task].execution_time; //choose cheapest
+            if (price &gt; station_price_rate[i] * (jobs[task].execution_time - 3)){
+                price = station_price_rate[i] * (jobs[task].execution_time - 3); //choose cheapest
             }
         }
     }
@@ -759,7 +607,7 @@ void statistics(int value){
 }
 
 void update_storage(int t) {
-   int memory = (jobs[t].execution_time * jobs[t].data_rate);
+   int memory = (jobs[t].execution_time-3) * jobs[t].data_rate;
    if (sats[sat_id].memory + memory &gt; MAX_MEMORY) { // add above
            memory = MAX_MEMORY - sats[sat_id].memory;
            sats[sat_id].memory = MAX_MEMORY;
@@ -896,29 +744,17 @@ void delayed(int t) {
 
 
 </declaration>
-		<location id="id23" x="-2856" y="-2397">
+		<location id="id16" x="-2643" y="-2397">
 			<committed/>
 		</location>
-		<location id="id24" x="-2643" y="-2397">
+		<location id="id17" x="-2218" y="-2864">
 			<committed/>
 		</location>
-		<location id="id25" x="-2974" y="-2524">
-			<committed/>
-		</location>
-		<location id="id26" x="-2855" y="-2796">
-			<committed/>
-		</location>
-		<location id="id27" x="-2218" y="-2473">
-			<committed/>
-		</location>
-		<location id="id28" x="-2218" y="-2864">
-			<committed/>
-		</location>
-		<location id="id29" x="-2473" y="-2796">
+		<location id="id18" x="-2473" y="-2796">
 			<name x="-2497" y="-2828">Aborted</name>
 			<committed/>
 		</location>
-		<location id="id30" x="-2218" y="-2796">
+		<location id="id19" x="-2218" y="-2796">
 			<name x="-2210" y="-2820">Waiting</name>
 			<label kind="invariant" x="-1980" y="-2805">run_time[task] &lt;= 
 getDeadline() &amp;&amp;
@@ -927,11 +763,11 @@ work' == 0 &amp;&amp;
 idle' == 0 &amp;&amp;
 slew' == 0</label>
 		</location>
-		<location id="id31" x="-2660" y="-2796">
+		<location id="id20" x="-2660" y="-2796">
 			<name x="-2700" y="-2820">End</name>
 			<committed/>
 		</location>
-		<location id="id32" x="-2218" y="-2617">
+		<location id="id21" x="-2218" y="-2617">
 			<name x="-2202" y="-2625">Slewing</name>
 			<label kind="invariant" x="-2099" y="-2626">run_time[task]  &lt;= 
 getDeadline() &amp;&amp;
@@ -940,7 +776,7 @@ work' == 0 &amp;&amp;
 idle' == 0 &amp;&amp;
 slew' == 1</label>
 		</location>
-		<location id="id33" x="-2473" y="-2617">
+		<location id="id22" x="-2473" y="-2617">
 			<name x="-2550" y="-2618">Occupied</name>
 			<label kind="invariant" x="-2524" y="-2371">run_time[task]  &lt;= 
 getDeadline() &amp;&amp;
@@ -951,34 +787,17 @@ work' == 1 &amp;&amp;
 idle' == 0 &amp;&amp;
 slew' == 0</label>
 		</location>
-		<location id="id34" x="-2473" y="-2473">
-			<name x="-2524" y="-2490">Block</name>
-			<committed/>
-		</location>
-		<location id="id35" x="-2855" y="-2473">
+		<location id="id23" x="-2855" y="-2473">
 			<name x="-2898" y="-2498">Free</name>
-			<label kind="invariant" x="-3281" y="-2465">wait' == 0  &amp;&amp;
+			<label kind="invariant" x="-2907" y="-2371">wait' == 0  &amp;&amp;
 work' == 0 &amp;&amp; 
 idle' == 1 &amp;&amp;
 slew' == 0</label>
 		</location>
-		<init ref="id35"/>
+		<init ref="id23"/>
 		<transition>
-			<source ref="id35"/>
-			<target ref="id23"/>
-			<label kind="synchronisation" x="-2983" y="-2431">request[sat_id]?</label>
-		</transition>
-		<transition>
-			<source ref="id23"/>
-			<target ref="id24"/>
-			<label kind="guard" x="-2847" y="-2346">time_used[active[sat_id]]</label>
-			<label kind="assignment" x="-2839" y="-2329">task = active[sat_id]</label>
-			<nail x="-2856" y="-2329"/>
-			<nail x="-2643" y="-2329"/>
-		</transition>
-		<transition>
-			<source ref="id32"/>
-			<target ref="id28"/>
+			<source ref="id21"/>
+			<target ref="id17"/>
 			<label kind="guard" x="-2116" y="-2779">run_time[task] &gt;=
 getDeadline()</label>
 			<nail x="-2184" y="-2652"/>
@@ -987,14 +806,14 @@ getDeadline()</label>
 		</transition>
 		<transition>
 			<source ref="id23"/>
-			<target ref="id24"/>
-			<label kind="guard" x="-2847" y="-2422">!time_used[active[sat_id]]</label>
-			<label kind="assignment" x="-2830" y="-2397">task = active[sat_id],
+			<target ref="id16"/>
+			<label kind="synchronisation" x="-2837" y="-2452">request[sat_id]?</label>
+			<label kind="assignment" x="-2864" y="-2431">task = active[sat_id],
 run_time[task] = 0</label>
 		</transition>
 		<transition>
-			<source ref="id24"/>
-			<target ref="id33"/>
+			<source ref="id16"/>
+			<target ref="id22"/>
 			<label kind="guard" x="-2779" y="-2592">run_time[task] &gt; 
 getDeadline() &amp;&amp;
 time_used[task] != 0</label>
@@ -1004,82 +823,27 @@ exe_time = 0</label>
 			<nail x="-2643" y="-2618"/>
 		</transition>
 		<transition>
-			<source ref="id25"/>
-			<target ref="id35"/>
-			<label kind="synchronisation" x="-2966" y="-2550">release[sat_id]!</label>
-			<nail x="-2856" y="-2524"/>
-		</transition>
-		<transition>
-			<source ref="id26"/>
-			<target ref="id25"/>
-			<label kind="guard" x="-2991" y="-2685">!empty(w_queue) &amp;&amp;
-getWaitingD() &lt; run_time[task] 
-+ getRemaining()</label>
-			<label kind="assignment" x="-2992" y="-2635">delayed(w_queue[0]),
-resume_task()</label>
-			<nail x="-2974" y="-2796"/>
-		</transition>
-		<transition>
-			<source ref="id26"/>
-			<target ref="id35"/>
-			<label kind="guard" x="-3102" y="-2873">!empty(w_queue) &amp;&amp;
-getWaitingD() &gt;= run_time[task] 
-+ getRemaining()</label>
-			<label kind="synchronisation" x="-3102" y="-2822">next[sat_id]!</label>
-			<label kind="assignment" x="-3111" y="-2805">resume_task()</label>
-			<nail x="-2855" y="-2821"/>
-			<nail x="-3000" y="-2821"/>
-			<nail x="-3000" y="-2473"/>
-		</transition>
-		<transition>
-			<source ref="id26"/>
-			<target ref="id35"/>
-			<label kind="guard" x="-2932" y="-2762">empty(w_queue)</label>
-			<label kind="synchronisation" x="-2932" y="-2745">release[sat_id]!</label>
-			<label kind="assignment" x="-2932" y="-2728">active[sat_id] = -1</label>
-			<nail x="-2813" y="-2762"/>
-			<nail x="-2814" y="-2609"/>
-			<nail x="-2856" y="-2609"/>
-		</transition>
-		<transition>
-			<source ref="id30"/>
-			<target ref="id27"/>
-			<label kind="synchronisation" x="-2192" y="-2677">preemt[sat_id]?</label>
-			<nail x="-2137" y="-2761"/>
-			<nail x="-2137" y="-2609"/>
-			<nail x="-2137" y="-2473"/>
-		</transition>
-		<transition>
-			<source ref="id27"/>
-			<target ref="id34"/>
-		</transition>
-		<transition>
-			<source ref="id32"/>
-			<target ref="id27"/>
-			<label kind="synchronisation" x="-2252" y="-2533">preemt[sat_id]?</label>
-		</transition>
-		<transition>
-			<source ref="id28"/>
-			<target ref="id31"/>
+			<source ref="id17"/>
+			<target ref="id20"/>
 			<label kind="synchronisation" x="-2575" y="-2864">release[sat_id]!</label>
 			<label kind="assignment" x="-2448" y="-2864">delayed(task)</label>
 			<nail x="-2660" y="-2864"/>
 		</transition>
 		<transition>
-			<source ref="id29"/>
-			<target ref="id31"/>
+			<source ref="id18"/>
+			<target ref="id20"/>
 			<label kind="assignment" x="-2642" y="-2796">pre++</label>
 		</transition>
 		<transition>
-			<source ref="id33"/>
-			<target ref="id29"/>
+			<source ref="id22"/>
+			<target ref="id18"/>
 			<label kind="guard" x="-2550" y="-2771">task == RECEIVE_INDEX ||
 task == TRANSMIT_INDEX</label>
 			<label kind="synchronisation" x="-2533" y="-2737">release[sat_id]?</label>
 		</transition>
 		<transition>
-			<source ref="id32"/>
-			<target ref="id29"/>
+			<source ref="id21"/>
+			<target ref="id18"/>
 			<label kind="synchronisation" x="-2345" y="-2681">release[sat_id]?</label>
 			<nail x="-2337" y="-2697"/>
 			<nail x="-2329" y="-2705"/>
@@ -1087,18 +851,18 @@ task == TRANSMIT_INDEX</label>
 			<nail x="-2353" y="-2713"/>
 		</transition>
 		<transition>
-			<source ref="id30"/>
-			<target ref="id29"/>
+			<source ref="id19"/>
+			<target ref="id18"/>
 			<label kind="synchronisation" x="-2396" y="-2813">release[sat_id]?</label>
 		</transition>
 		<transition>
-			<source ref="id30"/>
-			<target ref="id28"/>
+			<source ref="id19"/>
+			<target ref="id17"/>
 			<label kind="guard" x="-2311" y="-2838">run_time[task] &gt;= getDeadline()</label>
 		</transition>
 		<transition>
-			<source ref="id24"/>
-			<target ref="id30"/>
+			<source ref="id16"/>
+			<target ref="id19"/>
 			<label kind="guard" x="-2439" y="-2465">activeIsTrans() &amp;&amp; 
 orientation(sat_id) &amp;&amp; 
 run_time[task] &lt;= 
@@ -1109,30 +873,32 @@ getDeadline()</label>
 			<nail x="-2124" y="-2796"/>
 		</transition>
 		<transition>
-			<source ref="id30"/>
-			<target ref="id33"/>
+			<source ref="id19"/>
+			<target ref="id22"/>
 			<label kind="synchronisation" x="-2337" y="-2779">request[sat_id]?</label>
 			<label kind="assignment" x="-2337" y="-2762">exe_time = 0,
 calc_cost()</label>
 		</transition>
 		<transition>
-			<source ref="id32"/>
-			<target ref="id30"/>
+			<source ref="id21"/>
+			<target ref="id19"/>
 			<label kind="guard" x="-2274" y="-2730">isInternalCom() &amp;&amp;
 orientation(sat_id)</label>
 			<label kind="synchronisation" x="-2274" y="-2696">slew_sat[sat_id]?</label>
 		</transition>
 		<transition>
-			<source ref="id31"/>
-			<target ref="id26"/>
-			<label kind="assignment" x="-2822" y="-2864">resetPriority(),
+			<source ref="id20"/>
+			<target ref="id23"/>
+			<label kind="synchronisation" x="-2837" y="-2813">release[sat_id]!</label>
+			<label kind="assignment" x="-2839" y="-2898">resetPriority(),
 resetProgress(),
 active[sat_id] = 
-w_queue[0]</label>
+w_queue[0],
+active[sat_id] = -1</label>
 		</transition>
 		<transition>
-			<source ref="id33"/>
-			<target ref="id31"/>
+			<source ref="id22"/>
+			<target ref="id20"/>
 			<label kind="guard" x="-2771" y="-2762">run_time[task] &gt;= 
 getDeadline() &amp;&amp; 
 exe_time + time_used[task]  &lt; 
@@ -1141,8 +907,8 @@ getExeTime()</label>
 			<nail x="-2660" y="-2643"/>
 		</transition>
 		<transition>
-			<source ref="id32"/>
-			<target ref="id33"/>
+			<source ref="id21"/>
+			<target ref="id22"/>
 			<label kind="guard" x="-2351" y="-2594">!isInternalCom() &amp;&amp;
 orientation(sat_id)</label>
 			<label kind="synchronisation" x="-2351" y="-2560">slew_sat[sat_id]?</label>
@@ -1150,14 +916,14 @@ orientation(sat_id)</label>
 			<nail x="-2345" y="-2592"/>
 		</transition>
 		<transition>
-			<source ref="id33"/>
-			<target ref="id32"/>
+			<source ref="id22"/>
+			<target ref="id21"/>
 			<label kind="guard" x="-2413" y="-2651">!orientation(sat_id)</label>
 			<label kind="synchronisation" x="-2405" y="-2634">slew_sat[sat_id]!</label>
 		</transition>
 		<transition>
-			<source ref="id33"/>
-			<target ref="id31"/>
+			<source ref="id22"/>
+			<target ref="id20"/>
 			<label kind="guard" x="-2618" y="-2711">exe_time + time_used[task] 
 == getExeTime()</label>
 			<label kind="assignment" x="-2618" y="-2677">update_storage(task),
@@ -1166,24 +932,8 @@ reportDone()</label>
 			<nail x="-2577" y="-2713"/>
 		</transition>
 		<transition>
-			<source ref="id34"/>
-			<target ref="id33"/>
-			<label kind="assignment" x="-2456" y="-2541">exe_time = 0,
-calc_cost(),
-pre++</label>
-			<nail x="-2425" y="-2489"/>
-			<nail x="-2425" y="-2593"/>
-		</transition>
-		<transition>
-			<source ref="id33"/>
-			<target ref="id34"/>
-			<label kind="guard" x="-2584" y="-2567">task != active[sat_id]</label>
-			<label kind="synchronisation" x="-2584" y="-2550">request[sat_id]?</label>
-			<label kind="assignment" x="-2584" y="-2533">preemt_task()</label>
-		</transition>
-		<transition>
-			<source ref="id24"/>
-			<target ref="id33"/>
+			<source ref="id16"/>
+			<target ref="id22"/>
 			<label kind="guard" x="-2626" y="-2482">rdyToRun() &amp;&amp;
 run_time[task] &lt;= 
 getDeadline()</label>
@@ -1253,52 +1003,40 @@ void suggest_task(){
 	sats[sat_id].suggested_task = selected;
 }
 </declaration>
-		<location id="id36" x="-216" y="-576">
+		<location id="id24" x="-216" y="-576">
 			<urgent/>
 		</location>
-		<location id="id37" x="-816" y="-576">
+		<location id="id25" x="-816" y="-576">
 			<name x="-864" y="-584">Start</name>
 			<label kind="invariant" x="-867" y="-629">t_time &lt;= 
 sats[sat_id].offset</label>
 		</location>
-		<location id="id38" x="-720" y="-464">
-			<name x="-768" y="-456">Slewing</name>
-			<label kind="invariant" x="-816" y="-440">slew_time &lt;= 3</label>
-		</location>
-		<location id="id39" x="-216" y="-464">
+		<location id="id26" x="-216" y="-464">
 			<name x="-256" y="-456">Checking</name>
 			<urgent/>
 		</location>
-		<location id="id40" x="-528" y="-464">
+		<location id="id27" x="-528" y="-464">
 			<name x="-535" y="-450">Waiting</name>
 			<label kind="invariant" x="-561" y="-425">loc_time &lt;= TASK_SUGGEST_INTERVAL</label>
 		</location>
-		<init ref="id37"/>
+		<init ref="id25"/>
 		<transition>
-			<source ref="id38"/>
-			<target ref="id40"/>
-			<label kind="synchronisation" x="-672" y="-432">release[sat_id]?</label>
-			<label kind="assignment" x="-672" y="-416">loc_time = 0</label>
-			<nail x="-688" y="-416"/>
-			<nail x="-576" y="-416"/>
-		</transition>
-		<transition>
-			<source ref="id36"/>
-			<target ref="id40"/>
+			<source ref="id24"/>
+			<target ref="id27"/>
 			<label kind="guard" x="-504" y="-600">!validSuggestion(sat_id)</label>
 			<nail x="-528" y="-576"/>
 		</transition>
 		<transition>
-			<source ref="id36"/>
-			<target ref="id40"/>
+			<source ref="id24"/>
+			<target ref="id27"/>
 			<label kind="guard" x="-496" y="-576">validSuggestion(sat_id)</label>
 			<label kind="synchronisation" x="-496" y="-552">add_task[sat_id]!</label>
 			<nail x="-288" y="-552"/>
 			<nail x="-512" y="-552"/>
 		</transition>
 		<transition>
-			<source ref="id37"/>
-			<target ref="id40"/>
+			<source ref="id25"/>
+			<target ref="id27"/>
 			<label kind="guard" x="-714" y="-629">t_time &gt;= 
 sats[sat_id].offset</label>
 			<label kind="assignment" x="-705" y="-578">loc_time = 0,
@@ -1306,45 +1044,19 @@ in_orbit[sat_id] = true</label>
 			<nail x="-552" y="-576"/>
 		</transition>
 		<transition>
-			<source ref="id38"/>
-			<target ref="id40"/>
-			<label kind="guard" x="-672" y="-544">orientation(sat_id)</label>
-			<label kind="synchronisation" x="-672" y="-528">slew_sat[sat_id]!</label>
-			<label kind="assignment" x="-672" y="-504">loc_time = 0</label>
-			<nail x="-688" y="-504"/>
-			<nail x="-576" y="-504"/>
-		</transition>
-		<transition>
-			<source ref="id38"/>
-			<target ref="id38"/>
-			<label kind="guard" x="-848" y="-536">slew_time &gt;= 3 &amp;&amp;
-!orientation(sat_id)</label>
-			<label kind="assignment" x="-848" y="-496">turn_satellite(),
-slew_time = 0, slews++</label>
-			<nail x="-856" y="-464"/>
-			<nail x="-856" y="-496"/>
-			<nail x="-736" y="-496"/>
-		</transition>
-		<transition>
-			<source ref="id39"/>
-			<target ref="id36"/>
+			<source ref="id26"/>
+			<target ref="id24"/>
 			<label kind="assignment" x="-306" y="-535">loc_time = 0,
 suggest_task()</label>
 		</transition>
 		<transition>
-			<source ref="id40"/>
-			<target ref="id39"/>
+			<source ref="id27"/>
+			<target ref="id26"/>
 			<label kind="guard" x="-459" y="-518">loc_time &gt;= 
 TASK_SUGGEST_INTERVAL</label>
 			<label kind="synchronisation" x="-459" y="-484">find_new!</label>
 			<label kind="assignment" x="-459" y="-467">RQ = sat_id,
 sugest_iterations[sat_id] ++</label>
-		</transition>
-		<transition>
-			<source ref="id40"/>
-			<target ref="id38"/>
-			<label kind="synchronisation" x="-672" y="-480">slew_sat[sat_id]?</label>
-			<label kind="assignment" x="-672" y="-464">slew_time = 0</label>
 		</transition>
 	</template>
 	<template>
@@ -1431,19 +1143,19 @@ bool depends() {
 }
 
 //TODO overhold at vi ikke går ud over et vindue</declaration>
-		<location id="id41" x="102" y="-212">
+		<location id="id28" x="102" y="-212">
 			<committed/>
 		</location>
-		<location id="id42" x="-306" y="-357">
+		<location id="id29" x="-306" y="-357">
 			<name x="-316" y="-387">Wait</name>
 		</location>
-		<location id="id43" x="-306" y="-212">
+		<location id="id30" x="-306" y="-212">
 			<committed/>
 		</location>
-		<init ref="id42"/>
+		<init ref="id29"/>
 		<transition>
-			<source ref="id41"/>
-			<target ref="id41"/>
+			<source ref="id28"/>
+			<target ref="id28"/>
 			<label kind="guard" x="136" y="-408">windowEnd() &gt;= t_time - sats[RQ].offset &amp;&amp;
 windowEnd() &lt; t_time - sats[RQ].offset +
 jobs[task_to_check].execution_time 
@@ -1454,16 +1166,16 @@ jobs[task_to_check].execution_time
 			<nail x="127" y="-383"/>
 		</transition>
 		<transition>
-			<source ref="id41"/>
-			<target ref="id43"/>
+			<source ref="id28"/>
+			<target ref="id30"/>
 			<label kind="guard" x="-195" y="-170">!station_to_check</label>
 			<label kind="assignment" x="-195" y="-153">next()</label>
 			<nail x="25" y="-153"/>
 			<nail x="-238" y="-153"/>
 		</transition>
 		<transition>
-			<source ref="id41"/>
-			<target ref="id41"/>
+			<source ref="id28"/>
+			<target ref="id28"/>
 			<label kind="guard" x="136" y="-263">windowEnd() &lt; t_time - sats[RQ].offset
 &amp;&amp; index[RQ][window_to_check] &lt; STATION_INDEX-1</label>
 			<label kind="assignment" x="280" y="-212">index[RQ][window_to_check]++</label>
@@ -1471,8 +1183,8 @@ jobs[task_to_check].execution_time
 			<nail x="450" y="-169"/>
 		</transition>
 		<transition>
-			<source ref="id41"/>
-			<target ref="id41"/>
+			<source ref="id28"/>
+			<target ref="id28"/>
 			<label kind="guard" x="144" y="-136">windowEnd() &gt;= t_time - sats[RQ].offset +
 jobs[task_to_check].execution_time  &amp;&amp;
 windowStart() &lt;= t_time - sats[RQ].offset
@@ -1483,8 +1195,8 @@ overStation()</label>
 			<nail x="85" y="-25"/>
 		</transition>
 		<transition>
-			<source ref="id43"/>
-			<target ref="id43"/>
+			<source ref="id30"/>
+			<target ref="id30"/>
 			<label kind="guard" x="-382" y="-161">independent()</label>
 			<label kind="assignment" x="-399" y="-144">skipWindowCheck(),
 allTaskChecked()</label>
@@ -1492,31 +1204,31 @@ allTaskChecked()</label>
 			<nail x="-346" y="-156"/>
 		</transition>
 		<transition>
-			<source ref="id42"/>
-			<target ref="id43"/>
+			<source ref="id29"/>
+			<target ref="id30"/>
 			<label kind="synchronisation" x="-391" y="-306">check?</label>
 			<label kind="assignment" x="-433" y="-289">resetRunnable()</label>
 			<nail x="-399" y="-357"/>
 			<nail x="-399" y="-212"/>
 		</transition>
 		<transition>
-			<source ref="id43"/>
-			<target ref="id43"/>
+			<source ref="id30"/>
+			<target ref="id30"/>
 			<label kind="guard" x="-289" y="-272">!depends() &amp;&amp; !independent()</label>
 			<label kind="assignment" x="-289" y="-255">next()</label>
 			<nail x="-212" y="-255"/>
 			<nail x="-204" y="-229"/>
 		</transition>
 		<transition>
-			<source ref="id43"/>
-			<target ref="id41"/>
+			<source ref="id30"/>
+			<target ref="id28"/>
 			<label kind="guard" x="-178" y="-246">!all_checked &amp;&amp; !independent() &amp;&amp;
 depends()</label>
 			<label kind="assignment" x="-288" y="-212">station_to_check = true</label>
 		</transition>
 		<transition>
-			<source ref="id43"/>
-			<target ref="id42"/>
+			<source ref="id30"/>
+			<target ref="id29"/>
 			<label kind="guard" x="-297" y="-331">all_checked</label>
 			<label kind="synchronisation" x="-297" y="-314">check!</label>
 			<label kind="assignment" x="-297" y="-297">all_checked = false</label>
@@ -1554,119 +1266,6 @@ gantt{
         p2.Waiting -&gt; 26;
 }</system>
 	<queries>
-		<query>
-			<formula>E&lt;&gt; p0.Free &amp;&amp; p1.Free &amp;&amp;  delayed[2][3] == 1
-			</formula>
-			<comment>
-			</comment>
-		</query>
-		<query>
-			<formula>E&lt;&gt; p2.Free &amp;&amp; p1.Free &amp;&amp; runs[1][2] &gt; runs[2][3]
-			</formula>
-			<comment>Don't fucking delete me!
-			</comment>
-		</query>
-		<query>
-			<formula>E&lt;&gt; forall (i : id_s) Processor(i).Occupied
-			</formula>
-			<comment>
-			</comment>
-		</query>
-		<query>
-			<formula>E[&lt;=1; 1330](max: sats[2].memory)
-			</formula>
-			<comment>
-			</comment>
-		</query>
-		<query>
-			<formula>E&lt;&gt; forall (i : id_t) forall (j : id_t) runs[i][j]+1 &lt; runs[i][j] &amp;&amp; t_time &lt; 600
-			</formula>
-			<comment>== runs[j] &amp;&amp; i != j
-			</comment>
-		</query>
-		<query>
-			<formula>E&lt;&gt; CheckRunnable.index[0] == STATION_INDEX -1
-			</formula>
-			<comment>
-			</comment>
-		</query>
-		<query>
-			<formula>E&lt;&gt; delayed[0][2] == 1
-			</formula>
-			<comment>
-			</comment>
-		</query>
-		<query>
-			<formula>E&lt;&gt; delayed[1][2] &gt; delayed[2][3] +1 &amp;&amp; p2.Free &amp;&amp; p1.Free
-			</formula>
-			<comment>
-			</comment>
-		</query>
-		<query>
-			<formula>E&lt;&gt; Scheduler(0).KK &amp;&amp; active[0] == 1
-			</formula>
-			<comment>
-			</comment>
-		</query>
-		<query>
-			<formula>E&lt;&gt; Scheduler(0).AA &amp;&amp; t_time &gt;= 200
-			</formula>
-			<comment>
-			</comment>
-		</query>
-		<query>
-			<formula>E&lt;&gt; t_time &gt;=20
-			</formula>
-			<comment>
-			</comment>
-		</query>
-		<query>
-			<formula>E&lt;&gt; Scheduler(1).pre_in
-			</formula>
-			<comment>
-			</comment>
-		</query>
-		<query>
-			<formula>E&lt;&gt; t_time &lt;= 1440 &amp;&amp; w1 + w2 &lt; runs[0][1] + runs[1][1] + runs[2][0]
-			</formula>
-			<comment>
-			</comment>
-		</query>
-		<query>
-			<formula>E&lt;&gt; t_time &gt;=1440
-			</formula>
-			<comment>
-			</comment>
-		</query>
-		<query>
-			<formula>E&lt;&gt; t_time ==600
-			</formula>
-			<comment>
-			</comment>
-		</query>
-		<query>
-			<formula>E&lt;&gt; t_time &gt;= 167
-			</formula>
-			<comment>
-			</comment>
-		</query>
-		<query>
-			<formula>E&lt;&gt; t_time &gt;=640 &amp;&amp; Scheduler(0).AA
-			</formula>
-			<comment>
-			</comment>
-		</query>
-		<query>
-			<formula>E&lt;&gt; runs[2][0] &gt; w2
-			</formula>
-			<comment>
-			</comment>
-		</query>
-		<query>
-			<formula>E&lt;&gt; priorities[0][1] == 0
-			</formula>
-			<comment>
-			</comment>
-		</query>
+
 	</queries>
 </nta>

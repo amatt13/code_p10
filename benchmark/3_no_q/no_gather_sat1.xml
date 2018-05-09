@@ -99,9 +99,9 @@ const TaskDescription jobs[N]         = {send_data, gather_new_data, transfer, r
 const int PRIOS[N] = {jobs[0].prio, jobs[1].prio, jobs[2].prio, jobs[3].prio};
 
 // some satellites performing different tasks and with different offset
-const SatDescription sat_gat = {3, 0, 80, {1,1,1,1}, -1};
-const SatDescription sat_trans = {3, 0, 20, {1,1,1,1}, -1};
-const SatDescription sat_sen = {9, 2, 0, {1,1,0,1}, -1};
+const SatDescription sat_gat = {3, 0, 80, {0,1,1,0}, -1};
+const SatDescription sat_trans = {3, 0, 20, {0,0,1,1}, -1};
+const SatDescription sat_sen = {9, 2, 0, {1,0,0,1}, -1};
 SatDescription sats[S] = {sat_gat, sat_trans, sat_sen};
 
 /** Remove StationDescription and replace with array over costrate */
@@ -223,7 +223,7 @@ void set_com(){
 }
 
 bool hasSpace(){
-	return sats[sat_id].memory + receive.data_rate * receive.execution_time &lt;= MAX_MEMORY;
+	return sats[sat_id].memory + 3 * transfer.execution_time &lt;= MAX_MEMORY;
 }
 
 int orientationProgress(){
@@ -1554,119 +1554,6 @@ gantt{
         p2.Waiting -&gt; 26;
 }</system>
 	<queries>
-		<query>
-			<formula>E&lt;&gt; p0.Free &amp;&amp; p1.Free &amp;&amp;  delayed[2][3] == 1
-			</formula>
-			<comment>
-			</comment>
-		</query>
-		<query>
-			<formula>E&lt;&gt; p2.Free &amp;&amp; p1.Free &amp;&amp; runs[1][2] &gt; runs[2][3]
-			</formula>
-			<comment>Don't fucking delete me!
-			</comment>
-		</query>
-		<query>
-			<formula>E&lt;&gt; forall (i : id_s) Processor(i).Occupied
-			</formula>
-			<comment>
-			</comment>
-		</query>
-		<query>
-			<formula>E[&lt;=1; 1330](max: sats[2].memory)
-			</formula>
-			<comment>
-			</comment>
-		</query>
-		<query>
-			<formula>E&lt;&gt; forall (i : id_t) forall (j : id_t) runs[i][j]+1 &lt; runs[i][j] &amp;&amp; t_time &lt; 600
-			</formula>
-			<comment>== runs[j] &amp;&amp; i != j
-			</comment>
-		</query>
-		<query>
-			<formula>E&lt;&gt; CheckRunnable.index[0] == STATION_INDEX -1
-			</formula>
-			<comment>
-			</comment>
-		</query>
-		<query>
-			<formula>E&lt;&gt; delayed[0][2] == 1
-			</formula>
-			<comment>
-			</comment>
-		</query>
-		<query>
-			<formula>E&lt;&gt; delayed[1][2] &gt; delayed[2][3] +1 &amp;&amp; p2.Free &amp;&amp; p1.Free
-			</formula>
-			<comment>
-			</comment>
-		</query>
-		<query>
-			<formula>E&lt;&gt; Scheduler(0).KK &amp;&amp; active[0] == 1
-			</formula>
-			<comment>
-			</comment>
-		</query>
-		<query>
-			<formula>E&lt;&gt; Scheduler(0).AA &amp;&amp; t_time &gt;= 200
-			</formula>
-			<comment>
-			</comment>
-		</query>
-		<query>
-			<formula>E&lt;&gt; t_time &gt;=20
-			</formula>
-			<comment>
-			</comment>
-		</query>
-		<query>
-			<formula>E&lt;&gt; Scheduler(1).pre_in
-			</formula>
-			<comment>
-			</comment>
-		</query>
-		<query>
-			<formula>E&lt;&gt; t_time &lt;= 1440 &amp;&amp; w1 + w2 &lt; runs[0][1] + runs[1][1] + runs[2][0]
-			</formula>
-			<comment>
-			</comment>
-		</query>
-		<query>
-			<formula>E&lt;&gt; t_time &gt;=1440
-			</formula>
-			<comment>
-			</comment>
-		</query>
-		<query>
-			<formula>E&lt;&gt; t_time ==600
-			</formula>
-			<comment>
-			</comment>
-		</query>
-		<query>
-			<formula>E&lt;&gt; t_time &gt;= 167
-			</formula>
-			<comment>
-			</comment>
-		</query>
-		<query>
-			<formula>E&lt;&gt; t_time &gt;=640 &amp;&amp; Scheduler(0).AA
-			</formula>
-			<comment>
-			</comment>
-		</query>
-		<query>
-			<formula>E&lt;&gt; runs[2][0] &gt; w2
-			</formula>
-			<comment>
-			</comment>
-		</query>
-		<query>
-			<formula>E&lt;&gt; priorities[0][1] == 0
-			</formula>
-			<comment>
-			</comment>
-		</query>
+
 	</queries>
 </nta>
