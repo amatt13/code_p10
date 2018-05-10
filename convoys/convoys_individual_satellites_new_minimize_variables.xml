@@ -592,8 +592,6 @@ void assign_send_task(){
 				sat_array[id][p].execution_time = tasks[assign_task].execution_time;
 				sat_array[id][p].task_type = assign_task;
 				sat_array[id][p].to = check_window(p, assign_task);
-				proc_in_use[id]++;
-				send_to_station[id]++;
 			}
 			else if (assign_task == SEND_TO_CONVOY){//Send_to_convoy
 				lowest_cost = MAX_VALUE;
@@ -619,10 +617,6 @@ void assign_send_task(){
 					sat_array[lowest_convoy][lowest_processor].execution_time = tasks[RECIEVE_FROM_CONVOY].execution_time;
 					sat_array[lowest_convoy][lowest_processor].task_type = RECIEVE_FROM_CONVOY;
 					sat_array[lowest_convoy][lowest_processor].to = p;
-					proc_in_use[id]++;
-					proc_in_use[lowest_convoy]++;
-					send_to_convoy[id]++;
-					send_to_convoy[lowest_convoy]++;
 				}
 			}
 		}

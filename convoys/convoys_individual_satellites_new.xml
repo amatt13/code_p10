@@ -9,6 +9,7 @@ const int SEND_TO_STATION = 1;
 const int SEND_TO_CONVOY = 2;
 const int RECIEVE_FROM_CONVOY = 3;
 const int OPEN_WINDOW = 1;
+const int CLOSED_WINDOW = 0;
 const int NO_WINDOW_DEPENDENCY = -1;
 const bool IDLE_ALLOWED = false;
 int int_clock = 0;
@@ -57,13 +58,8 @@ const int OVER_STATION[STATION_INDEX][STATIONS][STATION_ATTRI] = {
 {{1394, 1440, 1}, {1414, 1440, 1}, {1353, 1417, 0}},
 {{0, 9999, 0}, {0, 9999, 0}, {1418, 9999, 1}}};
 
-typedef struct {
-	int cost;
-	int data_recieved;
-} StationDescription;
-
-// #Station0 // #Station1 // #Station2
-StationDescription stations[STATIONS] = {{2,0},{4,0},{8,0}};
+int station_data_recieved[STATIONS] = {0,0,0};
+const int STATION_COSTS[STATIONS] = {2,4,8};
 const int STATION_ZEROS[STATIONS] = {0,0,0};
 
 //CONVOYS
@@ -108,7 +104,7 @@ typedef struct {
 
 
 //Value determines how many minutes each satellites are apart from one another.
-const int OFFSET_BETWEEN_SATELLITE = 5;
+const int OFFSET_BETWEEN_SATELLITE = 10;
 const int STORAGE = 500;
 SatDescription sat_array[CONVOYS][PROCESSORS];
 
@@ -118,7 +114,7 @@ int proc_in_use[CONVOYS] = CONVOY_ZEROS;
 int gather_in_use[CONVOYS] = CONVOY_ZEROS;
 int send_to_station[CONVOYS][STATIONS] = {STATION_ZEROS, STATION_ZEROS, STATION_ZEROS};
 int send_to_convoy[CONVOYS][CONVOYS] = {CONVOY_ZEROS, CONVOY_ZEROS, CONVOY_ZEROS} ;
-int recieve_from_convoys[CONVOYS][CONVOYS] = {CONVOY_ZEROS, CONVOY_ZEROS, CONVOY_ZEROS};
+//int recieve_from_convoys[CONVOYS][CONVOYS] = {CONVOY_ZEROS, CONVOY_ZEROS, CONVOY_ZEROS}; // Not Used
 const int schedule_length = 1050;
 
 //CHANNELS
@@ -137,13 +133,13 @@ bool idle = false;
 
 int obs_gather_cost[CONVOYS] = CONVOY_ZEROS;
 int obs_sender_station_cost[CONVOYS] = CONVOY_ZEROS;
-int obs_sender_convoy_cost[CONVOYS] = CONVOY_ZEROS;
+//int obs_sender_convoy_cost[CONVOYS] = CONVOY_ZEROS; //Not used.
 int calculated_cost = 0;
 
 //OBSERVABLE VARIABLES
-int total_runs[CONVOYS][4] = {{0,0,0,0}, {0,0,0,0}, {0,0,0,0}}; 
-int total_convoy_recived[CONVOYS] = CONVOY_ZEROS;
-int total_convoy_send[CONVOYS] = CONVOY_ZEROS;
+//int total_runs[CONVOYS][4] = {{0,0,0,0}, {0,0,0,0}, {0,0,0,0}}; //Not used.
+//int total_convoy_recived[CONVOYS] = CONVOY_ZEROS; //Not used.
+//int total_convoy_send[CONVOYS] = CONVOY_ZEROS; //Not used.
 
 void init_sats(){
 	int c,p,s;
@@ -175,6 +171,7 @@ int tm = MAX_VALUE;
 int window_count = 0;
 
 //Look at the stations to see how much time needs to be advanced before a window change appears.
+//TODO check all processors in each convoy with their offset to see next window.
 int nearest_window(){
 	int s, c, p;
 	tm = MAX_VALUE;
@@ -253,6 +250,7 @@ void update_storage(){
 			}
 			else if (sat_array[c][p].task_type == SEND_TO_STATION){
 				sat_array[c][p].storage -= tasks[SEND_TO_STATION].data_rate * lowest;
+				station_data_recieved[sat_array[c][p].to] += tasks[SEND_TO_STATION].data_rate * lowest;
 				if (sat_array[c][p].storage &lt; 0){
 					storage_underflow = true;
 				}
@@ -272,11 +270,6 @@ void update_storage(){
 		}
 	}
 }
-
-
-
-
-
 
 //Enforces that scheduler is less likely to idle to reduce state-space
 bool check_idle(){
@@ -321,7 +314,7 @@ void update_windows(){
 	for (s = 0; s &lt; STATIONS; s++){
 		for (c = 0; c &lt; CONVOYS; c++){
 			for (p = 0; p &lt; convoys[c].processors; p++){
-				while(OVER_STATION[sat_array[c][p].station_indexes[s]][s][1] &lt; int_clock){
+				while(OVER_STATION[sat_array[c][p].station_indexes[s]][s][1] &lt; int_clock+sat_array[c][p].offset){
 					sat_array[c][p].station_indexes[s]++;
 				}	
 			}
@@ -333,7 +326,8 @@ TotalTime &lt; schedule_length &amp;&amp;
 lowest != 0 &amp;&amp;
 check_constrains() &amp;&amp;
 cost '== calculated_cost</label></location><location id="id5" x="-480" y="-72"><committed/></location><location id="id6" x="-256" y="-16"><committed/></location><init ref="id1"/><transition><source ref="id3"/><target ref="id0"/><label kind="synchronisation" x="-596" y="9">assign_rest!</label></transition><transition><source ref="id1"/><target ref="id6"/><label kind="assignment" x="-216" y="-16">initialize(),
-current_task = 1</label></transition><transition><source ref="id2"/><target ref="id3"/><label kind="synchronisation" x="-512" y="-40">assign_send_tasks!</label></transition><transition><source ref="id0"/><target ref="id4"/><label kind="assignment" x="-472" y="128">time = 0,
+current_task = 1,
+update_windows()</label></transition><transition><source ref="id2"/><target ref="id3"/><label kind="synchronisation" x="-512" y="-40">assign_send_tasks!</label></transition><transition><source ref="id0"/><target ref="id4"/><label kind="assignment" x="-472" y="128">time = 0,
 closest_task_to_finish()</label><nail x="-552" y="184"/></transition><transition><source ref="id5"/><target ref="id6"/><label kind="synchronisation" x="-456" y="-160">move!</label><label kind="assignment" x="-456" y="-136">current_task++</label><nail x="-480" y="-136"/><nail x="-256" y="-136"/></transition><transition><source ref="id4"/><target ref="id6"/><label kind="guard" x="-392" y="32">time == lowest</label><label kind="assignment" x="-392" y="48">current_task = 1,
 int_clock += lowest,
 update_storage(),
@@ -351,62 +345,9 @@ void accept_suggestion(){
 void reject_suggestion(){
 	decisions[current_task] = 0;
 }
-//Calculates how many processors need to be assigned to the accepted tasks
-int amount_of_tasks_to_execute(int t){
-	if (t == GATHER_DATA &amp;&amp; obs_gather_cost[id] != 0){
-		return (obs_gather_cost[id]*(convoys[id].processors - proc_in_use[id]))/(obs_gather_cost[id] + obs_sender_station_cost[id] + obs_sender_convoy_cost[id]);
-	}
-	else if (t == SEND_TO_STATION &amp;&amp; obs_sender_station_cost[id] != 0){
-		return (obs_sender_station_cost[id]*(convoys[id].processors - proc_in_use[id]))/(obs_gather_cost[id] + obs_sender_station_cost[id] + obs_sender_convoy_cost[id]);
-	}
-	else if (t == 2 &amp;&amp; obs_sender_convoy_cost[id] != 0){
-		return (obs_sender_convoy_cost[id]*(convoys[id].processors - proc_in_use[id]))/(obs_gather_cost[id] + obs_sender_station_cost[id] + obs_sender_convoy_cost[id]);
-	}
-	else{
-		return 1;
-	}
-}
-
-//Finds the lowest cost from the available stations and return the index position of the station
-int cheapest_available_station(){
-	int s;
-	int lowest = MAX_VALUE;
-	int position = 0;
-/*	for (s = 0; s &lt; STATIONS; s++){
-		if (convoys[id].send_to_station[s] &gt; send_to_station[id][s]){
-			if (stations[s].cost &lt; lowest){
-				lowest = stations[s].cost;
-				position = s;
-			}
-		}
-	}
-	if (lowest == MAX_VALUE){
-		position = MAX_VALUE;
-	}*/
-	return position;	
-}
-
-//Finds the convoy with the lowest amount of storage in relation to its maximum cappacity and returns the index position of the convoy
-int lowest_available_convoy(){
-	int c;
-	int lowest = MAX_VALUE;
-	int position = 0;
-/*	for (c = 0; c &lt; CONVOYS; c++){
-		if(convoys[id].send_to_convoy[c] &gt; send_to_convoy[id][c] &amp;&amp; c != id){
-			if (storages[c] &lt; lowest){
-				lowest = storages[c];
-				position = c;
-			}
-		}
-	}
-	if (lowest == MAX_VALUE){
-		position = MAX_VALUE;
-	}*/
-	return position;
-}
 
 //Check if the convoy can execute the task, identifyed by the parameter task_id to see if they are depending on a window and check we the convoy is within set window.
-bool task_within_station(int task_id){
+/*bool task_within_station(int task_id){
 	int s;
 	for (s = 0; s &lt; STATIONS; s++){
 		if (convoys[id].tasks_depending_on_window[task_id][s] || convoys[id].tasks_depending_on_window[task_id][s] == -1){
@@ -414,67 +355,6 @@ bool task_within_station(int task_id){
 		}
 	}
 	return false;
-}
-
-//Used by add_tasks(), this adds the tasks to the convoys processor list, based on the given parameter.
-/*int insert_task(TaskDescription item, int local_id){
-	int p, station_index, convoy_index;
-	if (local_id == -1){
-		local_id = id;
-	}
-	for(p = 0; p &lt; convoys[local_id].processors; p++){
-		if (sat_array[local_id][p].task_type == NO_TASK  &amp;&amp; task_within_station(item.task_type)){
-			if (item.task_type == GATHER_DATA){
-				proc_in_use[local_id]++;
-				sat_array[local_id][p].task_type = item.task_type;
-				sat_array[local_id][p].execution_time = item.execution_time;
-				sat_array[local_id][p].to = -1;
-				gather_in_use[local_id]++;
-				total_runs[local_id][item.task_type]++;
-				return -1;
-			}
-			else if (item.task_type == SEND_TO_STATION){
-				station_index = cheapest_available_station();
-				if (station_index == 9999){
-					return 9999;
-				}
-				else{
-					proc_in_use[local_id]++;
-					sat_array[local_id][p].task_type = item.task_type;
-					sat_array[local_id][p].execution_time = item.execution_time;
-					sat_array[local_id][p].to = station_index;
-					send_to_station[local_id][sat_array[local_id][p].to]++;
-					total_runs[local_id][item.task_type]++;
-					return -1;
-				}
-			}
-			else if (item.task_type == SEND_TO_CONVOY){
-				convoy_index = lowest_available_convoy();
-				if (convoy_index == 9999){
-					return 9999;
-				}
-				else{
-					proc_in_use[local_id]++;
-					sat_array[local_id][p].task_type = item.task_type;
-					sat_array[local_id][p].execution_time = item.execution_time;
-					sat_array[local_id][p].to = convoy_index;
-					send_to_convoy[local_id][sat_array[local_id][p].to]++;
-					total_runs[local_id][item.task_type]++;
-					return convoy_index;
-				}
-			}
-			else if (item.task_type == RECIEVE_FROM_CONVOY){
-				proc_in_use[local_id]++;
-				sat_array[local_id][p].task_type = item.task_type;
-				sat_array[local_id][p].execution_time = item.execution_time;
-				sat_array[local_id][p].to = id;
-				recieve_from_convoys[local_id][sat_array[local_id][p].to]++;
-				total_runs[local_id][item.task_type]++;
-				return -1;
-			}		
-		}
-	}
-	return 1337;
 }*/
 
 int calc_storage(int storage, int max_storage){
@@ -499,8 +379,8 @@ int calc_send_to_station(int storage, int max_storage){
 	}
 
 	for (s = 0; s &lt; STATIONS ; s++){
-		if (v &lt; ((p_storage-(stations[s].cost*stations[s].cost))+(stations[s].cost*stations[s].cost*p_storage)/100)){
-			v = (p_storage-(stations[s].cost*stations[s].cost))+(stations[s].cost*stations[s].cost*p_storage)/100;
+		if (v &lt; ((p_storage-(STATION_COSTS[s]*STATION_COSTS[s]))+(STATION_COSTS[s]*STATION_COSTS[s]*p_storage)/100)){
+			v = (p_storage-(STATION_COSTS[s]*STATION_COSTS[s]))+(STATION_COSTS[s]*STATION_COSTS[s]*p_storage)/100;
 		}		
 	}
 	return v;
@@ -534,9 +414,9 @@ int check_window(int p, int t){
 		return -1;
 	}
 	for (w = 0; w &lt; STATIONS; w++){
-		if (OVER_STATION[sat_array[id][p].station_indexes[w]][w][2] == OPEN_WINDOW &amp;&amp; best_cost &gt; stations[w].cost &amp;&amp; convoys[id].tasks_depending_on_window[t][w]){
+		if (OVER_STATION[sat_array[id][p].station_indexes[w]][w][2] == OPEN_WINDOW &amp;&amp; best_cost &gt; STATION_COSTS[w] &amp;&amp; convoys[id].tasks_depending_on_window[t][w]){
 			best_window = w;
-			best_cost = stations[w].cost;
+			best_cost = STATION_COSTS[w];
 		}
 	}
 	if (best_cost == MAX_VALUE){
@@ -592,8 +472,6 @@ void assign_send_task(){
 				sat_array[id][p].execution_time = tasks[assign_task].execution_time;
 				sat_array[id][p].task_type = assign_task;
 				sat_array[id][p].to = check_window(p, assign_task);
-				proc_in_use[id]++;
-				send_to_station[id]++;
 			}
 			else if (assign_task == SEND_TO_CONVOY){//Send_to_convoy
 				lowest_cost = MAX_VALUE;
@@ -619,10 +497,6 @@ void assign_send_task(){
 					sat_array[lowest_convoy][lowest_processor].execution_time = tasks[RECIEVE_FROM_CONVOY].execution_time;
 					sat_array[lowest_convoy][lowest_processor].task_type = RECIEVE_FROM_CONVOY;
 					sat_array[lowest_convoy][lowest_processor].to = p;
-					proc_in_use[id]++;
-					proc_in_use[lowest_convoy]++;
-					send_to_convoy[id]++;
-					send_to_convoy[lowest_convoy]++;
 				}
 			}
 		}
@@ -665,84 +539,6 @@ void assign_gather_task(){
 			}
 		}
 	}
-}
-//Called after cost has been calculated in the template, because insert_task uses the cost to determine the number of proccesers that needs to perform each task.
-void add_tasks(){
-	int p,s,t,c, assign_task, assign_score, assign_processor, lowest_cost, lowest_convoy, lowest_processor;
-	int assign_order[TASKS-1] = {SEND_TO_STATION,SEND_TO_CONVOY,GATHER_DATA};
-	int tries = proc_in_use[id];
-	// Split function into two function, one that handle send to station and send to convoy and another function to assign gather data. Variable score may need to be kept outside of function to maintain the tables values.
-	//Reset scores variable
-	/*for (p = 0; p &lt; convoys[id].processors; p++){
-		scores[p][0] = 0;
-		scores[p][1] = 0;
-		scores[p][2] = 0;
-	}
-	//Assign scores
-	for (p = 0; p &lt; convoys[id].processors; p++){
-		//Calculate cost for each satellites to determine the best task out of the available tasks that the convoy has decided between
-		if (decisions[GATHER_DATA] &amp;&amp; check_window(p, GATHER_DATA) != MAX_VALUE){
-			scores[p][0] = calc_storage(sat_array[id][p].storage,STORAGE);
-		}
-		if (decisions[SEND_TO_STATION] &amp;&amp; check_window(p, SEND_TO_STATION) != MAX_VALUE){
-			scores[p][1] = calc_send_to_station(sat_array[id][p].storage,STORAGE);
-		}
-		if (decisions[SEND_TO_CONVOY] &amp;&amp; check_window(p, SEND_TO_CONVOY) != MAX_VALUE){
-			scores[p][2] = calc_send_to_convoy(sat_array[id][p].storage,STORAGE);
-		}
-	}
-	//Assign tasks based on scores
-	while(convoys[id].processors != tries){
-		assign_task = -1;
-		assign_score = 0;
-		assign_processor = -1;
-		for (t = 0; t &lt; TASKS-1; t++){
-			for (p = 0; p &lt; convoys[id].processors; p++){
-				if (sat_array[id][p].task_type == -1 &amp;&amp; assign_score &lt; scores[p][assign_order[t]]){
-					assign_score = scores[p][assign_order[t]];
-					assign_task = assign_order[t];
-					assign_processor = p;
-				}	
-			}
-		}
-		if (assign_task == 0){
-			sat_array[id][assign_processor].execution_time = tasks[assign_task].execution_time;
-			sat_array[id][assign_processor].task_type = assign_task;
-			proc_in_use[id]++;
-		}
-		if (assign_task == 1){// Send_to_station
-			sat_array[id][assign_processor].execution_time = tasks[assign_task].execution_time;
-			sat_array[id][assign_processor].task_type = assign_task;
-			sat_array[id][assign_processor].to = check_window(assign_processor, assign_task);
-			proc_in_use[id]++;
-		}
-		else{//Send_to_convoy
-			lowest_cost = MAX_VALUE;
-			lowest_convoy = -1;
-			lowest_processor = -1;
-			for (c = 0; c &lt; CONVOYS; c++){
-				if (id != c){
-					for (p = 0; p &lt; convoys[c].processors; p++){
-						if (both_within_window(id, c, assign_processor, p)){
-							if (lowest_cost &gt; calc_storage(sat_array[c][p].storage,STORAGE)){
-								lowest_cost = calc_storage(sat_array[c][p].storage,STORAGE);
-								lowest_convoy = c;
-								lowest_processor = p; 
-							}
-						}
-					}
-				}
-			}
-			if (lowest_cost != MAX_VALUE){
-				sat_array[id][assign_processor].execution_time = tasks[assign_task].execution_time;
-				sat_array[id][assign_processor].task_type = assign_task;
-				sat_array[id][assign_processor].to = check_window(assign_processor, assign_task);
-				proc_in_use[id]++;
-				proc_in_use[lowest_convoy]++;
-			}
-		}	
-		tries++;
-	}*/
 }
 
 //Template guard - forces gather data to be taken if storage is below 50%
@@ -809,22 +605,22 @@ bool allow_sending_to_convoy(){
 }
 
 //return the highest cost out of all the available stations for the individual convoy. Used in calc_cost method.
-int find_highest_cost(int c){
+/*int find_highest_cost(int c){
 	int s;
 	int highest = 0;
-	/*for (s = 0; s &lt; STATIONS; s++){
+	for (s = 0; s &lt; STATIONS; s++){
 		if(convoys[c].send_to_station[s] != 0 &amp;&amp; stations[s].cost &gt; highest){
 			highest = stations[s].cost;
 		}
-	}*/
+	}
 	return highest;
-}
+}*/
 
 
 
 //Calculate the cost based on storage, processors in use, and task distribution amount processors.
 void calc_cost(){
-	/*int i, c, s, p;
+	int i, c, s, p;
 	int sender_cost[CONVOYS][STATIONS] = {STATION_ZEROS, STATION_ZEROS, STATION_ZEROS};
 	int total_cost = 0;
 	int internal_cost = 0;
@@ -842,7 +638,7 @@ void calc_cost(){
 		obs_gather_cost[id] = (storages[id]*100/convoys[id].storage)*(gather_in_use[id]*100/convoys[id].processors)/1000;
 	}
 	//Cost goes up if we have high storage and no procceses sending to other convoys or stations on Earth
-	internal_cost = find_highest_cost(id);
+	/*internal_cost = find_highest_cost(id);
 	for (s = 0; s &lt; STATIONS ; s++){
 		sender_cost[id][s] = 0;
 		if (convoys[id].send_to_station[s] != 0){
@@ -858,9 +654,9 @@ void calc_cost(){
 		obs_sender_station_cost[id] += sender_cost[id][s]/100;
 	}
 	obs_sender_station_cost[id] /= total_cost/10;
-	calculated_cost += obs_sender_station_cost[id];
+	calculated_cost += obs_sender_station_cost[id];*/
 
-	obs_sender_convoy_cost[id] = 0;
+	/*obs_sender_convoy_cost[id] = 0;
 	for (c = 0; c &lt; CONVOYS; c++){
 		//Cost goes up if we have high storage and one convoys have low storage.
 		if (obs_sender_convoy_cost[id] &lt; ((storages[id]*100/convoys[id].storage) - (storages[c]*100/convoys[c].storage))/10 &amp;&amp; id != c){

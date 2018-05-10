@@ -1,0 +1,126 @@
+1 - Current model:further_high_low.xml
+Done:further_high_low.xml
+0			0			9
+12			13			0
+16			28			0
+0			16			28
+0			0			0
+0			0			0
+10			0			0
+0			0			0
+255			191			443
+221			30			0
+266			421			320
+78			178			57
+0.01375	6315	360	520	660
+1 - Current model:double_storage.xml
+Done:double_storage.xml
+0			0			9
+12			14			0
+17			30			0
+0			17			30
+0			0			0
+0			0			0
+11			0			0
+0			0			0
+292			206			494
+245			33			0
+272			452			336
+84			202			63
+0.01601	6510	360	535	705
+1 - Current model:double_deadline.xml
+Done:double_deadline.xml
+0			0			10
+12			14			0
+17			31			0
+0			17			32
+0			0			0
+0			0			0
+11			0			0
+0			0			0
+310			222			496
+256			36			0
+272			462			360
+84			202			66
+0.014861	6670	400	535	720
+1 - Current model:all_do_all.xml
+Done:all_do_all.xml
+0			0			10
+12			14			0
+17			33			0
+0			18			33
+0			0			0
+0			0			0
+12			0			0
+0			0			0
+310			222			508
+268			36			0
+277			472			365
+84			209			66
+0.013956	6670	400	535	750
+1 - Current model:closer_high_low.xml
+Done:closer_high_low.xml
+0			0			10
+12			14			0
+18			33			0
+0			18			33
+0			0			0
+0			0			0
+12			0			0
+0			0			0
+310			222			512
+268			36			0
+281			476			365
+84			209			66
+0.014285	6670	400	535	765
+1 - Current model:no_preemption.xml
+Done:no_preemption.xml
+0			0			16
+18			19			0
+26			46			0
+0			26			46
+0			0			0
+0			0			0
+17			0			0
+0			0			0
+515			415			789
+393			53			0
+408			653			550
+124			319			101
+173.422314	9775	640	775	1080
+1 - Current model:no_slew_high_exe.xml
+Done:no_slew_high_exe.xml
+0			0			16
+12			14			0
+23			46			0
+0			22			46
+0			0			0
+9			5			0
+12			0			0
+0			0			0
+672			604			693
+341			0			0
+427			836			747
+0			0			0
+229.930913	7240	640	780	1035
+1 - Current model:no_slew.xml
+Done:no_slew.xml
+1 - Current model:no_window.xml
+Done:no_window.xml
+1 - Current model:base.xml
+Done:base.xml
+0			0			16
+10			18			0
+20			51			0
+0			20			51
+0			0			0
+0			1			0
+24			0			0
+0			0			0
+305			83			758
+637			51			0
+349			740			585
+151			568			99
+153.399472	8020	640	840	1065
+1 - Current model:no_gather_sat1.xml
+Done:no_gather_sat1.xml
