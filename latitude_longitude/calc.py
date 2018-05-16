@@ -7,7 +7,6 @@ RADIUS_EARTH = 6.37 * 10 ** 6
 # Newton's Law - universal gravitation constant
 G = 6.673 * 10 ** -11
 
-
 class Orbit:
     def __init__(self, inclination, RAAN, eccentricity, aPerigee, mAnomaly, mMotion, revolutionAtEpoch):
         self.inclination = inclination
@@ -18,13 +17,11 @@ class Orbit:
         self.mMotion = mMotion
         self.revolutionAtEpoch = revolutionAtEpoch
 
-
 class Station:
     def __init__(self, longitude, latitude, distance):
         self.longitude = longitude
         self.latitude = latitude
         self.distance = distance
-
 
 def checksum(line: str):
     checksum = 0
@@ -34,7 +31,6 @@ def checksum(line: str):
         elif x == "-":
             checksum = checksum + 1
     return line + str(checksum)[-1]
-
 
 # line 1
 # 1     - Line Number of Element Data
@@ -76,7 +72,6 @@ def construct_line_one(year, days):
                                                                            c21_32,
                                                                            c34_43, c45_52, c54_61, c63, c65_68)
     return checksum(line1)
-
 
 # line 2
 # 1     - Line Number of  Element Data
@@ -219,11 +214,14 @@ def format_data(array):
 
 
 if __name__ == '__main__':
-    orbit1 = Orbit("50.0000", "020.519", "0020247", "81.2115", "279.186", "16.30050059", "00000")
-    orbit2 = Orbit("45.0000", "060.519", "0020247", "79.2115", "260.186", "16.20050059", "00000")
-    orbit3 = Orbit("60.0000", "160.519", "0020247", "75.2115", "220.186", "16.40050059", "00000")
-    stations = [Station(-45.10, 50.00, 250000), Station(-32.50, 75.00, 125000), Station(-45.10, 63.25, 95000)]
+    orbit1 = Orbit("75.0000", "160.519", "0020247", "75.2115", "220.186", "16.40050059", "00000")
+    orbit2 = Orbit("80.0000", "000.519", "0020247", "75.2115", "220.186", "16.40050059", "00000")
+    #Cheap and Expensive
+    stations2 = [Station(-99.19, 31.7387, 175000), Station(-0.989598, 51.647472, 200000)]
+    #Expensive and Cheap
+    stations1 = [Station(20.819871, 67.92, 200000), Station(60.91, -75.5757, 170000)]
+
     locations = []
-    length = 1440
-    generate_data_for_station(stations, orbit1, length, locations)
+    length = 2000
+    generate_data_for_station(stations1, orbit1, length, locations)
     format_data(locations)
