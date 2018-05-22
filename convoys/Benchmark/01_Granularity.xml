@@ -2,7 +2,7 @@
 const int THRESHOLD_SEND_TO_STATION_UPPER = 40;
 const int THRESHOLD_SEND_TO_STATION_LOWER = 30;
 const int THRESHOLD_SEND_TO_CONVOY_UPPER = 100;
-const int THRESHOLD_SEND_TO_CONVOY_LOWER = 70;
+const int THRESHOLD_SEND_TO_CONVOY_LOWER = 50;
 const int THRESHOLD_GATHER_DATA = 50;
 const int NO_TASK = -1;
 const int GATHER_DATA = 0;
@@ -635,11 +635,11 @@ void calc_cost(){
 	//Cost goes up if we have low storage and no processes gathering data.
 	if ((100-storages[id]*100/convoys[id].storage)*(100-gather_in_use[id]*100/convoys[id].processors)/convoys[id].storage*10 &gt;=
 	    (storages[id]*100/convoys[id].storage)*(gather_in_use[id]*100/convoys[id].processors)/convoys[id].storage*10){
-		calculated_cost += (100-storages[id]*100/convoys[id].storage)*(100-gather_in_use[id]*100/convoys[id].processors)/convoys[id].storage;
+		//calculated_cost += (100-storages[id]*100/convoys[id].storage)*(100-gather_in_use[id]*100/convoys[id].processors)/convoys[id].storage;
 		obs_gather_cost[id] = (100-storages[id]*100/convoys[id].storage)*(100-gather_in_use[id]*100/convoys[id].processors)/convoys[id].storage*10;
 	}
 	else {
-		calculated_cost += (storages[id]*100/convoys[id].storage)*(gather_in_use[id]*100/convoys[id].processors)/convoys[id].storage;
+		//calculated_cost += (storages[id]*100/convoys[id].storage)*(gather_in_use[id]*100/convoys[id].processors)/convoys[id].storage;
 		obs_gather_cost[id] = (storages[id]*100/convoys[id].storage)*(gather_in_use[id]*100/convoys[id].processors)/convoys[id].storage*10;
 	}
 	//Cost goes up if we have high storage and no procceses sending to stations on Earth
@@ -654,10 +654,10 @@ void calc_cost(){
 			else{
 				sender_cost[id][s] = ((storages[id]*100/convoys[id].storage) * ((internal_cost*10)/stations[s].cost)) + (((internal_cost*10)/stations[s].cost) * (send_to_station[id][s]*100/convoys[id].send_to_station[s]));
 			}
-			total_cost += 100-(internal_cost*10)/stations[s].cost;
+			total_cost += (internal_cost*10)/stations[s].cost;
 			n++;
 		}
-		obs_sender_station_cost[id] += sender_cost[id][s]/25;
+		obs_sender_station_cost[id] += sender_cost[id][s]/50;
 	}
 	obs_sender_station_cost[id] *= 10;
 	obs_sender_station_cost[id] /= total_cost/10;
@@ -672,7 +672,7 @@ void calc_cost(){
 		}
 	}
 	obs_sender_convoy_cost[id] = obs_sender_convoy_cost[id]/10;
-	calculated_cost += obs_sender_convoy_cost[id];
+	//calculated_cost += obs_sender_convoy_cost[id];
 }
 
 

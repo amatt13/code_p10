@@ -7,31 +7,31 @@ s4C = 2
 
 def tprint(list):
     time = 195
-    cost = 1575
-    s1 = 720
+    cost = 2665
+    s1 = 840
     s2 = 360
-    s3 = 240
-    s4 = 720
+    s3 = 420
+    s4 = 840
     CoB = int((s1*s1C)+(s2*s2C)+(s3*s3C)+(s4*s4C))
     ratio = round(int((s1*s1C)+(s2*s2C)+(s3*s3C)+(s4*s4C))/int(s1+s2+s3+s4), 3)
-    c1_Rsend = 18
-    c1_Rgather = 45
-    c1_Rtransfer = 2
-    c1_Rreceive = 4
-    c1_transfer = 120
-    c1_receive = 180
-    c1_storage = 650
-    c2_Rsend = 19
-    c2_Rgather = 47
-    c2_Rtransfer = 4
-    c2_Rreceive = 2
-    c2_transfer = 180
-    c2_receive = 120
-    c2_storage = 830
+    c1_Rsend = 20
+    c1_Rgather = 41
+    c1_Rtransfer = 0
+    c1_Rreceive = 2
+    c1_transfer = 0
+    c1_receive = 120
+    c1_storage = 530
+    c2_Rsend = 23
+    c2_Rgather = 50
+    c2_Rtransfer = 2
+    c2_Rreceive = 0
+    c2_transfer = 120
+    c2_receive = 0
+    c2_storage = 470
 
     #input
     itime = round(int(list[0].split("=")[1]),2)
-    icost = round(int(list[19].split("=")[1]),2)
+    icost = round(int(list[19].split("=")[1])+1320,2)
     is1 = round(int(list[1].split("=")[1]),2)
     is2 = round(int(list[2].split("=")[1]),2)
     is3 = round(int(list[3].split("=")[1]),2)
@@ -57,8 +57,8 @@ def tprint(list):
            "%\n			\\begin{tabular}{|llllllllll|}\n				\\hline\n				&		&		&		" \
            "&   &	\\multicolumn{5}{c|}{\\cellcolor[HTML]{ABCDEF}Station data}\\\\\n				\\rowcolor[HTML]{" \
            "ABCDEF}\n				&	Time	&	Cost of Bandwidth   &   CoB:ratio	&	Cora: cost	&	1	&	2	&	3	&	" \
-           "4	&	Total\\\\\n				Base	&	195	&	5400	&    2.647   &	1575	&	720	&	360	&	240	&	" \
-           "720	&	2040\\\\\n				\\rowcolor[HTML]{EFEFEF}\n				Result	&	_time	&	" \
+           "4	&	Total\\\\\n				Base	&	195	&	6420	&    2.61   &	2665	&	840	&	360	&	420	&	" \
+           "840	&	2460\\\\\n				\\rowcolor[HTML]{EFEFEF}\n				Result	&	_time	&	" \
            "_CoB	&  _CoBR\t   &	_cost	&	_s1	&	_s2	&	_s3	&	_s4	&	_total\t\\\\\n				Diff (\\%)	&	" \
            "_timediff	&	_CoBdiff	&   _CoBRdiff\t    &	_costdiff	&	_s1diff	&	_s2diff	&	_s3diff	&	_s4diff	&	" \
            "_totaldiff\t\\\\\\hline\n		\\end{tabular}}\n	\\end{minipage}\n	\\newline\n	\\vspace{-0.25em}\n	" \
@@ -66,17 +66,17 @@ def tprint(list):
            "tabular}{|lllllll|}\n				\\hline\n				\\rowcolor[HTML]{ABCDEF}\n				&	" \
            "\\multicolumn{3}{c}{\\cellcolor[HTML]{ABCDEF}Convoy1}	&	\\multicolumn{3}{c|}{\\cellcolor[HTML]{" \
            "ABCDEF}Convoy2}\\\\\n				\\rowcolor[HTML]{ABCDEF}\n				&	Base	&	Result	&	" \
-           "Diff (\\%)	&	Base	&	Result	&	Diff (\\%)\\\\\n				Runs:send\\_data	&	18	&	" \
-           "c1_send_data	&	c1_send_datadiff	&	19	&	c2_send_data	&	c2_send_datadiff	\\\\\n		" \
-           "		\\rowcolor[HTML]{EFEFEF}\n				Runs:gather\\_new\\_data	&	45	&	c1_gather	&	" \
-           "c1_gatherdiff	&	47	&	c2_gather	&	c2_gatherdiff	\\\\\n				Runs:transfer	&	2	" \
-           "&	c1_Rtransfer	&	c1_Rtransferdiff	&	4	&	c2_Rtransfer	&	c2_Rtransferdiff	\\\\\n	" \
-           "			\\rowcolor[HTML]{EFEFEF}\n				Runs:receive	&	4	&	c1_Rreceive	&	" \
-           "c1_Rreceivediff	&	2	&	c2_Rreceive	&	c2_Rreceivediff	\\\\\n				Transfer	&	120	&	" \
-           "c1_Transfer	&	c1_Transferdiff	&	180	&	c2_Transfer	&	c2_Transferdiff	\\\\\n				" \
-           "\\rowcolor[HTML]{EFEFEF}\n				Receive	&	180	&	c1_Receive	&	c1_Receivediff	&	120	&	" \
-           "c2_Receive	&	c2_Receivediff	\\\\\n				Storage	&	650	&	c1_storage	&	c1_storagediff	" \
-           "&	830	&	c2_storage	&	c2_storagediff	\\\\\\hline\n		\\end{tabular}}\n	\\end{minipage}\n	" \
+           "Diff (\\%)	&	Base	&	Result	&	Diff (\\%)\\\\\n				Runs:send\\_data	&	20	&	" \
+           "c1_send_data	&	c1_send_datadiff	&	23	&	c2_send_data	&	c2_send_datadiff	\\\\\n		" \
+           "		\\rowcolor[HTML]{EFEFEF}\n				Runs:gather\\_new\\_data	&	41	&	c1_gather	&	" \
+           "c1_gatherdiff	&	50	&	c2_gather	&	c2_gatherdiff	\\\\\n				Runs:transfer	&	0	" \
+           "&	c1_Rtransfer	&	c1_Rtransferdiff	&	2	&	c2_Rtransfer	&	c2_Rtransferdiff	\\\\\n	" \
+           "			\\rowcolor[HTML]{EFEFEF}\n				Runs:receive	&	2	&	c1_Rreceive	&	" \
+           "c1_Rreceivediff	&	0	&	c2_Rreceive	&	c2_Rreceivediff	\\\\\n				Transfer	&	0	&	" \
+           "c1_Transfer	&	c1_Transferdiff	&	120	&	c2_Transfer	&	c2_Transferdiff	\\\\\n				" \
+           "\\rowcolor[HTML]{EFEFEF}\n				Receive	&	120	&	c1_Receive	&	c1_Receivediff	&	0	&	" \
+           "c2_Receive	&	c2_Receivediff	\\\\\n				Storage	&	530	&	c1_storage	&	c1_storagediff	" \
+           "&	470	&	c2_storage	&	c2_storagediff	\\\\\\hline\n		\\end{tabular}}\n	\\end{minipage}\n	" \
            "\\caption{Mycaption}\n	\\label{my-label}\n\\end{table} "
     original_string = original_string.replace("_time\t", str(itime))
     original_string = original_string.replace("_timediff\t", str(round(itime * 100 / time,1)))
@@ -141,16 +141,17 @@ def tprint(list):
 
 if __name__ == '__main__':
     nbr_list = [2, 4, 6, 8, 10, 15, 16, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 143]
+    #nbr_list = [2, 4, 6, 8, 10, 15, 16, 171, 172, 173, 174, 175, 176, 177, 178, 179, 180, 181, 182, 203]
     with open("test", "r") as data_file:
         var_list = []
         for line in reversed(list(data_file)):
             if (line[:9] == 'TotalTime'):
                 vars = line.split(' ')
                 for i, var in enumerate(vars):
-                    #print(i, var)
+                    print(i, var)
                     if i in nbr_list:
                         var_list.append(var)
                 break
         for i, var in enumerate(var_list):
-            pass#print(i, var)
+            print(i, var)
         print(tprint(var_list))
