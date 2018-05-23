@@ -1,0 +1,15 @@
+E<> TotalTime >=100
+E<> TotalTime >=200
+E<> TotalTime >=300
+E<> TotalTime >=400
+E<> TotalTime >=500
+E<> TotalTime >=600
+E<> TotalTime >=700
+E<> TotalTime >=800
+E<> TotalTime >=900
+E<> TotalTime >=1000
+E<> TotalTime >=1100
+E<> TotalTime >=1200
+E<> TotalTime >=1300
+E<> TotalTime >=1400
+E<> TotalTime >=1440
