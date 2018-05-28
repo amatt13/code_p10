@@ -122,7 +122,7 @@ int gather_in_use[CONVOYS] = CONVOY_ZEROS;
 int send_to_station[CONVOYS][STATIONS] = {STATION_ZEROS, STATION_ZEROS};
 int send_to_convoy[CONVOYS][CONVOYS] = {CONVOY_ZEROS, CONVOY_ZEROS} ;
 int recieve_from_convoys[CONVOYS][CONVOYS] = {CONVOY_ZEROS, CONVOY_ZEROS};
-const int schedule_length = 1000;
+const int schedule_length = 2000;
 
 //CHANNELS
 broadcast chan suggest_task, assign_tasks, move;

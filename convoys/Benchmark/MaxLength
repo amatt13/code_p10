@@ -1,0 +1,15 @@
+experiments										max
+baseline										300
+Change granularity of scoring					400
+Change number of satellites in all convoys		300
+Change number of convoys						150
+Extending execution time for gather data		300
+Make all tasks independent of windows			1600 only has a choice of if it wants to transfer data to the other convoy, and most of the time they are close to the same levels.
+Tasks with different execution times			75
+Removing constraints							75
+Increase window's span							400
+Decrease window's span							300
+Increase threshold for convoys					200
+Decrease threshold for convoys					1600 same as independent.
+Increase threshold for station 					200
+Decrease threshold for station					300
