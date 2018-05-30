@@ -76,7 +76,8 @@ textOffsetX = -10
 textOffsetY = -5
 nodeOffsetX = 0
 nodeOffsetY = 0
-
+nameOffsetX = -20
+nameOffsetY = -5
 
 def replace_bools(str):
     return str.replace("\\&amp;","\\&").replace('\\&lt', '<').replace('\\&gt', '>').replace(';=', '=')
@@ -102,7 +103,9 @@ def GenerateTikz(name, nodes, transitions):
             fragments = code.split("\n")
             code = colorCodedText(l.Label.kind, fragments)
             f.write("\\node[anchor=north west, text width=10cm, font=\\tiny, align=left] at (" + str(int(l.Label.x) + textOffsetX) + "," + str((int(l.Label.y) + textOffsetY)*-1) + ") {\\begin{tabular}{l}" + code + "\\end{tabular}};\n")
-    f.write("\t% place transition labels\n")
+        if l.Name is not None:
+            f.write("\\node[anchor=north west, text width=10cm, font=\\tiny, align=left] at (" + str(int(l.Name.x) + nameOffsetX) + "," + str((int(l.Name.y) + nameOffsetY)*-1) + ") {\\begin{tabular}{l}" + l.Name.name + "\\end{tabular}};\n")
+        f.write("\t% place transition labels\n")
     for t in transitions:
         for ts in t.labels:
             if ts is not None:
