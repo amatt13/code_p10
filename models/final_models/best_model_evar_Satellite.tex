@@ -1,0 +1,37 @@
+\begin{figure}[H]
+	\centering
+	\begin{tikzpicture}[x=0.02cm,y=0.02cm]
+	% place nodes
+\node[location] at (-216, 576) (id25) {$\cup$};
+\node[init] at (-756, 578) (id26) {};
+\node[location] at (-216, 464) (id27) {$\cup$};
+\node[location] at (-528, 464) (id28) {};
+	% place node labels
+	% place transition labels
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-817,636) {\begin{tabular}{l}\textcolor{invariant}{t\_time <= }\\\textcolor{invariant}{sats[sat\_id].offset}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-824,591) {\begin{tabular}{l}Start\end{tabular}};
+	% place transition labels
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-276,461) {\begin{tabular}{l}Checking\end{tabular}};
+	% place transition labels
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-690,455) {\begin{tabular}{l}\textcolor{invariant}{loc\_time <= TASK\_SUGGEST\_INTERVAL}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-615,481) {\begin{tabular}{l}Waiting\end{tabular}};
+	% place transition labels
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-514,605) {\begin{tabular}{l}\textcolor{guard}{!validSuggestion(sat\_id)}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-506,581) {\begin{tabular}{l}\textcolor{guard}{validSuggestion(sat\_id)}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-506,557) {\begin{tabular}{l}\textcolor{sync}{add\_task[sat\_id]!}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-690,625) {\begin{tabular}{l}\textcolor{guard}{t\_time >= }\\\textcolor{guard}{sats[sat\_id].offset}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-690,583) {\begin{tabular}{l}\textcolor{update}{loc\_time = 0,}\\\textcolor{update}{in\_orbit[sat\_id] = true}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-322,541) {\begin{tabular}{l}\textcolor{update}{loc\_time = 0,}\\\textcolor{update}{suggest\_task()}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-511,506) {\begin{tabular}{l}\textcolor{guard}{loc\_time >= TASK\_SUGGEST\_INTERVAL}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-409,489) {\begin{tabular}{l}\textcolor{sync}{find\_new!}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-409,464) {\begin{tabular}{l}\textcolor{update}{RQ = sat\_id,}\\\textcolor{update}{sch\_time[sat\_id] += 2}\\\end{tabular}};
+	% place transitions
+\draw[->] (id25) -- (-528, 576) -- (id28) {};
+\draw[->] (id25) -- (-288, 552) -- (-512, 552) -- (id28) {};
+\draw[->] (id26) -- (-552, 576) -- (id28) {};
+\draw[->] (id27) -- (id25) {};
+\draw[->] (id28) -- (id27) {};
+	\end{tikzpicture}
+	\caption{The Satellite template}
+	\label{fig:t_best_model_evar_Satellite}
+\end{figure}

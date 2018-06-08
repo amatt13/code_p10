@@ -1,0 +1,125 @@
+\begin{figure}[H]
+	\centering
+	\begin{tikzpicture}[x=0.02cm,y=0.02cm]
+	% place nodes
+\node[location] at (110, 246) (id0) {c};
+\node[location] at (433, -323) (id1) {c};
+\node[location] at (722, -51) (id2) {c};
+\node[location] at (110, 136) (id3) {c};
+\node[location] at (376, 264) (id4) {c};
+\node[location] at (391, -51) (id5) {c};
+\node[location] at (552, -51) (id6) {$\cup$};
+\node[location] at (336, 208) (id7) {c};
+\node[init] at (-76, 221) (id8) {c};
+\node[location] at (-229, -127) (id9) {c};
+\node[location] at (-229, -59) (id10) {c};
+\node[location] at (110, 0) (id11) {c};
+\node[location] at (229, 136) (id12) {c};
+\node[location] at (229, -127) (id13) {};
+\node[location] at (-76, -127) (id14) {c};
+\node[location] at (-76, 136) (id15) {};
+	% place node labels
+	% place transition labels
+	% place transition labels
+	% place transition labels
+	% place transition labels
+	% place transition labels
+	% place transition labels
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (522,-12) {\begin{tabular}{l}Slewing\end{tabular}};
+	% place transition labels
+	% place transition labels
+	% place transition labels
+	% place transition labels
+	% place transition labels
+	% place transition labels
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (233,157) {\begin{tabular}{l}Release\end{tabular}};
+	% place transition labels
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (227,-99) {\begin{tabular}{l}Occupied\end{tabular}};
+	% place transition labels
+	% place transition labels
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-85,135) {\begin{tabular}{l}Start\end{tabular}};
+	% place transition labels
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (168,268) {\begin{tabular}{l}\textcolor{sync}{not\_rdy\_to\_rec[sat\_id]!}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-61,251) {\begin{tabular}{l}\textcolor{guard}{!hasSpace() || !in\_orbit[sat\_id]}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-52,234) {\begin{tabular}{l}\textcolor{sync}{transmit\_data[sat\_id]?}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (508,-224) {\begin{tabular}{l}\textcolor{guard}{active[sat\_id] != RECEIVE\_INDEX}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (508,-241) {\begin{tabular}{l}\textcolor{sync}{not\_rdy\_to\_rec[sat\_id]!}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (381,-233) {\begin{tabular}{l}\textcolor{guard}{active[sat\_id] ==}\\\textcolor{guard}{RECEIVE\_INDEX}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (551,-71) {\begin{tabular}{l}\textcolor{guard}{active[com] != TRANSMIT\_INDEX}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (602,-20) {\begin{tabular}{l}\textcolor{sync}{check?}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (653,30) {\begin{tabular}{l}\textcolor{guard}{active[com] == }\\\textcolor{guard}{TRANSMIT\_INDEX}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (313,-165) {\begin{tabular}{l}\textcolor{guard}{active[sat\_id] == TRANSMIT\_INDEX}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (389,-182) {\begin{tabular}{l}\textcolor{sync}{not\_rdy\_to\_rec[com]?}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (245,-258) {\begin{tabular}{l}\textcolor{sync}{transmit\_data[sat\_id]?}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (245,-284) {\begin{tabular}{l}\textcolor{update}{task = RECEIVE\_INDEX}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (66,175) {\begin{tabular}{l}\textcolor{guard}{active[com] != RECEIVE\_INDEX}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (100,141) {\begin{tabular}{l}\textcolor{guard}{active[com] == }\\\textcolor{guard}{RECEIVE\_INDEX}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (134,107) {\begin{tabular}{l}\textcolor{sync}{release[com]!}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-50,285) {\begin{tabular}{l}\textcolor{sync}{release[sat\_id]!}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-50,269) {\begin{tabular}{l}\textcolor{update}{active[sat\_id] = -1}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (440,251) {\begin{tabular}{l}\textcolor{guard}{task == TRANSMIT\_INDEX}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (440,234) {\begin{tabular}{l}\textcolor{sync}{not\_rdy\_to\_rec[com]?}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (245,-12) {\begin{tabular}{l}\textcolor{sync}{transmit\_data[com]!}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (406,-20) {\begin{tabular}{l}\textcolor{guard}{rdyToTrans()}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (406,-46) {\begin{tabular}{l}\textcolor{sync}{request[sat\_id]!}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (321,-80) {\begin{tabular}{l}\textcolor{guard}{task == TRANSMIT\_INDEX}\\\textcolor{guard}{\&\& !is\_synced \&\&}\\\textcolor{guard}{active[com] != TRANSMIT\_INDEX}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (449,-131) {\begin{tabular}{l}\textcolor{sync}{go!}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (330,-131) {\begin{tabular}{l}\textcolor{update}{is\_synced = true}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (278,85) {\begin{tabular}{l}\textcolor{sync}{request[sat\_id]!}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (194,243) {\begin{tabular}{l}\textcolor{guard}{hasSpace()}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (151,226) {\begin{tabular}{l}\textcolor{sync}{transmit\_data[sat\_id]?}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (66,209) {\begin{tabular}{l}\textcolor{update}{task = RECEIVE\_INDEX,}\\\textcolor{update}{active[sat\_id] = RECEIVE\_INDEX}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-154,200) {\begin{tabular}{l}\textcolor{update}{set\_com()}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-194,-123) {\begin{tabular}{l}\textcolor{sync}{check?}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-258,-139) {\begin{tabular}{l}\textcolor{update}{enqueue(task),}\\\textcolor{update}{active[sat\_id] = front()}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-234,-75) {\begin{tabular}{l}\textcolor{sync}{check!}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-186,53) {\begin{tabular}{l}\textcolor{guard}{queue[sat\_id][0] == -1 ||}\\\textcolor{guard}{!runnable[queue[sat\_id][0]]}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-27,-29) {\begin{tabular}{l}\textcolor{sync}{check?}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-27,5) {\begin{tabular}{l}\textcolor{update}{orderQueue(),}\\\textcolor{update}{active[sat\_id] = front()}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-58,157) {\begin{tabular}{l}\textcolor{guard}{empty(queue[sat\_id])}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-2,90) {\begin{tabular}{l}\textcolor{guard}{!empty(queue[sat\_id])}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (49,73) {\begin{tabular}{l}\textcolor{sync}{check!}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (15,-207) {\begin{tabular}{l}\textcolor{guard}{validSuggestion(sat\_id)}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (49,-224) {\begin{tabular}{l}\textcolor{sync}{add\_task[sat\_id]?}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-27,-241) {\begin{tabular}{l}\textcolor{update}{enqueue(sats[sat\_id].suggested\_task)}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (160,56) {\begin{tabular}{l}\textcolor{sync}{release[sat\_id]?}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (160,39) {\begin{tabular}{l}\textcolor{update}{orderQueue(),}\\\textcolor{update}{RQ = sat\_id}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-18,-63) {\begin{tabular}{l}\textcolor{guard}{queue[sat\_id][0] != -1 \&\& }\\\textcolor{guard}{runnable[queue[sat\_id][0]] \&\&}\\\textcolor{guard}{active[sat\_id] != -1}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-18,-122) {\begin{tabular}{l}\textcolor{sync}{request[sat\_id]!}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-18,-139) {\begin{tabular}{l}\textcolor{update}{dequeue(), is\_synced = false,}\\\textcolor{update}{task = active[sat\_id]}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-231,107) {\begin{tabular}{l}\textcolor{sync}{add\_task[sat\_id]?}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-299,90) {\begin{tabular}{l}\textcolor{update}{task = sats[sat\_id].suggested\_task}\\\end{tabular}};
+	% place transitions
+\draw[->] (id0) -- (357, 246) -- (id4) {};
+\draw[->] (id15) -- (-17, 246) -- (id0) {};
+\draw[->] (id1) -- (510, -323) -- (510, -221) -- (306, -221) -- (id13) {};
+\draw[->] (id1) -- (433, -238) -- (280, -238) -- (id13) {};
+\draw[->] (id2) -- (722, -76) -- (552, -76) -- (id6) {};
+\draw[->] (id6) -- (id2) {};
+\draw[->] (id2) -- (722, 263) -- (671, 263) -- (id4) {};
+\draw[->] (id13) -- (314, -144) -- (314, -187) -- (688, -187) -- (688, 263) -- (id4) {};
+\draw[->] (id13) -- (246, -280) -- (331, -280) -- (331, -323) -- (id1) {};
+\draw[->] (id12) -- (224, 160) -- (144, 160) -- (id3) {};
+\draw[->] (id12) -- (id3) {};
+\draw[->] (id4) -- (-48, 264) -- (id15) {};
+\draw[->] (id6) -- (552, 263) -- (id4) {};
+\draw[->] (id5) -- (272, -51) -- (id13) {};
+\draw[->] (id6) -- (id5) {};
+\draw[->] (id13) -- (552, -127) -- (id6) {};
+\draw[->] (id7) -- (336, 32) -- (248, 0) -- (id13) {};
+\draw[->] (id15) -- (0, 208) -- (id7) {};
+\draw[->] (id8) -- (id15) {};
+\draw[->] (id9) -- (id14) {};
+\draw[->] (id10) -- (id9) {};
+\draw[->] (id14) -- (id15) {};
+\draw[->] (id11) -- (-25, 0) -- (-25, -85) -- (id14) {};
+\draw[->] (id3) -- (id15) {};
+\draw[->] (id3) -- (id11) {};
+\draw[->] (id13) -- (229, -289) -- (170, -289) -- (id13) {};
+\draw[->] (id13) -- (id12) {};
+\draw[->] (id14) -- (id13) {};
+\draw[->] (id15) -- (-229, 136) -- (id10) {};
+	\end{tikzpicture}
+	\caption{The Scheduler template}
+	\label{fig:t_best_model_evar_Scheduler}
+\end{figure}

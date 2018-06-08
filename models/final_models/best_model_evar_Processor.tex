@@ -1,0 +1,73 @@
+\begin{figure}[H]
+	\centering
+	\begin{tikzpicture}[x=0.02cm,y=0.02cm]
+	% place nodes
+\node[location] at (-2779, 2618) (id16) {c};
+\node[location] at (-2643, 2618) (id17) {c};
+\node[location] at (-2856, 2796) (id18) {c};
+\node[location] at (-2218, 2864) (id19) {c};
+\node[location] at (-2473, 2796) (id20) {c};
+\node[location] at (-2218, 2618) (id21) {};
+\node[location] at (-2643, 2796) (id22) {c};
+\node[location] at (-2473, 2617) (id23) {};
+\node[init] at (-2856, 2618) (id24) {};
+	% place node labels
+	% place transition labels
+	% place transition labels
+	% place transition labels
+	% place transition labels
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-2517,2833) {\begin{tabular}{l}Aborted\end{tabular}};
+	% place transition labels
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-2220,2614) {\begin{tabular}{l}\textcolor{invariant}{exe\_time <= }\\\textcolor{invariant}{getDeadline()}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-2230,2647) {\begin{tabular}{l}Waiting\end{tabular}};
+	% place transition labels
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-2703,2825) {\begin{tabular}{l}End\end{tabular}};
+	% place transition labels
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-2509,2606) {\begin{tabular}{l}\textcolor{invariant}{exe\_time <= }\\\textcolor{invariant}{getDeadline() \&\&}\\\textcolor{invariant}{exe\_time <= }\\\textcolor{invariant}{getExeTime()}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-2476,2623) {\begin{tabular}{l}Occupied\end{tabular}};
+	% place transition labels
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-2919,2648) {\begin{tabular}{l}Free\end{tabular}};
+	% place transition labels
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-2917,2580) {\begin{tabular}{l}\textcolor{guard}{active[sat\_id] <; 0}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-2908,2563) {\begin{tabular}{l}\textcolor{sync}{release[sat\_id]!}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-2781,2623) {\begin{tabular}{l}\textcolor{guard}{active[sat\_id] != -1}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-2764,2606) {\begin{tabular}{l}\textcolor{update}{startNew()}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-2849,2657) {\begin{tabular}{l}\textcolor{sync}{request[sat\_id]?}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-2942,2750) {\begin{tabular}{l}\textcolor{sync}{release[sat\_id]!}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-2942,2733) {\begin{tabular}{l}\textcolor{update}{active[sat\_id] = -1}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-2458,2886) {\begin{tabular}{l}\textcolor{sync}{release[sat\_id]!}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-2458,2869) {\begin{tabular}{l}\textcolor{update}{delayed(task)}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-2458,2776) {\begin{tabular}{l}\textcolor{guard}{task == RECEIVE\_INDEX ||}\\\textcolor{guard}{task == TRANSMIT\_INDEX}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-2424,2742) {\begin{tabular}{l}\textcolor{sync}{release[sat\_id]?}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-2406,2818) {\begin{tabular}{l}\textcolor{sync}{release[sat\_id]?}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-2321,2843) {\begin{tabular}{l}\textcolor{guard}{exe\_time >= getDeadline()}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-2407,2546) {\begin{tabular}{l}\textcolor{guard}{activeIsTrans()}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-2364,2648) {\begin{tabular}{l}\textcolor{sync}{request[sat\_id]?}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-2364,2623) {\begin{tabular}{l}\textcolor{update}{exe\_time = 0,}\\\textcolor{update}{sch\_start()}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-2823,2827) {\begin{tabular}{l}\textcolor{update}{resetPriority()}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-2755,2776) {\begin{tabular}{l}\textcolor{guard}{exe\_time >= }\\\textcolor{guard}{getDeadline() \&\& }\\\textcolor{guard}{exe\_time  <; }\\\textcolor{guard}{getExeTime()}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-2755,2699) {\begin{tabular}{l}\textcolor{update}{delayed(task)}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-2628,2759) {\begin{tabular}{l}\textcolor{guard}{exe\_time == getExeTime()}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-2594,2742) {\begin{tabular}{l}\textcolor{update}{update\_storage(task),}\\\textcolor{update}{reportDone(),}\\\textcolor{update}{sch\_end()}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-2628,2623) {\begin{tabular}{l}\textcolor{guard}{!activeIsTrans()}\\\end{tabular}};
+\node[anchor=north west, text width=10cm, font=\tiny, align=left] at (-2611,2606) {\begin{tabular}{l}\textcolor{update}{sch\_start()}\\\end{tabular}};
+	% place transitions
+\draw[->] (id16) -- (-2822, 2575) -- (id24) {};
+\draw[->] (id16) -- (id17) {};
+\draw[->] (id24) -- (id16) {};
+\draw[->] (id18) -- (id24) {};
+\draw[->] (id19) -- (-2643, 2864) -- (id22) {};
+\draw[->] (id20) -- (id22) {};
+\draw[->] (id23) -- (-2414, 2660) -- (-2414, 2779) -- (id20) {};
+\draw[->] (id21) -- (-2227, 2796) -- (id20) {};
+\draw[->] (id21) -- (id19) {};
+\draw[->] (id17) -- (-2643, 2524) -- (-2218, 2524) -- (id21) {};
+\draw[->] (id21) -- (id23) {};
+\draw[->] (id22) -- (id18) {};
+\draw[->] (id23) -- (-2643, 2677) -- (id22) {};
+\draw[->] (id23) -- (-2490, 2762) -- (-2601, 2762) -- (id22) {};
+\draw[->] (id17) -- (id23) {};
+	\end{tikzpicture}
+	\caption{The Processor template}
+	\label{fig:t_best_model_evar_Processor}
+\end{figure}
